@@ -1,0 +1,28 @@
+---
+const { phrases = [] } = Astro.props;
+---
+
+<div class="w-full bg-theme-keppel overflow-hidden whitespace-nowrap">
+  <div class="animate-marquee flex gap-12 py-4">
+    {phrases.concat(phrases).map((phrase: string, index: number) => (
+        <span class="text-theme-rich-black font-light text-md md:text-lg min-w-max">
+            {phrase}
+        </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 20s linear infinite;
+  }
+</style>
