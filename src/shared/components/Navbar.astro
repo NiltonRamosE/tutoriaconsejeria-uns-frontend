@@ -1,0 +1,165 @@
+---
+import Button from "@/shared/components/Button.astro";
+import { siteConfig } from "@/shared/site";
+---
+
+<nav
+  id="navbar"
+  class="fixed left-0 right-0 z-50 transition-all duration-200 px-8 py-4 font-light shadow-md md:shadow-none"
+>
+  <div class="flex items-center ml-0 sm:ml-12 2xl:ml-24">
+    <a href="/" class="shrink-0">
+      <img src="/isologotipo.svg" alt="Logo" class="h-10 sm:h-16" />
+    </a>
+    <div id="menu" class="hidden w-full md:flex items-center justify-between">
+      <ul class="flex gap-8 ml-24 pt-2">
+        {siteConfig.navItems.map((item) => (
+          <li>
+            <a href={item.href} class="text-theme-rich-black hover:text-theme-keppel transition-colors">
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <Button
+        href="/login"
+        label="INICIAR SESIÓN"
+        color="text-theme-rich-black bg-theme-keppel hover:bg-theme-blue"
+        rounded="rounded-3xl"
+        py="py-2"
+        px="px-10"
+        aditionalClasses="ml-auto mr-0 lg:mr-16 2xl:mr-24"
+      />
+    </div>
+
+    <!-- Botón hamburguesa (visible en móvil) -->
+    <button
+      id="menu-toggle"
+      class="md:hidden flex flex-col justify-center items-center ml-auto mr-4 h-8 cursor-pointer"
+      aria-label="Toggle menu"
+    >
+      <span class="hamburger-line line-1 block w-6 h-0.5 bg-theme-rich-black mb-1"></span>
+      <span class="hamburger-line line-2 block w-6 h-0.5 bg-theme-rich-black mb-1"></span>
+      <span class="hamburger-line line-3 block w-6 h-0.5 bg-theme-rich-black"></span>
+    </button>
+  </div>
+
+  <!-- Menú móvil (inicialmente oculto) -->
+  <div
+    id="mobile-menu"
+    class="md:hidden border-t bg-white border-gray-200 transition-all duration-300 ease-in-out transform -translate-y-full opacity-0 max-h-0 overflow-hidden mt-4"
+  >
+    <div class="container mx-auto px-4 py-4">
+      <ul class="flex flex-col md:flex-row gap-4 md:gap-8 ml-4 md:ml-24">
+        {
+          siteConfig.navItems.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class="text-theme-rich-black hover:text-theme-keppel transition-colors"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+            <!-- Botón de login -->
+      <div class="mt-4 pl-3 md:mt-0 md:ml-auto md:mr-12 2xl:mr-24">
+        <Button
+          href="/login"
+          label="INICIAR SESIÓN"
+          color="text-theme-rich-black bg-theme-keppel hover:bg-theme-blue"
+          rounded="rounded-3xl"
+          py="py-2"
+          px="px-10"
+        />
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // JavaScript para manejar la funcionalidad del menú
+  const menuToggle = document.getElementById("menu-toggle");
+  const mobileMenu = document.getElementById("mobile-menu");
+  let isMenuOpen = false;
+
+  if (menuToggle && mobileMenu) {
+    menuToggle.addEventListener("click", function () {
+      isMenuOpen = !isMenuOpen;
+
+      if (isMenuOpen) {
+        // Abrir menú
+        menuToggle.classList.add("hamburger-active");
+        mobileMenu.classList.remove(
+          "-translate-y-full",
+          "opacity-0",
+          "max-h-0"
+        );
+        mobileMenu.classList.add("translate-y-0", "opacity-100", "max-h-96");
+      } else {
+        // Cerrar menú
+        menuToggle.classList.remove("hamburger-active");
+        mobileMenu.classList.remove("translate-y-0", "opacity-100", "max-h-96");
+        mobileMenu.classList.add("-translate-y-full", "opacity-0", "max-h-0");
+      }
+    });
+  }
+
+  // Cerrar menú al hacer clic en un enlace (opcional)
+  if (mobileMenu) {
+    const menuLinks = mobileMenu.querySelectorAll("a");
+    menuLinks.forEach((link) => {
+      link.addEventListener("click", function () {
+        isMenuOpen = false;
+        if (menuToggle) {
+          menuToggle.classList.remove("hamburger-active");
+        }
+        mobileMenu.classList.remove("translate-y-0", "opacity-100", "max-h-96");
+        mobileMenu.classList.add("-translate-y-full", "opacity-0", "max-h-0");
+      });
+    });
+  }
+
+  // Toggle mobile menu
+  const navbar = document.getElementById("navbar");
+  window.addEventListener("scroll", () => {
+    if (!navbar) return;
+    if (window.scrollY > 0) {
+      navbar.classList.add("bg-theme-seasalt");
+      navbar.classList.remove("md:shadow-none");
+      if (mobileMenu) {
+        mobileMenu.classList.remove("bg-white");
+        mobileMenu.classList.add("bg-theme-seasalt");
+        
+      }
+    } else {
+      navbar.classList.remove("bg-theme-seasalt");
+      navbar.classList.add("md:shadow-none");
+      if (mobileMenu) {
+        mobileMenu.classList.remove("bg-theme-seasalt");
+        mobileMenu.classList.add("bg-white");
+      }
+    }
+  });
+</script>
+
+<style>
+  /* Configuración adicional para animaciones personalizadas */
+  .hamburger-line {
+    transition: all 0.3s ease-in-out;
+  }
+
+  .hamburger-active .line-1 {
+    transform: rotate(45deg) translate(6px, 6px);
+  }
+
+  .hamburger-active .line-2 {
+    opacity: 0;
+  }
+
+  .hamburger-active .line-3 {
+    transform: rotate(-45deg) translate(6px, -6px);
+  }
+</style>
