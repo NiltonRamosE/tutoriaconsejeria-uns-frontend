@@ -1,11 +1,27 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import PublicLayout from '@/layouts/PublicLayout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import HeroSection from '@/landing/sections/Herosection.astro';
+import MessageSection from '@/landing/sections/MessageSection.astro';
+import PartnerSection from '@/landing/sections/PartnerSection.astro';
+import ProposalSection from '@/landing/sections/ProposalSection.astro';
+import FAQSection from '@/landing/sections/FAQSection.astro';
+import ContactSection from '@/landing/sections/ContactSection.astro';
+
+const robots = ["index", "follow"];
+const title = "Tutoría y Consejería EPISI";
+const description = "Bienvenido a Tutoría y Consejería, tu aliado en el camino hacia el bienestar integral. Descubre cómo podemos ayudarte a alcanzar tus metas.";
+const keywords = ["UNS", "Tutoría", "Consejería", "Bienestar", "Estudiantes"];
+const url = "https://tutoriaconsejeriauns.vercel.app";
+const imageOG = "/card-twt.webp";
+const imagetwt = "/card-twt.webp";
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<PublicLayout {robots} {title} {description} {keywords} {url} {imageOG} {imagetwt}>
+	<HeroSection />
+	<MessageSection />
+	<PartnerSection />
+	<ProposalSection />
+	<FAQSection />
+	<ContactSection />
+</PublicLayout>
