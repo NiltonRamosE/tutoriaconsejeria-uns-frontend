@@ -1,0 +1,15 @@
+---
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import LoginSection from '@/auth/sections/LoginSection.astro';
+const robots = ["index", "follow"];
+const title = "Iniciar Sesión";
+const description = "Accede a tu cuenta en Institucional y continúa tu camino hacia una vida más saludable. Gestiona tu progreso en nutrición, bienestar y hábitos positivos.";
+const keywords = ["iniciar sesión", "login", "acceder a cuenta", "Tutoría y Consejería", "bienestar personal"];
+const url = "https://tutoriaconsejeriauns.vercel.app/login";
+const imageOG = "/card-twt.webp";
+const imagetwt = "/card-twt.webp";
+---
+
+<PublicLayout {robots} {title} {description} {keywords} {url} {imageOG} {imagetwt}>
+    <LoginSection />
+</PublicLayout>
