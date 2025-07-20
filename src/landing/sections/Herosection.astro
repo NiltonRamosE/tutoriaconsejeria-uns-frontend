@@ -1,0 +1,38 @@
+---
+import Button from "@/shared/components/Button.astro";
+---
+
+<section class="pt-25 md:pt-20 ml-0 px-0 sm:px-4 md:ml-12 md:px-8 2xl:ml-24">
+  <div class="grid grid-cols-1 md:grid-cols-2 items-center">
+    
+    <div class="text-center md:text-left">
+      <p class="text-4xl sm:text-5xl xl:text-7xl 2xl:text-8xl font-semibold text-theme-rich-black mb-4 leading-snug">
+        La guía que transforma
+        <br class="hidden md:inline"/>
+        <span class="text-theme-keppel">tu camino</span>
+      </p>
+      
+      <p class="text-base md:text-sm font-light xl:text-lg text-theme-rich-black mb-8 md:w-xs lg:w-md">
+        Impulsamos tu desarrollo académico y personal con acompañamiento cercano, profesional y humano.
+      </p>
+
+      <Button
+        href="/login"
+        label="¡COMENCEMOS!"
+        color="text-theme-rich-black bg-theme-keppel hover:bg-theme-blue"
+        rounded="rounded-4xl"
+        py="py-4"
+        px="px-12 sm:px-35 md:px-6"
+        aditionalClasses=""
+      />
+    </div>
+
+    <div class="flex justify-center">
+      <img 
+        src="/logotipo.svg" 
+        alt="Imagen referencial de una tienda con diversos productos." 
+        class="w-sm mt-15 md:mt-0 md:w-xl xl:w-2xl 2xl:w-3xl h-auto"
+      />
+    </div>
+  </div>
+</section>
