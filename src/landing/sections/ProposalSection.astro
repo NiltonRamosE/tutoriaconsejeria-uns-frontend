@@ -1,0 +1,69 @@
+---
+import ScrollingBanner from "@/landing/components/ScrollingBanner.astro";
+import SolutionCard from "@/landing/components/SolutionCard.astro";
+
+const frases = [
+  "¿Sentís que todo se te junta? 📚💥",
+  "Tranquilo, la tutoría y consejería están para ayudarte a organizar y avanzar. 🛠️",
+  "¿No sabes a quién acudir? 🧭 Nosotros te guiamos.",
+  "Cada estudiante tiene un camino distinto... 🚶‍♂️🌱 ¡Te ayudamos a descubrir el tuyo!",
+  "Más que orientación, construimos juntos tu bienestar universitario. 🎓❤️",
+];
+
+---
+
+<section class="flex-col items-center justify-center">
+  <ScrollingBanner phrases={frases} />
+
+  <div class="text-center mt-10 mb-4">
+    <h3 class="text-3xl lg:text-5xl font-semibold">Nuestras Soluciones</h3>
+    <p class="text-lg lg:text-2xl text-theme-rich-black font-regular">
+      Para tutores y consejeros
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 max-w-6xl mx-auto mb-12 px-5 sm:px-30 md:px-50 lg:px-5">
+    <SolutionCard
+      image="/images/icon-solution-1.svg"
+      title="Seguimiento organizado"
+      description="Lleva un registro claro y actualizado del avance de cada estudiante bajo tu tutoría."
+      aditionalclass="rounded-t-2xl lg:rounded-none"
+    />
+    <SolutionCard
+      image="/images/icon-solution-2.svg"
+      title="Intervenciones efectivas"
+      description="Identifica a tiempo dificultades académicas o personales y actúa con respaldo institucional."
+    />
+    <SolutionCard
+      image="/images/icon-solution-3.svg"
+      title="Informes y estadísticas"
+      description="Genera reportes detallados para tomar decisiones basadas en datos reales."
+      aditionalclass="rounded-b-2xl lg:rounded-none"
+    />
+  </div>
+
+  <div class="text-center mt-10 mb-4">
+    <h3 class="text-3xl lg:text-5xl font-semibold">Nuestras Soluciones</h3>
+    <p class="text-lg lg:text-2xl text-theme-rich-black font-regular">Para estudiantes</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 max-w-6xl mx-auto px-5 sm:px-30 md:px-50 lg:px-5">
+    <SolutionCard
+      image="/images/icon-solution-4.svg"
+      title="Acompañamiento integral"
+      description="Recibe orientación académica y emocional para enfrentar cada etapa de tu carrera."
+      aditionalclass="rounded-t-2xl lg:rounded-none"
+    />
+    <SolutionCard
+      image="/images/icon-solution-5.svg"
+      title="Canal de comunicación"
+      description="Conéctate fácilmente con tu tutor o consejero para resolver inquietudes o pedir apoyo."
+    />
+    <SolutionCard
+      image="/images/icon-solution-6.svg"
+      title="Recursos útiles"
+      description="Accede a materiales, talleres y consejos para mejorar tu rendimiento y bienestar."
+      aditionalclass="rounded-b-2xl lg:rounded-none"
+    />
+  </div>
+</section>
