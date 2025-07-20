@@ -1,0 +1,31 @@
+---
+const { text, spanText, image, button = true, href = "/productos", label = "¡COMENCEMOS!" } = Astro.props;
+import Button from "@/shared/components/Button.astro";
+---
+
+<div class="relative border-3 rounded-3xl overflow-hidden w-full max-w-xl max-h-[350px] flex flex-col">
+  <!-- Parte superior -->
+  <div class="bg-theme-keppel text-theme-rich-black flex items-center justify-center px-6 py-8 text-center h-1/2 relative">
+    <p class="text-sm sm:text-lg md:text-xl xl:text-2xl font-regular">
+      {text} <br> <span class="font-bold text-xl sm:text-3xl md:text-4xl xl:text-5xl">{spanText}</span>
+    </p>
+
+    {button && (
+      <div class="absolute bottom-[-1.5rem] left-1/2 transform -translate-x-1/2 z-10">
+        <Button
+          href={href}
+          label={label}
+          color="text-theme-rich-black bg-theme-blue hover:bg-theme-blue/90 "
+          rounded="rounded-4xl"
+          py="py-2"
+          px="px-4"
+          aditionalClasses="border-b-8 w-[200px]"
+        />
+      </div>
+    )}
+  </div>
+
+  <div class="flex items-center justify-center h-64 w-full overflow-hidden">
+    <img src={image} alt={spanText} class="w-full h-full object-cover" loading="lazy" />
+  </div>
+</div>
