@@ -1,0 +1,139 @@
+---
+
+---
+
+<section class="items-center mx-auto py-10 text-center w-full">
+  <div
+    class="flex flex-row flex-wrap px-8 items-center justify-center gap-8 w-full"
+  >
+    <div class="m-8 text-left">
+      <h2 class="text-6xl xl:text-4xl font-bold text-theme-keppel">Preguntas Frecuentes</h2>
+      <p class="mt-2 text-2xl xl:text-xl text-theme-rich-black font-regular">
+        ¿Tienes alguna otra duda? Escríbenos 
+        <br> al <strong class="text-theme-keppel">+51 951 011 604</strong>
+      </p>
+    </div>
+
+    <div class="mt-6 space-y-4 text-left w-full max-w-xl">
+      <details
+        class="group bg-theme-blue rounded-3xl text-theme-rich-black px-4 py-3 transition-all duration-300"
+        data-open="false"
+      >
+        <summary
+          class="cursor-pointer flex justify-between items-center font-medium text-lg"
+        >
+          <span>1. ¿Qué es el servicio de tutoría y consejería?</span>
+          <span>▼</span>
+        </summary>
+        <div
+          class="transition-all duration-500 overflow-hidden mt-4 text-sm text-gray-700"
+        >
+          <p class="p-3 bg-theme-seasalt rounded-lg">
+            Es un acompañamiento académico y personal que busca ayudarte a resolver dificultades, mejorar tu rendimiento y potenciar tu desarrollo integral durante la carrera universitaria.
+          </p>
+        </div>
+      </details>
+
+      <details
+        class="bg-theme-blue rounded-3xl text-theme-rich-black px-4 py-3"
+      >
+        <summary
+          class="cursor-pointer font-medium flex justify-between items-center text-lg"
+        >
+          <span>2. ¿Quiénes pueden acceder a este servicio?</span>
+          <span>▼</span>
+        </summary>
+        <div
+          class="transition-all duration-500 overflow-hidden mt-4 text-sm text-gray-700"
+        >
+          <p class="p-3 bg-theme-seasalt rounded-lg">
+            Todos los estudiantes matriculados en la Escuela Profesional de Ingeniería de Sistemas e Informática tienen derecho a recibir tutoría y consejería gratuita.
+          </p>
+        </div>
+      </details>
+
+      <details
+        class="bg-theme-blue rounded-3xl text-theme-rich-black px-4 py-3"
+      >
+        <summary
+          class="cursor-pointer font-medium flex justify-between items-center text-lg"
+        >
+          <span>3. ¿Qué tipo de apoyo ofrecen los tutores?</span>
+          <span>▼</span>
+        </summary>
+        <div
+          class="transition-all duration-500 overflow-hidden mt-4 text-sm text-gray-700"
+        >
+          <p class="p-3 bg-theme-seasalt rounded-lg">
+            Ofrecen orientación académica, apoyo en la adaptación universitaria, manejo del tiempo, técnicas de estudio, derivación a servicios especializados y seguimiento de casos particulares.
+          </p>
+        </div>
+      </details>
+      <details class="bg-theme-blue rounded-3xl text-theme-rich-black px-4 py-3">
+        <summary class="cursor-pointer font-medium flex justify-between items-center text-lg">
+          <span>4. ¿Cómo sé quién es mi tutor?</span>
+          <span>▼</span>
+        </summary>
+        <div class="transition-all duration-500 overflow-hidden mt-4 text-sm text-gray-700">
+          <p class="p-3 bg-theme-seasalt rounded-lg">
+            El nombre de tu tutor asignado estará disponible en el sistema académico o puede ser comunicado directamente por la coordinación de tutoría de tu escuela profesional.
+          </p>
+        </div>
+      </details>
+
+      <details class="bg-theme-blue rounded-3xl text-theme-rich-black px-4 py-3">
+        <summary class="cursor-pointer font-medium flex justify-between items-center text-lg">
+          <span>5. ¿Es obligatorio participar en tutoría?</span>
+          <span>▼</span>
+        </summary>
+        <div class="transition-all duration-500 overflow-hidden mt-4 text-sm text-gray-700">
+          <p class="p-3 bg-theme-seasalt rounded-lg">
+            No es obligatorio, pero sí altamente recomendable, ya que puede marcar una gran diferencia en tu desempeño académico y bienestar emocional.
+          </p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+<style>
+  summary::marker {
+    display: none;
+  }
+</style>
+<script>
+  // Controla la animación suave al abrir/cerrar
+  document.querySelectorAll("details").forEach((detail) => {
+    const summary = detail.querySelector("summary");
+    const content = detail.querySelector("div");
+    if (!summary) return;
+    const icon = summary.querySelector("svg");
+
+    summary.addEventListener("click", (e) => {
+      e.preventDefault();
+      const isOpen = detail.hasAttribute("open");
+
+      // Cierre suave
+      if (isOpen) {
+        if (content) {
+          content.style.maxHeight = content.scrollHeight + "px";
+          requestAnimationFrame(() => {
+            content.style.maxHeight = "0px";
+          });
+        }
+        if (icon) icon.classList.remove("rotate-180");
+        setTimeout(() => detail.removeAttribute("open"), 500);
+      }
+      // Apertura suave
+      else {
+        detail.setAttribute("open", "");
+        if (content) {
+          content.style.maxHeight = "0px";
+          requestAnimationFrame(() => {
+            content.style.maxHeight = content.scrollHeight + "px";
+          });
+        }
+        if (icon) icon.classList.add("rotate-180");
+      }
+    });
+  });
+</script>
