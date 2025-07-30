@@ -1,0 +1,15 @@
+---
+import ProtectedLayout from '@/layouts/ProtectedLayout.astro';
+import AdministratorSection from '@/dashboard/administrator/sections/AdministratorSection.astro';
+const robots = ["noindex", "nofollow"];
+const title = "Plataforma de Administrador";
+const description = "Plataforma de Administrador de Tutoría y Consejería UNS. Administra usuarios, gestiona recursos y optimiza la plataforma.";
+const keywords = ["plataforma administrador", "gestión de usuarios", "Tutoría y Consejería UNS", "recursos administrativos", "optimización de plataforma"];
+const url = "https://tutoriaconsejeriauns.vercel.app/dashboard/administrator";
+const imageOG = "/card-twt.webp";
+const imagetwt = "/card-twt.webp";
+---
+
+<ProtectedLayout {robots} {title} {description} {keywords} {url} {imageOG} {imagetwt}>
+    <AdministratorSection />
+</ProtectedLayout>
