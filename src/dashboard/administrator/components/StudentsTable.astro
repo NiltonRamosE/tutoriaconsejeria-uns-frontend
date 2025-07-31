@@ -1,16 +1,8 @@
 ---
-interface Student {
-    id: number;
-    name: string;
-    email: string;
-    code: string;
-    faculty?: string;
-    teacher: string | null;
-    teacherEmail: string | null;
-    status?: string;
-}
+import type AssignmentResponse from "../types/assignmentResponse";
 
-const { students } = Astro.props;
+const { assignments = [] } = Astro.props;
+const itemsPerPage = 5;
 ---
 
 <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
@@ -35,18 +27,19 @@ const { students } = Astro.props;
                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Estudiante</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Código</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Docente</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Tipo</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
             <tbody id="studentsTableBody" class="bg-white divide-y divide-theme-rich-black/20">
-                {students.length === 0 ? (
+                {assignments.length === 0 ? (
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">
-                            No hay estudiantes para mostrar
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            No hay asignaciones para mostrar
                         </td>
                     </tr>
                 ) : (
-                    students.map((student:Student) => (
+                    assignments.slice(0, itemsPerPage).map((assignment:AssignmentResponse) => (
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
@@ -54,13 +47,13 @@ const { students } = Astro.props;
                                         <span class="text-theme-keppel">👨‍🎓</span>
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-medium text-theme-rich-black">{student.name}</div>
-                                        <div class="text-sm text-gray-500">{student.email}</div>
+                                        <div class="text-sm font-medium text-theme-rich-black">{assignment.studentName}</div>
+                                        <div class="text-sm text-gray-500">{assignment.studentInstitutionalEmail}</div>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
-                                {student.code}
+                                {assignment.studentCode}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
@@ -68,28 +61,395 @@ const { students } = Astro.props;
                                         <span class="text-theme-blue">👩‍🏫</span>
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-medium text-theme-rich-black">{student.teacher || 'Sin asignar'}</div>
-                                        <div class="text-sm text-gray-500">{student.teacherEmail || ''}</div>
+                                        <div class="text-sm font-medium text-theme-rich-black">{assignment.instructorName || 'Sin asignar'}</div>
+                                        <div class="text-sm text-gray-500">{assignment.instructorInstitutionalEmail || ''}</div>
                                     </div>
                                 </div>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                                {assignment.typeActivity}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-theme-keppel hover:text-theme-keppel-dark mr-3">Asignar</button>
-                                <button class="text-theme-blue hover:text-theme-blue-dark">Reasignar</button>
+                                <button 
+                                    onclick={`handleAssign(${assignment.studentId}, ${assignment.instructorId || 'null'})`} 
+                                    class="text-theme-keppel hover:text-theme-keppel-dark mr-3"
+                                >
+                                    {assignment.instructorId ? 'Reasignar' : 'Asignar'}
+                                </button>
+                                {assignment.instructorId && (
+                                    <button 
+                                        onclick={`handleUnassign(${assignment.academicAssignmentId})`} 
+                                        class="text-red-500 hover:text-red-700"
+                                    >
+                                        Eliminar
+                                    </button>
+                                )}
                             </td>
                         </tr>
                     ))
                 )}
             </tbody>
         </table>
+        
+        <div id="paginationContainer" class="flex items-center justify-between px-6 py-3 bg-white border-t border-gray-200">
+            <div class="flex-1 flex justify-between sm:hidden">
+                <button 
+                    id="prevPageMobile" 
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                    Anterior
+                </button>
+                <button 
+                    id="nextPageMobile" 
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                    Siguiente
+                </button>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Mostrando <span id="currentPageStart" class="font-medium">1</span> a <span id="currentPageEnd" class="font-medium">{Math.min(itemsPerPage, assignments.length)}</span> de <span id="totalItems" class="font-medium">{assignments.length}</span> resultados
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button 
+                            id="prevPage" 
+                            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        >
+                            <span class="sr-only">Anterior</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div id="pageNumbers" class="flex">
+                            <!-- Los números de página se generarán dinámicamente con JavaScript -->
+                        </div>
+                        <button 
+                            id="nextPage" 
+                            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        >
+                            <span class="sr-only">Siguiente</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script is:inline>
-    // Mover la lógica de asignación aquí
-    document.getElementById('assignStudentsBtn')?.addEventListener('click', assignStudents);
+    // Variables para la paginación
+    let currentPage = 1;
+    let totalItems = 0;
+    const itemsPerPage = 5;
     
-    async function assignStudents() {
-        // Implementación igual que antes
+    // Función para verificar si un elemento existe antes de manipularlo
+    function safeUpdateElement(id, callback) {
+        const element = document.getElementById(id);
+        if (element) callback(element);
     }
+
+    // 1. Cargar datos iniciales al entrar a la página
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadAssignments();
+        setupPagination();
+    });
+
+    // 2. Función para actualizar la tabla con paginación
+    function updateAssignmentsTable(assignments) {
+        const tableBody = document.getElementById('studentsTableBody');
+        totalItems = assignments.length;
+        
+        if (!assignments || assignments.length === 0) {
+            if (tableBody) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            No hay asignaciones para mostrar
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            // Ocultar paginación si no hay datos
+            safeUpdateElement('paginationContainer', (container) => {
+                container.style.display = 'none';
+            });
+            return;
+        }
+
+        // Mostrar paginación si hay datos
+        safeUpdateElement('paginationContainer', (container) => {
+            container.style.display = 'flex';
+        });
+
+        // Calcular los elementos a mostrar en la página actual
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, assignments.length);
+        const paginatedItems = assignments.slice(startIndex, endIndex);
+        if (tableBody) {
+            tableBody.innerHTML = paginatedItems.map(assignment => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-theme-keppel/20 flex items-center justify-center">
+                                <span class="text-theme-keppel">👨‍🎓</span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-theme-rich-black">${assignment.studentName}</div>
+                                <div class="text-sm text-gray-500">${assignment.studentInstitutionalEmail}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${assignment.studentCode}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-theme-blue/20 flex items-center justify-center">
+                                <span class="text-theme-blue">👩‍🏫</span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-theme-rich-black">${assignment.instructorName || 'Sin asignar'}</div>
+                                <div class="text-sm text-gray-500">${assignment.instructorInstitutionalEmail || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${assignment.typeActivity}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button 
+                            onclick="handleAssign(${assignment.studentId}, ${assignment.instructorId || 'null'})" 
+                            class="text-theme-keppel hover:text-theme-keppel-dark mr-3"
+                        >
+                            ${assignment.instructorId ? 'Reasignar' : 'Asignar'}
+                        </button>
+                        ${assignment.instructorId ? `
+                        <button 
+                            onclick="handleUnassign(${assignment.academicAssignmentId})" 
+                            class="text-red-500 hover:text-red-700"
+                        >
+                            Eliminar
+                        </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+    // 3. Actualizar los indicadores de página de forma segura
+        safeUpdateElement('currentPageStart', (el) => el.textContent = startIndex + 1);
+        safeUpdateElement('currentPageEnd', (el) => el.textContent = endIndex);
+        safeUpdateElement('totalItems', (el) => el.textContent = assignments.length);
+    }
+
+    // 4. Configuración de los controles de paginación
+    function setupPagination() {
+        // Verificar que los elementos existen antes de agregar event listeners
+        safeUpdateElement('prevPage', (el) => el.addEventListener('click', goToPreviousPage));
+        safeUpdateElement('nextPage', (el) => el.addEventListener('click', goToNextPage));
+        safeUpdateElement('prevPageMobile', (el) => el.addEventListener('click', goToPreviousPage));
+        safeUpdateElement('nextPageMobile', (el) => el.addEventListener('click', goToNextPage));
+    }
+
+    // 5. Actualizar controles de paginación
+    function updatePaginationControls() {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        
+        safeUpdateElement('pageNumbers', (container) => {
+            container.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Mostrar máximo 5 números de página alrededor de la página actual
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+            
+            // Ajustar si estamos cerca del inicio o final
+            if (currentPage <= 3) {
+                endPage = Math.min(5, totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                startPage = Math.max(totalPages - 4, 1);
+            }
+            
+            // Botón para la primera página si no está visible
+            if (startPage > 1) {
+                const firstPageBtn = document.createElement('button');
+                firstPageBtn.textContent = '1';
+                firstPageBtn.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50';
+                firstPageBtn.addEventListener('click', () => goToPage(1));
+                container.appendChild(firstPageBtn);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+                    container.appendChild(ellipsis);
+                }
+            }
+            
+            // Botones para las páginas visibles
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i.toString();
+                pageBtn.className = `relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                    i === currentPage 
+                        ? 'z-10 bg-theme-keppel border-theme-keppel text-white' 
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`;
+                pageBtn.addEventListener('click', () => goToPage(i));
+                container.appendChild(pageBtn);
+            }
+            
+            // Botón para la última página si no está visible
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+                    container.appendChild(ellipsis);
+                }
+                
+                const lastPageBtn = document.createElement('button');
+                lastPageBtn.textContent = totalPages.toString();
+                lastPageBtn.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50';
+                lastPageBtn.addEventListener('click', () => goToPage(totalPages));
+                container.appendChild(lastPageBtn);
+            }
+        });
+        
+        // Habilitar/deshabilitar botones de anterior/siguiente
+        safeUpdateElement('prevPage', (el) => el.disabled = currentPage === 1);
+        safeUpdateElement('nextPage', (el) => el.disabled = currentPage === totalPages);
+        safeUpdateElement('prevPageMobile', (el) => el.disabled = currentPage === 1);
+        safeUpdateElement('nextPageMobile', (el) => el.disabled = currentPage === totalPages);
+    }
+
+    // 6. Funciones para cambiar de página
+    function goToPreviousPage() {
+        if (currentPage > 1) {
+            goToPage(currentPage - 1);
+        }
+    }
+
+    function goToNextPage() {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadAssignments();
+    }
+
+    // Endpoint para cargar asignaciones
+    async function loadAssignments() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No hay token de autenticación');
+                return;
+            }
+
+            const response = await fetch('http://localhost:8080/administrator/assign/list', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const assignments = await response.json();
+                totalItems = assignments.length;
+                updateAssignmentsTable(assignments);
+                updatePaginationControls();
+            } else {
+                console.error('Error al cargar asignaciones');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Endpoint para ejecutar asignación
+    document.getElementById('assignStudentsBtn')?.addEventListener('click', async function() {
+        const btn = this;
+        const originalBtnText = btn.innerHTML;
+        
+        try {
+            btn.disabled = true;
+            btn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Asignando...
+            `;
+
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('No se encontró el token');
+
+            const assignResponse = await fetch('http://localhost:8080/administrator/students/assign', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!assignResponse.ok) {
+                const errorData = await assignResponse.json();
+                throw new Error(errorData.message || 'Error en asignación');
+            }
+
+            await loadAssignments();
+            alert('Asignación completada');
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error: ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnText;
+        }
+    });
+
+    // Endpoint para asignar estudiante a instructor
+    window.handleAssign = async function(studentId, instructorId) {
+        console.log(`Asignando estudiante ${studentId} a instructor ${instructorId}`);
+        // Implementar lógica de asignación
+    };
+
+    // Endpoint para eliminar asignación
+    window.handleUnassign = async function(assignmentId) {
+        if (!confirm('¿Estás seguro de eliminar esta asignación?')) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/administrator/assignments/${assignmentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al eliminar la asignación');
+            }
+
+            alert('Asignación eliminada correctamente');
+            await loadAssignments();
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+        }
+    };
 </script>

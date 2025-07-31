@@ -1,5 +1,6 @@
 ---
 import AdminProfileCard from '@/dashboard/administrator/components/AdminProfileCard.astro';
+import LogoutButton from '@/shared/components/LogoutButton.astro';
 const { currentPage } = Astro.props;
 ---
 
@@ -46,7 +47,7 @@ const { currentPage } = Astro.props;
                 </div>
             </a>
             
-            <!-- Más items del menú según necesites -->
+            <LogoutButton />
         </nav>
     </div>
 </aside>
