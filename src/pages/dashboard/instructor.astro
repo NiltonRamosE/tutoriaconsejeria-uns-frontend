@@ -1,5 +1,6 @@
 ---
 import ProtectedLayout from '@/layouts/ProtectedLayout.astro';
+import InstructorSection from '@/dashboard/instructor/sections/InstructorSection.astro';
 const robots = ["noindex", "nofollow"];
 const title = "Plataforma de Docente";
 const description = "Plataforma de Docente de Tutoría y Consejería UNS. Accede a herramientas, gestiona tu curso y mejora la experiencia educativa.";
@@ -10,5 +11,5 @@ const imagetwt = "/card-twt.webp";
 ---
 
 <ProtectedLayout {robots} {title} {description} {keywords} {url} {imageOG} {imagetwt}>
-    Docente
+    <InstructorSection />
 </ProtectedLayout>
