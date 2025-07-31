@@ -1,0 +1,95 @@
+---
+import StudentSidebar from '@/dashboard/student/components/StudentSidebar.astro';
+import DashboardSection from '@/dashboard/student/sections/DashboardSection.astro';
+import EvaluateSection from '@/dashboard/student/sections/EvaluateSection.astro';
+import SurveysSection from '@/dashboard/student/sections/SurveysSection.astro';
+import AppointmentsSection from '@/dashboard/student/sections/AppointmentsSection.astro';
+
+// Obtener parámetro de la URL
+const url = new URL(Astro.request.url);
+const currentSection = 'dashboard';
+---
+
+<section class="min-h-screen bg-theme-seasalt p-6 md:p-10">
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-3xl md:text-4xl font-bold text-theme-rich-black">Panel de Estudiante</h1>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Sidebar -->
+        <StudentSidebar currentSection={currentSection} />
+        
+        <!-- Contenido dinámico -->
+        <main class="lg:col-span-3">
+            <div id="dashboard-section" class="content-section" style="display: ${currentSection === 'dashboard' ? 'block' : 'none'}">
+                <DashboardSection />
+            </div>
+            <div id="evaluate-section" class="content-section" style="display: ${currentSection === 'evaluate' ? 'block' : 'none'}">
+                <EvaluateSection />
+            </div>
+            <div id="surveys-section" class="content-section" style="display: ${currentSection === 'surveys' ? 'block' : 'none'}">
+                <SurveysSection />
+            </div>
+            <div id="appointments-section" class="content-section" style="display: ${currentSection === 'appointments' ? 'block' : 'none'}">
+                <AppointmentsSection />
+            </div>
+        </main>
+    </div>
+</section>
+
+<script is:inline>
+    // Función para cambiar de sección
+    function changeSection(section) {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.content-section').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Mostrar la sección seleccionada
+        const targetSection = document.getElementById(`${section}-section`);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+        }
+        
+        // Actualizar estilos del sidebar
+        updateActiveSectionStyles(section);
+        
+        // Actualizar URL
+        window.history.pushState({ section }, '', `?section=${section}`);
+    }
+
+    // Actualizar estilos del sidebar
+    function updateActiveSectionStyles(section) {
+        document.querySelectorAll('[data-section]').forEach(el => {
+            const isActive = el.getAttribute('data-section') === section;
+            el.classList.toggle('bg-theme-keppel/10', isActive);
+            el.classList.toggle('border-theme-keppel', isActive);
+            el.classList.toggle('hover:bg-theme-keppel/5', !isActive);
+            el.classList.toggle('border-theme-rich-black/20', !isActive);
+        });
+    }
+
+    // Configurar event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicializar mostrando solo la sección actual
+        changeSection('dashboard');
+        
+        // Manejar clicks en el sidebar
+        document.querySelectorAll('[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = e.currentTarget.getAttribute('data-section');
+                changeSection(section);
+            });
+        });
+        
+        // Manejar navegación con botones atrás/adelante
+        window.addEventListener('popstate', (event) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get('section') || 'dashboard';
+            changeSection(section);
+        });
+    });
+</script>
