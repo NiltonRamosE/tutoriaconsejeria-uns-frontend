@@ -1,0 +1,268 @@
+---
+// src/components/AcademicSchedulesSection.astro
+
+interface ScheduleItem {
+  day: string;
+  course: string;
+  type: 'TEO' | 'LAB';
+  startTime: string;
+  endTime: string;
+}
+
+---
+
+<div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
+    <h2 class="text-2xl font-bold mb-6 text-theme-rich-black">Horarios Académicos</h2>
+    
+    <div class="space-y-6">
+        <!-- Selector de Ciclo -->
+        <div class="flex items-center space-x-4">
+            <label for="cycleSelect" class="text-sm font-medium text-theme-rich-black">Seleccionar Ciclo:</label>
+            <select 
+                id="cycleSelect"
+                class="border rounded-md px-3 py-2 text-sm border-theme-rich-black/40 focus:ring-theme-keppel focus:border-theme-keppel"
+            >
+                <option value="1" selected>PRIMERO</option>
+                <option value="2">SEGUNDO</option>
+                <option value="3">TERCERO</option>
+                <option value="4">CUARTO</option>
+                <option value="5">QUINTO</option>
+                <option value="6">SEXTO</option>
+                <option value="7">SEPTIMO</option>
+                <option value="8">OCTAVO</option>
+                <option value="9">NOVENO</option>
+                <option value="10">DECIMO</option>
+            </select>
+            <button 
+                id="loadScheduleBtn"
+                class="bg-theme-keppel text-white px-4 py-2 rounded-md hover:bg-theme-keppel-dark transition-colors"
+            >
+                Cargar Horario
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingIndicator" class="hidden text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-theme-keppel"></div>
+            <p class="mt-2 text-theme-rich-black">Cargando horarios...</p>
+        </div>
+
+        <!-- Schedule Display -->
+        <div id="scheduleContainer" class="hidden overflow-x-auto">
+            <h3 id="scheduleTitle" class="text-xl font-semibold mb-4 text-theme-rich-black"></h3>
+            
+            <!-- Weekly Calendar View -->
+            <div class="min-w-max">
+                <div class="grid grid-cols-[auto_repeat(6,minmax(0,1fr))] gap-px bg-theme-rich-black/20">
+                    <!-- Header Row -->
+                    <div class="w-15 bg-theme-keppel/10 p-2 font-bold text-theme-rich-black text-center">Hora</div>
+                    <div class="bg-theme-keppel/10 p-2 font-bold text-theme-rich-black text-center">Lunes</div>
+                    <div class="bg-theme-keppel/10 p-2 font-bold text-theme-rich-black text-center">Martes</div>
+                    <div class="bg-theme-keppel/10 p-2 font-bold text-theme-rich-black text-center">Miércoles</div>
+                    <div class="bg-theme-keppel/10 p-2 font-bold text-theme-rich-black text-center">Jueves</div>
+                    <div class="bg-theme-keppel/10 p-2 font-bold text-theme-rich-black text-center">Viernes</div>
+                    <div class="bg-theme-keppel/10 p-2 font-bold text-theme-rich-black text-center">Sábado</div>
+                    
+                    <!-- Time Slots -->
+                    <div id="timeSlots" class="col-span-7 grid grid-cols-[auto_repeat(6,minmax(0,1fr))] gap-px bg-theme-rich-black/20">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-8">
+            <p class="text-gray-500">No se encontraron horarios para este ciclo.</p>
+        </div>
+    </div>
+</div>
+
+<script is:inline>
+    document.getElementById('loadScheduleBtn').addEventListener('click', loadSchedule);
+
+    // Generar horas desde 7:00 AM hasta 8:00 PM
+    function generateTimeSlots() {
+        const hours = [];
+        for (let i = 7; i <= 20; i++) {
+            hours.push(`${i.toString().padStart(2, '0')}:00`);
+        }
+        return hours;
+    }
+
+    async function loadSchedule() {
+        const cycleSelect = document.getElementById('cycleSelect');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const scheduleContainer = document.getElementById('scheduleContainer');
+        const emptyState = document.getElementById('emptyState');
+        const scheduleTitle = document.getElementById('scheduleTitle');
+        
+        const selectedCycle = cycleSelect.value;
+        
+        // Mostrar loading
+        loadingIndicator.classList.remove('hidden');
+        scheduleContainer.classList.add('hidden');
+        emptyState.classList.add('hidden');
+        
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('No autenticado');
+            
+            const response = await fetch(`http://localhost:8080/academic-schedule?cycle=${selectedCycle}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) throw new Error('Error al cargar horarios');
+            
+            const scheduleData = await response.json();
+            console.log('Horarios cargados:', scheduleData);
+            // Actualizar título
+            scheduleTitle.textContent = `Horario - Ciclo ${getCycleName(selectedCycle)}`;
+            
+            // Renderizar datos
+            renderWeeklySchedule(scheduleData);
+            
+            // Mostrar resultados
+            scheduleContainer.classList.remove('hidden');
+            if (scheduleData.length === 0) {
+                emptyState.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error al cargar horarios: ${error.message}`);
+        } finally {
+            loadingIndicator.classList.add('hidden');
+        }
+    }
+
+    function getCycleName(cycleNumber) {
+        const cycleNames = {
+            '1': 'I',
+            '2': 'II',
+            '3': 'III',
+            '4': 'IV',
+            '5': 'V',
+            '6': 'VI',
+            '7': 'VII',
+            '8': 'VIII',
+            '9': 'IX',
+            '10': 'X'
+        };
+        return cycleNames[cycleNumber] || cycleNumber;
+    }
+
+    function renderWeeklySchedule(schedules) {
+        const timeSlotsContainer = document.getElementById('timeSlots');
+        timeSlotsContainer.innerHTML = '';
+        
+        if (schedules.length === 0) return;
+
+        // 1. Definimos 9 colores distintos para cursos (puedes ajustar los tonos)
+        const courseColors = [
+            'bg-blue-100 border-blue-300',    // Curso 1
+            'bg-green-100 border-green-300',   // Curso 2
+            'bg-yellow-100 border-yellow-300', // Curso 3
+            'bg-purple-100 border-purple-300', // Curso 4
+            'bg-pink-100 border-pink-300',     // Curso 5
+            'bg-indigo-100 border-indigo-300', // Curso 6
+            'bg-red-100 border-red-300',       // Electivo 1
+            'bg-amber-100 border-amber-300',   // Electivo 2
+            'bg-lime-100 border-lime-300'      // Electivo 3
+        ];
+
+        // 2. Mapeo de cursos a colores (basado en el nombre del curso)
+        const courseColorMap = {};
+        const allCourses = [...new Set(schedules.map(item => item.course))];
+        
+        allCourses.forEach((course, index) => {
+            courseColorMap[course] = courseColors[index % courseColors.length];
+        });
+
+        const daysOrder = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+        const timeSlots = generateTimeSlots();
+        
+        // 3. Matriz para organizar cursos
+        const scheduleMatrix = {};
+        daysOrder.forEach(day => {
+            scheduleMatrix[day] = {};
+            timeSlots.forEach(time => {
+                scheduleMatrix[day][time] = [];
+            });
+        });
+        
+        // 4. Llenar la matriz
+        schedules.forEach(item => {
+            if (daysOrder.includes(item.day)) {
+                const startHour = parseInt(item.startTime.split(':')[0]);
+                const duration = calculateDuration(item.startTime, item.endTime);
+                
+                for (let i = 0; i < duration; i++) {
+                    const currentHour = startHour + i;
+                    const timeSlot = `${currentHour.toString().padStart(2, '0')}:00`;
+                    scheduleMatrix[item.day][timeSlot].push({
+                        ...item,
+                        isFirstHour: i === 0
+                    });
+                }
+            }
+        });
+        
+        // 5. Renderizar tabla
+        timeSlots.forEach(time => {
+            // Fila de hora
+            const timeRow = document.createElement('div');
+            timeRow.className = 'col-span-1 bg-theme-seasalt p-1 text-xs text-theme-rich-black text-center border-b border-theme-rich-black/10';
+            timeRow.textContent = formatDisplayTime(time);
+            timeSlotsContainer.appendChild(timeRow);
+            
+            // Celdas para cada día
+            daysOrder.forEach(day => {
+                const courses = scheduleMatrix[day][time];
+                const cell = document.createElement('div');
+                cell.className = 'p-1 bg-white border-b border-theme-rich-black/10 h-16';
+                
+                if (courses.length > 0) {
+                    cell.innerHTML = `
+                        <div class="h-full flex">
+                            ${courses.map(course => {
+                                const baseColor = courseColorMap[course.course];
+                                const typeStyle = course.type === 'TEO' ? 
+                                    'border-l-4 border-l-blue-500' : 
+                                    'border-l-4 border-l-green-500';
+                                
+                                return `
+                                <div class="h-full flex flex-col justify-center items-center p-1 rounded-sm ${baseColor} ${typeStyle}">
+                                    <span class="font-medium text-xs text-center truncate px-1">${course.course}</span>
+                                    <span class="text-2xs mt-0.5 font-semibold">
+                                        ${course.type}
+                                    </span>
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                } else {
+                    cell.innerHTML = `<span class="text-gray-400 text-xs">Libre</span>`;
+                }
+                
+                timeSlotsContainer.appendChild(cell);
+            });
+        });
+    }
+
+    function calculateDuration(startTime, endTime) {
+        const start = new Date(`2000-01-01T${startTime}`);
+        const end = new Date(`2000-01-01T${endTime}`);
+        const diffHours = (end - start) / (1000 * 60 * 60);
+        return Math.max(1, Math.round(diffHours));
+    }
+
+    function formatDisplayTime(time) {
+        const [hour, minute] = time.split(':');
+        const hourNum = parseInt(hour);
+        return `${hourNum <= 12 ? hourNum : hourNum - 12}:${minute} ${hourNum < 12 ? 'AM' : 'PM'}`;
+    }
+
+</script>
