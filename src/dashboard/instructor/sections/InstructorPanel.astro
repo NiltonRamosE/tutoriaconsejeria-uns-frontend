@@ -36,63 +36,9 @@ import AppointmentsSection from '@/dashboard/instructor/sections/AppointmentsSec
     </div>
 </section>
 
-<script is:inline>
-    // Función para cambiar de sección
-    function changeSection(section) {
-        // Ocultar todas las secciones
-        document.querySelectorAll('.content-section').forEach(el => {
-            el.style.display = 'none';
-        });
-        
-        // Mostrar la sección seleccionada
-        const targetSection = document.getElementById(`${section}-section`);
-        if (targetSection) {
-            targetSection.style.display = 'block';
-        }
-        
-        // Actualizar estilos del sidebar
-        updateActiveSectionStyles(section);
-        
-        // Actualizar URL
-        window.history.pushState({ section }, '', `?section=${section}`);
-    }
-
-    // Actualizar estilos del sidebar
-    function updateActiveSectionStyles(section) {
-        document.querySelectorAll('[data-section]').forEach(el => {
-            const isActive = el.getAttribute('data-section') === section;
-            el.classList.toggle('bg-theme-keppel/10', isActive);
-            el.classList.toggle('border-theme-keppel', isActive);
-            el.classList.toggle('hover:bg-theme-keppel/5', !isActive);
-            el.classList.toggle('border-theme-rich-black/20', !isActive);
-        });
-    }
-
-    function init() {
-        // Obtener el parámetro de la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const section = urlParams.get('section') || 'dashboard';
-        
-        // Cambiar a la sección correspondiente
-        changeSection(section);
-    }
-
-    // Configurar event listeners
+<script type="module" is:inline>
+    import { setupSectionListeners } from '/src/dashboard/shared/sectionManager.js';
     document.addEventListener('DOMContentLoaded', () => {
-        init();
-        
-        // Manejar clicks en el sidebar
-        document.querySelectorAll('[data-section]').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const section = e.currentTarget.getAttribute('data-section');
-                changeSection(section);
-            });
-        });
-        
-        // Manejar navegación con botones atrás/adelante
-        window.addEventListener('popstate', (event) => {
-            init();
-        });
+        setupSectionListeners('dashboard');
     });
 </script>
