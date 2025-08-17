@@ -1,0 +1,21 @@
+---
+const { href, section, title, description, iconSrc, currentPage } = Astro.props;
+---
+
+<a
+    href={href}
+    data-section={section}
+    class={`block p-4 rounded-xl transition-all duration-300 border group ${currentPage === section ? 'bg-theme-keppel/10 border-theme-keppel' : 'hover:bg-theme-keppel/5 border-theme-rich-black/20'}`}
+>
+    <div class="flex items-center">
+        <!-- Ícono -->
+        <div class="mr-4 w-10 h-10 bg-theme-keppel/20 rounded-xl flex items-center justify-center group-hover:bg-theme-keppel/30 transition-colors duration-300">
+            <img src={iconSrc} alt={title} class="h-5 w-5" />
+        </div>
+        <!-- Contenido -->
+        <div>
+            <h3 class="font-bold">{title}</h3>
+            <p class="text-sm text-gray-600">{description}</p>
+        </div>
+    </div>
+</a>
