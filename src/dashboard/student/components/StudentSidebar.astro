@@ -3,7 +3,6 @@ import StudentProfileCard from '@/dashboard/student/components/StudentProfileCar
 import LogoutButton from '@/shared/components/LogoutButton.astro';
 import ItemSidebar from '@/shared/components/ItemSidebar.astro';
 
-const { currentPage } = Astro.props;
 ---
 
 <aside class="lg:col-span-1 space-y-6">
@@ -23,7 +22,6 @@ const { currentPage } = Astro.props;
                 title="Inicio"
                 description="Resumen de actividades"
                 iconSrc="/src/assets/icons/four-square.svg"
-                currentPage={currentPage}
             />
 
             <ItemSidebar
@@ -32,7 +30,6 @@ const { currentPage } = Astro.props;
                 title="Evaluar Docente"
                 description="Comparte tu retroalimentación"
                 iconSrc="/src/assets/icons/writing-in-paper.svg"
-                currentPage={currentPage}
             />
 
             <ItemSidebar
@@ -41,7 +38,6 @@ const { currentPage } = Astro.props;
                 title="Cuestionarios"
                 description="Registro de evaluaciones"
                 iconSrc="/src/assets/icons/paper.svg"
-                currentPage={currentPage}
             />
 
             <ItemSidebar
@@ -50,7 +46,6 @@ const { currentPage } = Astro.props;
                 title="Programar Cita"
                 description="Agenda tutorías o consejería"
                 iconSrc="/src/assets/icons/calendar-blank.svg"
-                currentPage={currentPage}
             />
             
             <!-- Cerrar Sesión -->

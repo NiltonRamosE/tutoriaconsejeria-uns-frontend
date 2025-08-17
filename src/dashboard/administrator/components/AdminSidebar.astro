@@ -2,7 +2,6 @@
 import AdminProfileCard from '@/dashboard/administrator/components/AdminProfileCard.astro';
 import LogoutButton from '@/shared/components/LogoutButton.astro';
 import ItemSidebar from '@/shared/components/ItemSidebar.astro';
-const { currentPage } = Astro.props;
 ---
 
 <aside class="lg:col-span-1 space-y-6">
@@ -21,16 +20,22 @@ const { currentPage } = Astro.props;
                 title="Asignar Estudiantes"
                 description="Gestiona la asignación de tutorados"
                 iconSrc="/src/assets/icons/team-person-outline.svg"
-                currentPage={currentPage}
             />
 
             <ItemSidebar
                 href="#"
-                section="users"
-                title="Gestión de Usuarios"
-                description="Administra estudiantes y docentes"
+                section="students"
+                title="Gestión de Estudiantes"
+                description="Administra estudiantes"
                 iconSrc="/src/assets/icons/team-person-fill.svg"
-                currentPage={currentPage}
+            />
+
+            <ItemSidebar
+                href="#"
+                section="instructors"
+                title="Gestión de Docentes"
+                description="Administra docentes"
+                iconSrc="/src/assets/icons/team-person-fill.svg"
             />
 
             <ItemSidebar
@@ -39,7 +44,14 @@ const { currentPage } = Astro.props;
                 title="Horarios Académicos Estudiantes"
                 description="Verifica horarios de estudiantes en el semestre lectivo"
                 iconSrc="/src/assets/icons/calendar-blank.svg"
-                currentPage={currentPage}
+            />
+
+            <ItemSidebar
+                href="#"
+                section="instructor-schedule"
+                title="Horarios Académicos Docentes"
+                description="Verifica horarios de docentes en el semestre lectivo"
+                iconSrc="/src/assets/icons/calendar-blank.svg"
             />
             
             <div class="pt-4 border-t border-theme-rich-black/20">
