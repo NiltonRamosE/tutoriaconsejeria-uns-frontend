@@ -1,39 +1,40 @@
 ---
-import InstructorSidebar from '@/dashboard/instructor/components/InstructorSidebar.astro';
-import DashboardSection from '@/dashboard/instructor/sections/DashboardSection.astro';
-import EvaluateSection from '@/dashboard/instructor/sections/EvaluateSection.astro';
-import ManageStudentsSection from '@/dashboard/instructor/sections/ManageStudentsSection.astro';
-import AppointmentsSection from '@/dashboard/instructor/sections/AppointmentsSection.astro';
+import AssignSection from '@/dashboard/administrator/sections/AssignSection.astro';
+import AdminSidebar from '@/dashboard/administrator/components/AdminSidebar.astro';
+import InstructorSection from '@/dashboard/administrator/sections/InstructorSection.astro';
+import StudentSection from '@/dashboard/administrator/sections/StudentSection.astro';
+import AcademicScheduleSection from '@/dashboard/administrator/sections/AcademicScheduleSection.astro';
+import InstructorScheduleSection from '@/dashboard/administrator/sections/InstructorScheduleSection.astro';
 
-// Obtener parámetro de la URL
-const url = new URL(Astro.request.url);
-const currentSection = 'dashboard';
 ---
 
 <section class="min-h-screen bg-theme-seasalt p-6 md:p-10">
     <!-- Header -->
     <div class="mb-10">
-        <h1 class="text-3xl md:text-4xl font-bold text-theme-rich-black">Panel de Docente</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-theme-rich-black">Panel de Administrador</h1>
     </div>
     
     <!-- Contenido principal -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <!-- Sidebar -->
-        <InstructorSidebar currentSection={currentSection} />
+        <AdminSidebar />
         
-        <!-- Contenido dinámico -->
+        <!-- Contenido principal -->
         <main class="lg:col-span-3">
-            <div id="dashboard-section" class="content-section" style="display: ${currentSection === 'dashboard' ? 'block' : 'none'}">
-                <DashboardSection />
+            <div id="assign-section" class="content-section">
+                <AssignSection />
             </div>
-            <div id="evaluate-section" class="content-section" style="display: ${currentSection === 'evaluate' ? 'block' : 'none'}">
-                <EvaluateSection />
+            <div id="students-section" class="content-section">
+                <StudentSection />
             </div>
-            <div id="surveys-section" class="content-section" style="display: ${currentSection === 'surveys' ? 'block' : 'none'}">
-                <ManageStudentsSection />
+            <div id="instructors-section" class="content-section">
+                <InstructorSection />
             </div>
-            <div id="appointments-section" class="content-section" style="display: ${currentSection === 'appointments' ? 'block' : 'none'}">
-                <AppointmentsSection />
+            <div id="academic-schedule-section" class="content-section">
+                <AcademicScheduleSection />
+            </div>
+            <div id="instructor-schedule-section" class="content-section">
+                <InstructorScheduleSection />
             </div>
         </main>
     </div>
@@ -71,10 +72,18 @@ const currentSection = 'dashboard';
         });
     }
 
+    function init() {
+        // Obtener el parámetro de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section') || 'assign';
+        
+        // Cambiar a la sección correspondiente
+        changeSection(section);
+    }
+
     // Configurar event listeners
     document.addEventListener('DOMContentLoaded', () => {
-        // Inicializar mostrando solo la sección actual
-        changeSection('dashboard');
+        init();
         
         // Manejar clicks en el sidebar
         document.querySelectorAll('[data-section]').forEach(link => {
@@ -87,9 +96,7 @@ const currentSection = 'dashboard';
         
         // Manejar navegación con botones atrás/adelante
         window.addEventListener('popstate', (event) => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const section = urlParams.get('section') || 'dashboard';
-            changeSection(section);
+            init();
         });
     });
 </script>

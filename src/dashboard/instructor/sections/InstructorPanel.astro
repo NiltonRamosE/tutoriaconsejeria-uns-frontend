@@ -1,36 +1,36 @@
 ---
-import AssignSection from '@/dashboard/administrator/sections/AssignSection.astro';
-import AdminSidebar from '@/dashboard/administrator/components/AdminSidebar.astro';
-import UsersSection from '@/dashboard/administrator/sections/UsersSection.astro';
-import AcademicScheduleSection from '@/dashboard/administrator/sections/AcademicScheduleSection.astro';
-const { students } = Astro.props;
+import InstructorSidebar from '@/dashboard/instructor/components/InstructorSidebar.astro';
+import DashboardSection from '@/dashboard/instructor/sections/DashboardSection.astro';
+import EvaluateSection from '@/dashboard/instructor/sections/EvaluateSection.astro';
+import ManageStudentsSection from '@/dashboard/instructor/sections/ManageStudentsSection.astro';
+import AppointmentsSection from '@/dashboard/instructor/sections/AppointmentsSection.astro';
 
-// Obtener parámetro de la URL
-const url = new URL(Astro.request.url);
-const currentSection = 'assign';
 ---
 
 <section class="min-h-screen bg-theme-seasalt p-6 md:p-10">
     <!-- Header -->
     <div class="mb-10">
-        <h1 class="text-3xl md:text-4xl font-bold text-theme-rich-black">Panel de Administrador</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-theme-rich-black">Panel de Docente</h1>
     </div>
     
     <!-- Contenido principal -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <!-- Sidebar -->
-        <AdminSidebar currentPage="assign" />
+        <InstructorSidebar />
         
-        <!-- Contenido principal -->
+        <!-- Contenido dinámico -->
         <main class="lg:col-span-3">
-            <div id="assign-section" class="content-section" style="display: ${currentSection === 'assign' ? 'block' : 'none'}">
-                <AssignSection {students} />
+            <div id="dashboard-section" class="content-section">
+                <DashboardSection />
             </div>
-            <div id="users-section" class="content-section" style="display: ${currentSection === 'users' ? 'block' : 'none'}">
-                <UsersSection />
+            <div id="evaluate-section" class="content-section">
+                <EvaluateSection />
             </div>
-            <div id="academic-schedule-section" class="content-section" style="display: ${currentSection === 'users' ? 'block' : 'none'}">
-                <AcademicScheduleSection />
+            <div id="surveys-section" class="content-section">
+                <ManageStudentsSection />
+            </div>
+            <div id="appointments-section" class="content-section">
+                <AppointmentsSection />
             </div>
         </main>
     </div>
@@ -68,10 +68,18 @@ const currentSection = 'assign';
         });
     }
 
+    function init() {
+        // Obtener el parámetro de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section') || 'dashboard';
+        
+        // Cambiar a la sección correspondiente
+        changeSection(section);
+    }
+
     // Configurar event listeners
     document.addEventListener('DOMContentLoaded', () => {
-        // Inicializar mostrando solo la sección actual
-        changeSection('assign');
+        init();
         
         // Manejar clicks en el sidebar
         document.querySelectorAll('[data-section]').forEach(link => {
@@ -84,9 +92,7 @@ const currentSection = 'assign';
         
         // Manejar navegación con botones atrás/adelante
         window.addEventListener('popstate', (event) => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const section = urlParams.get('section') || 'assign';
-            changeSection(section);
+            init();
         });
     });
 </script>

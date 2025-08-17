@@ -5,9 +5,7 @@ import EvaluateSection from '@/dashboard/student/sections/EvaluateSection.astro'
 import SurveysSection from '@/dashboard/student/sections/SurveysSection.astro';
 import AppointmentsSection from '@/dashboard/student/sections/AppointmentsSection.astro';
 
-// Obtener parámetro de la URL
-const url = new URL(Astro.request.url);
-const currentSection = 'dashboard';
+
 ---
 
 <section class="min-h-screen bg-theme-seasalt p-6 md:p-10">
@@ -19,20 +17,20 @@ const currentSection = 'dashboard';
     <!-- Contenido principal -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <!-- Sidebar -->
-        <StudentSidebar currentSection={currentSection} />
+        <StudentSidebar />
         
         <!-- Contenido dinámico -->
         <main class="lg:col-span-3">
-            <div id="dashboard-section" class="content-section" style="display: ${currentSection === 'dashboard' ? 'block' : 'none'}">
+            <div id="dashboard-section" class="content-section">
                 <DashboardSection />
             </div>
-            <div id="evaluate-section" class="content-section" style="display: ${currentSection === 'evaluate' ? 'block' : 'none'}">
+            <div id="evaluate-section" class="content-section">
                 <EvaluateSection />
             </div>
-            <div id="surveys-section" class="content-section" style="display: ${currentSection === 'surveys' ? 'block' : 'none'}">
+            <div id="surveys-section" class="content-section">
                 <SurveysSection />
             </div>
-            <div id="appointments-section" class="content-section" style="display: ${currentSection === 'appointments' ? 'block' : 'none'}">
+            <div id="appointments-section" class="content-section">
                 <AppointmentsSection />
             </div>
         </main>
@@ -71,10 +69,18 @@ const currentSection = 'dashboard';
         });
     }
 
+    function init() {
+        // Obtener el parámetro de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section') || 'dashboard';
+        
+        // Cambiar a la sección correspondiente
+        changeSection(section);
+    }
+
     // Configurar event listeners
     document.addEventListener('DOMContentLoaded', () => {
-        // Inicializar mostrando solo la sección actual
-        changeSection('dashboard');
+        init();
         
         // Manejar clicks en el sidebar
         document.querySelectorAll('[data-section]').forEach(link => {
@@ -87,9 +93,7 @@ const currentSection = 'dashboard';
         
         // Manejar navegación con botones atrás/adelante
         window.addEventListener('popstate', (event) => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const section = urlParams.get('section') || 'dashboard';
-            changeSection(section);
+            init();
         });
     });
 </script>
