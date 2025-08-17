@@ -1,8 +1,13 @@
 ---
-import StudentsTable from '@/dashboard/administrator/components/StudentsTable.astro';
+import AssignSection from '@/dashboard/administrator/sections/AssignSection.astro';
 import AdminSidebar from '@/dashboard/administrator/components/AdminSidebar.astro';
-
+import UsersSection from '@/dashboard/administrator/sections/UsersSection.astro';
+import AcademicScheduleSection from '@/dashboard/administrator/sections/AcademicScheduleSection.astro';
 const { students } = Astro.props;
+
+// Obtener parámetro de la URL
+const url = new URL(Astro.request.url);
+const currentSection = 'assign';
 ---
 
 <section class="min-h-screen bg-theme-seasalt p-6 md:p-10">
@@ -18,7 +23,70 @@ const { students } = Astro.props;
         
         <!-- Contenido principal -->
         <main class="lg:col-span-3">
-            <StudentsTable {students} />
+            <div id="assign-section" class="content-section" style="display: ${currentSection === 'assign' ? 'block' : 'none'}">
+                <AssignSection {students} />
+            </div>
+            <div id="users-section" class="content-section" style="display: ${currentSection === 'users' ? 'block' : 'none'}">
+                <UsersSection />
+            </div>
+            <div id="academic-schedule-section" class="content-section" style="display: ${currentSection === 'users' ? 'block' : 'none'}">
+                <AcademicScheduleSection />
+            </div>
         </main>
     </div>
 </section>
+
+<script is:inline>
+    // Función para cambiar de sección
+    function changeSection(section) {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.content-section').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Mostrar la sección seleccionada
+        const targetSection = document.getElementById(`${section}-section`);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+        }
+        
+        // Actualizar estilos del sidebar
+        updateActiveSectionStyles(section);
+        
+        // Actualizar URL
+        window.history.pushState({ section }, '', `?section=${section}`);
+    }
+
+    // Actualizar estilos del sidebar
+    function updateActiveSectionStyles(section) {
+        document.querySelectorAll('[data-section]').forEach(el => {
+            const isActive = el.getAttribute('data-section') === section;
+            el.classList.toggle('bg-theme-keppel/10', isActive);
+            el.classList.toggle('border-theme-keppel', isActive);
+            el.classList.toggle('hover:bg-theme-keppel/5', !isActive);
+            el.classList.toggle('border-theme-rich-black/20', !isActive);
+        });
+    }
+
+    // Configurar event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicializar mostrando solo la sección actual
+        changeSection('assign');
+        
+        // Manejar clicks en el sidebar
+        document.querySelectorAll('[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = e.currentTarget.getAttribute('data-section');
+                changeSection(section);
+            });
+        });
+        
+        // Manejar navegación con botones atrás/adelante
+        window.addEventListener('popstate', (event) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get('section') || 'assign';
+            changeSection(section);
+        });
+    });
+</script>
