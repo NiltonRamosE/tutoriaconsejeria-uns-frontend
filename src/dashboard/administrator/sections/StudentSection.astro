@@ -1,0 +1,225 @@
+---
+import Pagination from "@/dashboard/shared/Pagination.astro";
+---
+
+<div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+        <h2 class="text-2xl font-bold text-theme-rich-black">Relación de Estudiantes</h2>
+        
+        <div class="flex flex-col md:flex-row items-stretch gap-2 w-full sm:w-auto">
+            <!-- Campo de búsqueda -->
+            <div class="relative flex-grow">
+                <input
+                    type="text"
+                    id="studentSearchInput"
+                    placeholder="Ingresar código..."
+                    class="bg-white text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 pl-10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200 w-full xs:w-64"
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-rich-black/50" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+            </div>
+
+            <!-- Botón Buscar -->
+            <button
+                id="searchStudentBtn"
+                class="bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200 flex items-center justify-center xs:w-auto"
+            >
+                Buscar
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="mb-6 flex flex-wrap gap-3">
+        <button 
+            id="filterAll"
+            class="filter-btn active bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200"
+            data-endpoint="students/list"
+        >
+            Todos
+        </button>
+
+        <button 
+            id="filterEarlyStage"
+            class="filter-btn bg-theme-keppel/20 text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200"
+            data-endpoint="students/early-stage"
+        >
+            Primeros ciclos
+        </button>
+        
+        <button 
+            id="filterLateStage"
+            class="filter-btn bg-theme-keppel/20 text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/30 transition-colors duration-200"
+            data-endpoint="students/late-stage"
+        >
+            Últimos ciclos
+        </button>
+        
+        <button 
+            id="filterIrregularEarly"
+            class="filter-btn bg-theme-keppel/20 text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/30 transition-colors duration-200"
+            data-endpoint="students/irregular/early-stage"
+        >
+            Irregulares (primeros)
+        </button>
+        
+        <button 
+            id="filterIrregularLate"
+            class="filter-btn bg-theme-keppel/20 text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/30 transition-colors duration-200"
+            data-endpoint="students/irregular/late-stage"
+        >
+            Irregulares (últimos)
+        </button>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-theme-rich-black/20">
+            <thead class="bg-theme-keppel/10">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Estudiante</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Código</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Celular</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Año de estudio</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="studentsTableBody" class="bg-white divide-y divide-theme-rich-black/20">
+                <!-- Los datos de los estudiantes se llenarán dinámicamente con JavaScript -->
+            </tbody>
+        </table>
+        
+        <Pagination idPrefix="students" />
+    </div>
+</div>
+
+<script type="module" is:inline>
+    import { createPagination } from "/src/dashboard/shared/paginationManager";
+    const pgn = createPagination('students', 5);
+
+    // Estado global
+    let currentFilter = 'students/list';
+    let allStudents = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadStudents(currentFilter);
+        pgn.setupPagination(() => loadStudents(currentFilter));
+        
+        // Configurar eventos de los filtros
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                // Actualizar estilos de los botones
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('active', 'bg-theme-keppel');
+                    b.classList.add('bg-theme-keppel/20');
+                });
+                
+                btn.classList.add('active', 'bg-theme-keppel');
+                btn.classList.remove('bg-theme-keppel/20');
+                
+                // Cambiar filtro y cargar datos
+                currentFilter = btn.dataset.endpoint;
+                await loadStudents(currentFilter);
+            });
+        });
+
+        // Evento de búsqueda
+        document.getElementById('searchStudentBtn').addEventListener('click', () => {
+            const searchTerm = document.getElementById('studentSearchInput').value.toLowerCase();
+            if (searchTerm) {
+                const filtered = allStudents.filter(student => 
+                    student.studentCode.toLowerCase().includes(searchTerm))
+                updateStudentsTable(filtered);
+            } else {
+                updateStudentsTable(allStudents);
+            }
+        });
+    });
+
+    // Función para actualizar la tabla
+    function updateStudentsTable(students) {
+        const tableBody = document.getElementById('studentsTableBody');        
+        if (!students || students.length === 0) {
+            if (tableBody) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            No hay estudiantes para mostrar
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            pgn.hiddenPagination();
+            return;
+        }
+
+        pgn.showPagination();
+
+        const paginatedItems = pgn.calculateVisibleElements(students);
+        if (tableBody) {
+            tableBody.innerHTML = paginatedItems.map(student => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-theme-keppel/20 flex items-center justify-center">
+                                <span class="text-theme-keppel">👨‍🎓</span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-theme-rich-black">${student.studentName}</div>
+                                <div class="text-sm text-gray-500">${student.studentInstitutionalEmail}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${student.studentCode}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${student.studentCellphone}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${student.yearOfStudy}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button 
+                            onclick="" 
+                            class="text-theme-keppel hover:text-theme-keppel-dark mr-3"
+                        >
+                            ${student.studentId ? 'Ver perfil' : ''}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        pgn.updateIndicators(students.length);
+    }
+
+    // Función para cargar estudiantes según filtro
+    async function loadStudents(endpoint) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No hay token de autenticación');
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8080/administrator/${endpoint}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                allStudents = await response.json();
+                updateStudentsTable(allStudents);
+                pgn.updatePaginationControls(() => loadStudents(currentFilter), allStudents.length);
+            } else {
+                console.error('Error al cargar los estudiantes');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+</script>
