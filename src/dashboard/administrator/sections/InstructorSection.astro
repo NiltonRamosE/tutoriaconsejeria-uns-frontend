@@ -1,0 +1,164 @@
+---
+import Pagination from "@/dashboard/shared/Pagination.astro";
+---
+
+<div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+        <h2 class="text-2xl font-bold text-theme-rich-black">Relación de Docentes</h2>
+        
+        <div class="flex flex-col md:flex-row items-stretch gap-2 w-full sm:w-auto">
+            <!-- Campo de búsqueda -->
+            <div class="relative flex-grow">
+                <input
+                    type="text"
+                    id="instructorSearchInput"
+                    placeholder="Ingresar correo..."
+                    class="bg-white text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 pl-10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200 w-full xs:w-64"
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-rich-black/50" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+            </div>
+
+            <!-- Botón Buscar -->
+            <button
+                id="searchInstructorBtn"
+                class="bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200 flex items-center justify-center xs:w-auto"
+            >
+                Buscar
+            </button>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-theme-rich-black/20">
+            <thead class="bg-theme-keppel/10">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Estudiante</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Código</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Celular</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Año de estudio</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="instructorsTableBody" class="bg-white divide-y divide-theme-rich-black/20">
+                <!-- Los datos de los estudiantes se llenarán dinámicamente con JavaScript -->
+            </tbody>
+        </table>
+        
+        <Pagination idPrefix="instructors" />
+
+    </div>
+</div>
+
+<script type="module" is:inline>
+
+    let allInstructors = [];
+
+    import { createPagination } from "/src/dashboard/shared/paginationManager";
+    const pgn = createPagination('instructors', 5);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadInstructors();
+        pgn.setupPagination(loadInstructors);
+
+        // Evento de búsqueda
+        document.getElementById('searchInstructorBtn').addEventListener('click', () => {
+            const searchTerm = document.getElementById('instructorSearchInput').value.toLowerCase();
+            if (searchTerm) {
+                const filtered = allInstructors.filter(instructor => 
+                    instructor.instructorInstitutionalEmail.toLowerCase().includes(searchTerm))
+                updateInstructorsTable(filtered);
+            } else {
+                updateInstructorsTable(allInstructors);
+            }
+        });
+    });
+
+    // 2. Función para actualizar la tabla con paginación
+    function updateInstructorsTable(allInstructors) {
+        const tableBody = document.getElementById('instructorsTableBody');        
+        if (!allInstructors || allInstructors.length === 0) {
+            if (tableBody) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            No hay docentes para mostrar
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            pgn.hiddenPagination();
+            return;
+        }
+
+        pgn.showPagination();
+
+        const paginatedItems = pgn.calculateVisibleElements(allInstructors);
+        if (tableBody) {
+            tableBody.innerHTML = paginatedItems.map(instructor => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-theme-keppel/20 flex items-center justify-center">
+                                <span class="text-theme-keppel">👨‍🎓</span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-theme-rich-black">${instructor.instructorName}</div>
+                                <div class="text-sm text-gray-500">${instructor.instructorInstitutionalEmail}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${instructor.instructorMaxAcademicDegree}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${instructor.instructorAcademicDepartment}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${instructor.instructorDedication}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button 
+                            onclick="" 
+                            class="text-theme-keppel hover:text-theme-keppel-dark mr-3"
+                        >
+                            ${instructor.instructorId ? 'Ver perfil' : ''}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        pgn.updateIndicators(allInstructors.length);
+    }
+
+    // Endpoint para cargar asignaciones
+    async function loadInstructors() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No hay token de autenticación');
+                return;
+            }
+
+            const response = await fetch('http://localhost:8080/administrator/instructors/list', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                allInstructors = await response.json();
+                updateInstructorsTable(allInstructors);
+                pgn.updatePaginationControls(loadInstructors, allInstructors.length);
+            } else {
+                console.error('Error al cargar los docentes');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+</script>
