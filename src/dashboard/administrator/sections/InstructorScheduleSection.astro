@@ -1,0 +1,80 @@
+---
+import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
+---
+
+<div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+        <h2 class="text-2xl font-bold text-theme-rich-black">Horario de Docentes</h2>
+        
+        <div class="flex flex-col md:flex-row items-stretch gap-2 w-full sm:w-auto">
+            <!-- Campo de búsqueda -->
+            <div class="relative flex-grow">
+                <input
+                    type="text"
+                    id="instructorScheduleSearchInput"
+                    placeholder="Ingresar correo..."
+                    class="bg-white text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 pl-10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200 w-full xs:w-64"
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-rich-black/50" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+            </div>
+
+            <!-- Botón Buscar -->
+            <button
+                id="searchInstructorScheduleBtn"
+                class="bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200 flex items-center justify-center xs:w-auto"
+            >
+                Buscar
+            </button>
+        </div>
+    </div>
+    
+    <div class="space-y-6">
+
+        <ScheduleTable idPrefix="instructor" />
+
+        <!-- Empty State -->
+        <div id="instructorEmptyState" class="hidden text-center py-8">
+            <p class="text-gray-500">No se encontraron horarios para este docente.</p>
+        </div>
+    </div>
+</div>
+
+<script type="module" is:inline>
+    import { createScheduleRenderer } from "/src/dashboard/shared/scheduleManager.js";
+    const sched = createScheduleRenderer('instructor');
+
+    document.getElementById('searchInstructorScheduleBtn').addEventListener('click', loadInstructorSchedule);
+
+    async function loadInstructorSchedule() {
+        const emailInstructor = document.getElementById('instructorScheduleSearchInput').value.trim();
+        if (!emailInstructor) {
+            alert('Por favor, ingresa el correo del docente.');
+            return;
+        }
+
+        sched.hide();
+        const emptyState = document.getElementById('instructorEmptyState');
+        if (emptyState) emptyState.classList.add('hidden');
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('No autenticado');
+
+            const resp = await fetch(`http://localhost:8080/instructor-schedule?emailInstructor=${emailInstructor}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!resp.ok) throw new Error('Error al cargar horario del docente');
+
+            const data = await resp.json(); // { instructorName, academicSchedule: ScheduleItem[] }
+
+            sched.setTitle(`Horario - ${data.instructorName || emailInstructor}`);
+            sched.render(data.academicSchedule || [], { emptyStateId: 'instructorEmptyState' });
+            sched.show();
+        } catch (err) {
+            console.error(err);
+            alert(`Error al cargar horarios: ${err.message}`);
+        }
+    }
+</script>
