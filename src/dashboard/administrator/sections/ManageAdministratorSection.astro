@@ -1,0 +1,339 @@
+---
+import Pagination from "@/dashboard/shared/Pagination.astro";
+---
+
+<div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+        <h2 class="text-2xl font-bold text-theme-rich-black">Gestión de Administradores</h2>
+        
+        <div class="flex flex-col md:flex-row items-stretch gap-2 w-full sm:w-auto">
+            <button 
+                id="addAdministratorBtn"
+                class="bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200 flex items-center ml-4"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                </svg>
+                Nuevo
+            </button>
+            <!-- Campo de búsqueda -->
+            <div class="relative flex-grow">
+                <input
+                    type="text"
+                    id="administratorSearchInput"
+                    placeholder="Ingresar correo..."
+                    class="bg-white text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 pl-10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200 w-full xs:w-64"
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-rich-black/50" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+            </div>
+
+            <!-- Botón Buscar -->
+            <button
+                id="searchAdministratorBtn"
+                class="bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-2 px-4 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200 flex items-center justify-center xs:w-auto"
+            >
+                Buscar
+            </button>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-theme-rich-black/20">
+            <thead class="bg-theme-keppel/10">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Administrador</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Género</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Correo Institucional</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="administratorsTableBody" class="bg-white divide-y divide-theme-rich-black/20">
+                <!-- Los datos de los administradores se llenarán dinámicamente con JavaScript -->
+            </tbody>
+        </table>
+        
+        <Pagination idPrefix="administrators" />
+
+    </div>
+
+    <!-- Modal para agregar/editar administrador -->
+    <div id="administratorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-bold text-theme-rich-black">Nuevo Administrador</h3>
+                <button class="close-modal-btn text-theme-rich-black hover:text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="administratorForm" class="space-y-4">
+                <input type="hidden" id="administratorId">
+                
+                <div>
+                    <label for="administratorNameInput" class="block text-sm font-medium text-theme-rich-black/70 mb-1">Nombres</label>
+                    <input type="text" id="administratorNameInput" required class="w-full border rounded-md px-3 py-2 border-theme-rich-black/40">
+                </div>
+                
+                <div>
+                    <label for="administratorPaternalSurnameInput" class="block text-sm font-medium text-theme-rich-black/70 mb-1">Apellido Paterno</label>
+                    <input type="text" id="administratorPaternalSurnameInput" required class="w-full border rounded-md px-3 py-2 border-theme-rich-black/40">
+                </div>
+                
+                <div>
+                    <label for="administratorMaternalSurnameInput" class="block text-sm font-medium text-theme-rich-black/70 mb-1">Apellido Materno</label>
+                    <input type="text" id="administratorMaternalSurnameInput" required class="w-full border rounded-md px-3 py-2 border-theme-rich-black/40">
+                </div>
+                
+                <div>
+                    <label for="passwordInput" class="block text-sm font-medium text-theme-rich-black/70 mb-1">Contraseña</label>
+                    <input type="password" id="passwordInput" class="w-full border rounded-md px-3 py-2 border-theme-rich-black/40" placeholder="Dejar vacío para no cambiar">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-theme-rich-black/70 mb-1" for="genderM">Género</label>
+                    <div class="flex space-x-4">
+                        <input type="radio" id="genderM" name="gender" value="M" class="text-theme-keppel">
+                        <label for="genderM" class="ml-2 inline-flex items-center">Masculino</label>
+
+                        <input type="radio" id="genderF" name="gender" value="F" class="text-theme-keppel">
+                        <label for="genderF" class="ml-2 inline-flex items-center">Femenino</label>
+                    </div>
+                </div>
+
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" class="close-modal-btn px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-theme-keppel text-white px-4 py-2 rounded-md hover:bg-theme-keppel-dark">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="module" is:inline>
+    let allAdministrators = [];
+    let currentAdministratorId = null;
+
+    import { createPagination } from "/src/dashboard/shared/paginationManager";
+    const pgn = createPagination('administrators', 5);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadAdministrators();
+        pgn.setupPagination(loadAdministrators);
+
+        document.getElementById('searchAdministratorBtn').addEventListener('click', () => {
+            const searchTerm = document.getElementById('administratorSearchInput').value.toLowerCase();
+            if (searchTerm) {
+                const filtered = allAdministrators.filter(admin => 
+                    admin.administratorInstitutionalEmail.toLowerCase().includes(searchTerm));
+                updateAdministratorsTable(filtered);
+            } else {
+                updateAdministratorsTable(allAdministrators);
+            }
+        });
+
+        // Evento para el botón de agregar
+        document.getElementById('addAdministratorBtn').addEventListener('click', openAddModal);
+
+        // Manejar el formulario
+        document.getElementById('administratorForm').addEventListener('submit', handleFormSubmit);
+    });
+
+    function openAddModal() {
+        currentAdministratorId = null;
+        document.getElementById('modalTitle').textContent = 'Nuevo Administrador';
+        document.getElementById('administratorForm').reset();
+        document.getElementById('administratorModal').classList.remove('hidden');
+    }
+
+    function openEditModal(id) {
+        const admin = allAdministrators.find(a => a.id === id);
+        if (!admin) return;
+        
+        currentAdministratorId = id;
+        document.getElementById('modalTitle').textContent = 'Editar Administrador';
+        document.getElementById('administratorId').value = admin.id;
+        document.getElementById('administratorNameInput').value = admin.administratorName;
+        document.getElementById('administratorPaternalSurnameInput').value = admin.administratorPaternalSurname;
+        document.getElementById('administratorMaternalSurnameInput').value = admin.administratorMaternalSurname;
+        document.querySelector(`input[name="gender"][value="${admin.gender === 'FEMENINO' ? 'F' : 'M'}"]`).checked = true;
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('administratorModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('administratorModal').classList.add('hidden');
+    }
+
+    document.querySelectorAll('.close-modal-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            closeModal();
+        });
+    });
+
+
+    async function confirmDelete(id) {
+        if (!confirm('¿Estás seguro de eliminar este administrador?')) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/administrator/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                await loadAdministrators();
+                alert('Administrador eliminado correctamente');
+            } else {
+                throw new Error('Error al eliminar');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al eliminar el administrador');
+        }
+    }
+
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        const formData = {
+            id: currentAdministratorId,
+            administratorName: document.getElementById('administratorNameInput').value,
+            administratorPaternalSurname: document.getElementById('administratorPaternalSurnameInput').value,
+            administratorMaternalSurname: document.getElementById('administratorMaternalSurnameInput').value,
+            password: document.getElementById('passwordInput').value,
+            gender: document.querySelector('input[name="gender"]:checked').value
+        };
+        
+        console.log('Form Data:', formData);
+        try {
+            const token = localStorage.getItem('token');
+            const url = currentAdministratorId ? 'http://localhost:8080/administrator/update' : 'http://localhost:8080/administrator';
+            const method = currentAdministratorId ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            if (!response.ok) throw new Error('Error en la operación');
+            
+            await loadAdministrators();
+            closeModal();
+            alert(`Administrador ${currentAdministratorId ? 'actualizado' : 'creado'} correctamente`);
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`Error al ${currentAdministratorId ? 'actualizar' : 'crear'} el administrador`);
+        }
+    }
+
+    function updateAdministratorsTable(administrators) {
+        const tableBody = document.getElementById('administratorsTableBody');        
+        if (!administrators || administrators.length === 0) {
+            if (tableBody) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                            No hay administradores para mostrar
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            pgn.hiddenPagination();
+            return;
+        }
+
+        pgn.showPagination();
+
+        const paginatedItems = pgn.calculateVisibleElements(administrators);
+        if (tableBody) {
+            tableBody.innerHTML = paginatedItems.map(admin => `
+                <tr data-id="${admin.id}">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-theme-keppel/20 flex items-center justify-center">
+                                <span class="text-theme-keppel">
+                                    ${admin.gender === 'FEMENINO' ? 
+                                    '<img src="/src/assets/icons/female-user.svg" alt="Icono de Usuario Mujer" class="h-5 w-5" />' : 
+                                    '<img src="/src/assets/icons/male-user.svg" alt="Icono de Usuario Hombre" class="h-5 w-5" />'}
+                                </span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-theme-rich-black">${admin.administratorName} ${admin.administratorPaternalSurname} ${admin.administratorMaternalSurname}</div>
+                                <div class="text-sm text-gray-500">${admin.administratorInstitutionalEmail}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${admin.gender === 'FEMENINO' ? 'Femenino' : 'Masculino'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-theme-rich-black">
+                        ${admin.administratorInstitutionalEmail}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button class="edit-btn text-theme-keppel hover:text-theme-keppel-dark mr-3">Editar</button>
+                        <button class="delete-btn text-red-500 hover:text-red-700">Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            tableBody.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.closest('tr').dataset.id);
+                    openEditModal(id);
+                });
+            });
+
+            tableBody.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.closest('tr').dataset.id);
+                    confirmDelete(id);
+                });
+            });
+        }
+        
+        pgn.updateIndicators(administrators.length);
+    }
+
+    async function loadAdministrators() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No hay token de autenticación');
+                return;
+            }
+
+            const response = await fetch('http://localhost:8080/administrator', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                allAdministrators = await response.json();
+                updateAdministratorsTable(allAdministrators);
+                pgn.updatePaginationControls(loadAdministrators, allAdministrators.length);
+            } else {
+                console.error('Error al cargar los administradores');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+</script>
