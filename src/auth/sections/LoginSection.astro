@@ -248,9 +248,6 @@
   document.getElementById('actualLoginForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const formData = new FormData(this);
-    console.log('Email:', formData.get('institutionalEmail'));
-    console.log('Password:', formData.get('password'));
-    console.log('Remember:', formData.get('remember'));
     
     const payload = {
       institutionalEmail: formData.get('institutionalEmail'),
@@ -276,17 +273,13 @@
     })
     .then(data => {
       if (data?.token) {
-        console.log('✅ Login exitoso');
-        console.log('🎟️ JWT:', data.token);
-
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.userResponse));
-        alert('Inicio de sesión exitoso como ' + data.userType);
         window.location.href = `/dashboard/${data.userType}`;
       }
     })
     .catch(error => {
-      console.error('❌ Error en la petición:', error);
+      console.error('Error en la petición:', error);
     });
   });
 </script>
