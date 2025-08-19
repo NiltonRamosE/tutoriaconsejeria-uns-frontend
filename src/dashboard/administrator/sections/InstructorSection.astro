@@ -34,10 +34,10 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
         <table class="min-w-full divide-y divide-theme-rich-black/20">
             <thead class="bg-theme-keppel/10">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Estudiante</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Código</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Celular</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Año de estudio</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Docente</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Grado Académico</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Departamento</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Dedicación</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-theme-rich-black uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
@@ -102,7 +102,7 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10 rounded-full bg-theme-keppel/20 flex items-center justify-center">
-                                <span class="text-theme-keppel">👨‍🎓</span>
+                                <span class="text-theme-keppel"><img src="/src/assets/icons/instructor-outline.svg" alt="Icono de Docente" class="h-5 w-5" /></span>
                             </div>
                             <div class="ml-4">
                                 <div class="text-sm font-medium text-theme-rich-black">${instructor.instructorName}</div>
