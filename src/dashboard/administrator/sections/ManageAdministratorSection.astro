@@ -59,7 +59,7 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
     </div>
 
     <!-- Modal para agregar/editar administrador -->
-    <div id="administratorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" hidden aria-modal="true" aria-hidden="true">
+    <div id="administratorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" hidden aria-modal="true">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="modalTitle" class="text-xl font-bold text-theme-rich-black">Nuevo Administrador</h3>
@@ -153,7 +153,6 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
         document.getElementById('modalTitle').textContent = 'Nuevo Administrador';
         document.getElementById('administratorForm').reset();
         modal.hidden = false
-        modal.setAttribute('aria-hidden', 'false');
     }
 
     function openEditModal(id) {
@@ -169,12 +168,10 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
         document.querySelector(`input[name="gender"][value="${admin.gender === 'FEMENINO' ? 'F' : 'M'}"]`).checked = true;
         document.getElementById('passwordInput').value = '';
         modal.hidden = false
-        modal.setAttribute('aria-hidden', 'false');
     }
 
     function closeModal() {
         modal.hidden = true;
-        modal.setAttribute('aria-hidden', 'true');
     }
 
     document.querySelectorAll('.close-modal-btn').forEach(btn => {
@@ -198,7 +195,6 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
             
             if (response.ok) {
                 await loadAdministrators();
-                alert('Administrador eliminado correctamente');
             } else {
                 throw new Error('Error al eliminar');
             }
@@ -219,7 +215,6 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
             gender: document.querySelector('input[name="gender"]:checked').value
         };
         
-        console.log('Form Data:', formData);
         try {
             const token = localStorage.getItem('token');
             const url = currentAdministratorId ? 'http://localhost:8080/administrator/update' : 'http://localhost:8080/administrator';
@@ -238,7 +233,6 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
             
             await loadAdministrators();
             closeModal();
-            alert(`Administrador ${currentAdministratorId ? 'actualizado' : 'creado'} correctamente`);
         } catch (error) {
             console.error('Error:', error);
             alert(`Error al ${currentAdministratorId ? 'actualizar' : 'crear'} el administrador`);
