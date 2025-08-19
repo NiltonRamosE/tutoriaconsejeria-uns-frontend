@@ -5,7 +5,8 @@ import InstructorSection from '@/dashboard/administrator/sections/InstructorSect
 import StudentSection from '@/dashboard/administrator/sections/StudentSection.astro';
 import AcademicScheduleSection from '@/dashboard/administrator/sections/AcademicScheduleSection.astro';
 import InstructorScheduleSection from '@/dashboard/administrator/sections/InstructorScheduleSection.astro';
-
+import AdministratorProfile from '@/dashboard/administrator/sections/AdministratorProfile.astro';
+import ManageAdministratorSection from '@/dashboard/administrator/sections/ManageAdministratorSection.astro';
 ---
 
 <section class="min-h-screen bg-theme-seasalt p-6 md:p-10">
@@ -21,6 +22,12 @@ import InstructorScheduleSection from '@/dashboard/administrator/sections/Instru
         
         <!-- Contenido principal -->
         <main class="lg:col-span-3">
+            <div id="administrator-profile-section" class="content-section">
+                <AdministratorProfile />
+            </div>
+            <div id="manage-administrator-section" class="content-section">
+                <ManageAdministratorSection />
+            </div>
             <div id="assign-section" class="content-section">
                 <AssignSection />
             </div>
@@ -43,6 +50,6 @@ import InstructorScheduleSection from '@/dashboard/administrator/sections/Instru
 <script type="module" is:inline>
     import { setupSectionListeners } from '/src/dashboard/shared/sectionManager.js';
     document.addEventListener('DOMContentLoaded', () => {
-        setupSectionListeners('assign');
+        setupSectionListeners('manage-administrator');
     });
 </script>
