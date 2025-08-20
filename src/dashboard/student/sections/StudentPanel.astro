@@ -4,8 +4,7 @@ import DashboardSection from '@/dashboard/student/sections/DashboardSection.astr
 import EvaluateSection from '@/dashboard/student/sections/EvaluateSection.astro';
 import SurveysSection from '@/dashboard/student/sections/SurveysSection.astro';
 import AppointmentsSection from '@/dashboard/student/sections/AppointmentsSection.astro';
-
-
+import StudentProfile from '@/dashboard/student/sections/StudentProfile.astro';
 ---
 
 <section class="min-h-screen bg-theme-seasalt p-6 md:p-10">
@@ -21,6 +20,9 @@ import AppointmentsSection from '@/dashboard/student/sections/AppointmentsSectio
         
         <!-- Contenido dinámico -->
         <main class="lg:col-span-3">
+            <div id="student-profile-section" class="content-section">
+                <StudentProfile />
+            </div>
             <div id="dashboard-section" class="content-section">
                 <DashboardSection />
             </div>

@@ -1,19 +1,29 @@
 ---
-const { user = { name: "Estudiante", email: "estudiante@institucion.edu" } } = Astro.props;
----
 
+---
 <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
     <div class="flex items-center">
         <div class="mr-4 w-16 h-16 bg-theme-keppel/20 rounded-2xl flex items-center justify-center">
-            <span class="text-2xl text-theme-keppel">👨‍🎓</span>
+            <span class="text-2xl text-theme-keppel">
+                <img src="/src/assets/icons/student-outline.svg" alt="Icono de Estudiante" class="h-5 w-5" />
+            </span>
         </div>
         <div>
-            <h2 class="text-xl font-bold text-theme-rich-black">{user.name}</h2>
-            <p class="text-sm text-gray-600">{user.email}</p>
+            <h2 id="profileCardFullName" class="text-xl font-bold text-theme-rich-black"></h2>
+            <p id="profileCardInstitutionalEmail" class="text-sm text-gray-600"></p>
         </div>
     </div>
     <div class="mt-4 pt-4 border-t border-theme-rich-black/20">
-        <p class="text-sm font-light text-gray-600">Carrera: Ingeniería de Sistemas</p>
-        <p class="text-sm font-light text-gray-600">Semestre: 6°</p>
+        <p class="text-sm font-light text-gray-600"><span class="font-bold">Carrera:</span> Ingeniería de Sistemas e Informática</p>
+        <a href="#" data-section="student-profile" class="text-sm text-theme-keppel hover:underline">Ver perfil</a>
     </div>
 </div>
+
+<script is:inline>
+    const userData = JSON.parse(localStorage.getItem('user')) || null;
+
+    if (userData) {
+        document.getElementById('profileCardFullName').textContent = userData.fullName || 'Estudiante';
+        document.getElementById('profileCardInstitutionalEmail').textContent = userData.institutionalEmail || 'No se encontró el correo institucional';
+    }
+</script>

@@ -1,0 +1,351 @@
+<div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+        <h2 class="text-2xl font-bold text-theme-rich-black">Perfil de Estudiante</h2>
+    </div>
+    
+    <div class="flex flex-col md:flex-row gap-8">
+        <div class="flex flex-col items-center">
+            <div class="relative w-32 h-32 rounded-full bg-theme-keppel/20 flex items-center justify-center overflow-hidden border-4 border-theme-keppel/30">
+                <span id="genderIcon" class="text-5xl">
+                    <!-- Se llenará dinámicamente -->
+                </span>
+            </div>
+            <button class="mt-4 text-theme-keppel hover:text-theme-keppel-dark text-sm font-medium text-center w-full">
+                Cambiar foto
+            </button>
+        </div>
+        
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Nombre completo</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="studentNameProfileSection" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Código de estudiante</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="studentCodeProfileSection" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Correo institucional</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="studentInstitutionalEmailProfileSection" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Teléfono celular</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="studentCellphoneProfileSection" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Año de estudio</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="studentYearOfStudyProfileSection" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Fecha de nacimiento</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="studentDateOfBirthProfileSection" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sección de Información Socioeconómica -->
+    <div class="mt-8">
+        <h3 class="text-xl font-bold text-theme-rich-black mb-4 border-b-2 border-theme-keppel pb-2">Información Socioeconómica</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Lugar de nacimiento</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-placeOfBirth" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Estado civil</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-maritalStatus" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Número de hijos</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-numberOfChildren" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Ocupación laboral actual</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-currentJobOccupation" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Centro de trabajo</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-workCenter" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Antigüedad laboral (años)</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-seniorityAtWork" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Ingreso familiar mensual</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-monthlyFamilyIncome" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Teléfono fijo</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-homePhoneNumber" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Correo personal</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-email" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Dirección de domicilio</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-homeAddress" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Miembros del hogar</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-numberOfHouseHoldMembers" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Parentesco</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-kinshipRelationship" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Tipo de vivienda</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="socio-housingType" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sección de Problemas Personales -->
+    <div class="mt-8">
+        <h3 class="text-xl font-bold text-theme-rich-black mb-4 border-b-2 border-theme-keppel pb-2">Problemas Personales</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Problemas identificados</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="personal-problems" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Nombre del representante</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="personal-nameOfTheRepresentative" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Sección de Información Familiar -->
+    <div class="mt-8">
+        <h3 class="text-xl font-bold text-theme-rich-black mb-4 border-b-2 border-theme-keppel pb-2">Información Familiar</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Nivel educativo del padre</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-fatherEducationLevel" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Nivel educativo de la madre</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-motherEducationLevel" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Ocupación del padre</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-fatherOccupation" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Ocupación de la madre</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-motherOccupation" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Composición familiar</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-familyComposition" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Total de hermanos</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-totalSiblings" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Número de dependientes</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-numberOfDependents" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+            
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Tipo de familia</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-familyType" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+
+            <div>
+                <span class="block text-sm font-medium text-theme-rich-black/70 mb-1">Teléfono del representante</span>
+                <div class="bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/20">
+                    <p id="family-representativePhoneNumber" class="text-theme-rich-black"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script is:inline>
+    const studentData = JSON.parse(localStorage.getItem('user')) || null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadStudentProfile(studentData ? studentData.id : null);
+    });
+
+    async function loadStudentProfile(id) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No hay token de autenticación');
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8080/student/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const student = await response.json();
+                updateStudentProfileItems(student);
+            } else {
+                console.error('Error al cargar el perfil del estudiante:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function updateStudentProfileItems(student) {
+        if (student) {
+            // Información básica
+            document.getElementById('studentNameProfileSection').textContent = student.fullName || 'No especificado';
+            document.getElementById('studentCodeProfileSection').textContent = student.studentCode || 'No especificado';
+            document.getElementById('studentInstitutionalEmailProfileSection').textContent = student.institutionalEmail || 'No especificado';
+            document.getElementById('studentCellphoneProfileSection').textContent = student.cellphone || 'No especificado';
+            document.getElementById('studentYearOfStudyProfileSection').textContent = student.yearOfStudy || 'No especificado';
+            document.getElementById('studentDateOfBirthProfileSection').textContent = student.dateOfBirth || 'No especificado';
+
+            // Información socioeconómica
+            if (student.socioeconomicInformation) {
+                const socio = student.socioeconomicInformation;
+                document.getElementById('socio-placeOfBirth').textContent = socio.placeOfBirth || 'No especificado';
+                document.getElementById('socio-maritalStatus').textContent = socio.maritalStatus || 'No especificado';
+                document.getElementById('socio-numberOfChildren').textContent = socio.numberOfChildren !== undefined ? socio.numberOfChildren : 'No especificado';
+                document.getElementById('socio-currentJobOccupation').textContent = socio.currentJobOccupation || 'No especificado';
+                document.getElementById('socio-workCenter').textContent = socio.workCenter || 'No especificado';
+                document.getElementById('socio-seniorityAtWork').textContent = socio.seniorityAtWork !== undefined ? socio.seniorityAtWork + ' años' : 'No especificado';
+                document.getElementById('socio-monthlyFamilyIncome').textContent = socio.monthlyFamilyIncome !== undefined ? 'S/ ' + socio.monthlyFamilyIncome : 'No especificado';
+                document.getElementById('socio-homePhoneNumber').textContent = socio.homePhoneNumber || 'No especificado';
+                document.getElementById('socio-email').textContent = socio.email || 'No especificado';
+                document.getElementById('socio-homeAddress').textContent = socio.homeAddress || 'No especificado';
+                document.getElementById('socio-numberOfHouseHoldMembers').textContent = socio.numberOfHouseHoldMembers !== undefined ? socio.numberOfHouseHoldMembers : 'No especificado';
+                document.getElementById('socio-kinshipRelationship').textContent = socio.kinshipRelationship || 'No especificado';
+                document.getElementById('socio-housingType').textContent = socio.housingType || 'No especificado';
+            }
+
+            // Problemas personales
+            if (student.personalProblems) {
+                const personal = student.personalProblems;
+                document.getElementById('personal-problems').textContent = personal.problems || 'No especificado';
+                document.getElementById('personal-nameOfTheRepresentative').textContent = personal.nameOfTheRepresentative || 'No especificado';
+            }
+
+            // Información familiar
+            if (student.familyGroupInformation) {
+                const family = student.familyGroupInformation;
+                document.getElementById('family-fatherEducationLevel').textContent = family.fatherEducationLevel || 'No especificado';
+                document.getElementById('family-motherEducationLevel').textContent = family.motherEducationLevel || 'No especificado';
+                document.getElementById('family-fatherOccupation').textContent = family.fatherOccupation || 'No especificado';
+                document.getElementById('family-motherOccupation').textContent = family.motherOccupation || 'No especificado';
+                document.getElementById('family-familyComposition').textContent = family.familyComposition || 'No especificado';
+                document.getElementById('family-totalSiblings').textContent = family.totalSiblings !== undefined ? family.totalSiblings : 'No especificado';
+                document.getElementById('family-numberOfDependents').textContent = family.numberOfDependents !== undefined ? family.numberOfDependents : 'No especificado';
+                document.getElementById('family-familyType').textContent = family.familyType || 'No especificado';
+                document.getElementById('family-representativePhoneNumber').textContent = family.representativePhoneNumber || 'No especificado';
+            }
+
+            // Icono de género
+            const genderIconContainer = document.getElementById('genderIcon');
+            let iconPath = '/src/assets/icons/student-outline.svg';
+            let altText = 'Icono de Estudiante';
+
+            if (student.gender === 'M') {
+                iconPath = '/src/assets/icons/male-user.svg';
+                altText = 'Icono Masculino';
+            } else if (student.gender === 'F') {
+                iconPath = '/src/assets/icons/female-user.svg';
+                altText = 'Icono Femenino';
+            }
+
+            genderIconContainer.innerHTML = `
+                <img src="${iconPath}" alt="${altText}" class="w-16 h-16 object-contain" />
+            `;
+        }
+    }
+</script>
