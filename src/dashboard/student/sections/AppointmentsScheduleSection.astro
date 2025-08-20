@@ -1,0 +1,278 @@
+<div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
+    <h2 class="text-2xl font-bold mb-6 text-theme-rich-black">Gestión de Citas</h2>
+    
+    <div class="space-y-8">
+        <h5 class="font-light">Es posible que necesites recargar la página para tener las citas actualizadas</h5>
+        <!-- Citas Solicitadas por el Estudiante -->
+        <div>
+            <h3 class="text-lg font-semibold mb-4 text-theme-rich-black">Citas que he solicitado</h3>
+            <div id="sentAppointmentsContainer" class="space-y-3">
+                <!-- Las citas se cargarán dinámicamente aquí -->
+                <div class="text-center py-8 text-gray-500">
+                    <p>Cargando citas solicitadas...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Citas Recibidas de Instructores -->
+        <div>
+            <h3 class="text-lg font-semibold mb-4 text-theme-rich-black">Citas que he recibido</h3>
+            <div id="receivedAppointmentsContainer" class="space-y-3">
+                <!-- Las citas se cargarán dinámicamente aquí -->
+                <div class="text-center py-8 text-gray-500">
+                    <p>Cargando citas recibidas...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script is:inline>
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadAppointments();
+    });
+
+    // Cargar citas del estudiante
+    async function loadAppointments() {
+        try {
+            const studentData = JSON.parse(localStorage.getItem('user')) || null;
+            if (!studentData || !studentData.id) {
+                console.error('No se encontró información del estudiante');
+                showError('No se encontró información del estudiante');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No hay token de autenticación');
+                showError('No hay token de autenticación');
+                return;
+            }
+
+            // Cargar citas enviadas
+            const sentResponse = await fetch(`http://localhost:8080/student/appointments/sent/${studentData.id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            // Cargar citas recibidas
+            const receivedResponse = await fetch(`http://localhost:8080/student/appointments/received/${studentData.id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (sentResponse.ok && receivedResponse.ok) {
+                const sentAppointments = await sentResponse.json();
+                const receivedAppointments = await receivedResponse.json();
+                
+                displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
+                displayAppointments(receivedAppointments, 'receivedAppointmentsContainer', false);
+            } else {
+                console.error('Error al cargar las citas');
+                showError('Error al cargar las citas');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showError('Error al cargar las citas');
+        }
+    }
+
+    // Mostrar citas en el contenedor correspondiente
+    function displayAppointments(appointments, containerId, isSent) {
+        const container = document.getElementById(containerId);
+        
+        if (!appointments || appointments.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <p>No hay citas ${isSent ? 'solicitadas' : 'recibidas'}</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = appointments.map(appointment => {
+            const { appointment: apptDetails, instructorFullName } = appointment;
+            
+            // Formatear fecha y hora
+            const formattedDate = apptDetails.date ? formatDate(apptDetails.date) : '--';
+            const formattedStartTime = apptDetails.startTime ? formatTime(apptDetails.startTime) : '--:--';
+            const formattedEndTime = apptDetails.endTime ? formatTime(apptDetails.endTime) : '--:--';
+            
+            // Determinar clase de estado
+            let statusClass = '';
+            switch (apptDetails.state) {
+                case 'PENDIENTE':
+                    statusClass = 'bg-yellow-100 text-yellow-800';
+                    break;
+                case 'ACEPTADA':
+                    statusClass = 'bg-green-100 text-green-800';
+                    break;
+                case 'EN_PROCESO':
+                    statusClass = 'bg-orange-100 text-orange-800';
+                    break;
+                case 'FINALIZADA':
+                    statusClass = 'bg-blue-100 text-blue-800';
+                    break;
+                case 'CANCELADA':
+                    statusClass = 'bg-red-100 text-red-800';
+                    break;
+                default:
+                    statusClass = 'bg-gray-100 text-gray-800';
+            }
+
+            return `
+                <div class="p-4 border border-theme-rich-black/20 rounded-xl bg-white">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                            <h4 class="font-medium text-theme-rich-black">${apptDetails.typeActivity || 'Cita'}</h4>
+                            <p class="text-sm text-gray-500">Con: ${instructorFullName || 'Docente'}</p>
+                            
+                            <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span class="font-medium">Fecha:</span> ${formattedDate}
+                                </div>
+                                <div>
+                                    <span class="font-medium">Horario:</span> ${formattedStartTime} - ${formattedEndTime}
+                                </div>
+                                <div>
+                                    <span class="font-medium">Modalidad:</span> ${apptDetails.appointmentModality || '--'}
+                                </div>
+                                <div>
+                                    <span class="font-medium">Método:</span> ${apptDetails.appointmentMethod || '--'}
+                                </div>
+                            </div>
+                            
+                            ${apptDetails.specificAppointmentMethod ? `
+                                <div class="mt-1">
+                                    <span class="font-medium">Método específico:</span> ${apptDetails.specificAppointmentMethod}
+                                </div>
+                            ` : ''}
+                            
+                            <div class="mt-2">
+                                <span class="font-medium">Razón:</span> ${apptDetails.appointmentReason || '--'}
+                            </div>
+                            
+                            ${apptDetails.specificAppointmentReason ? `
+                                <div class="mt-1">
+                                    <span class="font-medium">Razón específica:</span> ${apptDetails.specificAppointmentReason}
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="flex flex-col items-end gap-2">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">
+                                ${apptDetails.state || 'PENDIENTE'}
+                            </span>
+                            
+                            ${apptDetails.state === 'PENDIENTE' && isSent ? `
+                                <button class="text-red-500 hover:text-red-700 text-sm font-medium cancel-btn" data-appointment-id="${apptDetails.id}">
+                                    Cancelar
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Agregar event listeners a los botones de cancelar
+        if (isSent) {
+            document.querySelectorAll('.cancel-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = this.getAttribute('data-appointment-id');
+                    cancelAppointment(appointmentId);
+                });
+            });
+        }
+    }
+
+    // Formatear fecha
+    function formatDate(dateString) {
+        if (!dateString) return '--';
+        
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch (error) {
+            console.error('Error formateando fecha:', error);
+            return '--';
+        }
+    }
+
+    // Formatear hora
+    function formatTime(timeString) {
+        if (!timeString) return '--:--';
+        
+        try {
+            // Asumiendo que el tiempo viene en formato HH:mm:ss o similar
+            const timeParts = timeString.split(':');
+            if (timeParts.length >= 2) {
+                return `${timeParts[0]}:${timeParts[1]}`;
+            }
+            return timeString;
+        } catch (error) {
+            console.error('Error formateando hora:', error);
+            return '--:--';
+        }
+    }
+
+    // Mostrar error
+    function showError(message) {
+        const sentContainer = document.getElementById('sentAppointmentsContainer');
+        const receivedContainer = document.getElementById('receivedAppointmentsContainer');
+        
+        sentContainer.innerHTML = `
+            <div class="text-center py-8 text-red-500">
+                <p>${message}</p>
+            </div>
+        `;
+        
+        receivedContainer.innerHTML = `
+            <div class="text-center py-8 text-red-500">
+                <p>${message}</p>
+            </div>
+        `;
+    }
+
+    // Cancelar cita
+    async function cancelAppointment(appointmentId) {
+        if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('No hay token de autenticación');
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8080/appointments/cancel/${appointmentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                alert('Cita cancelada exitosamente');
+                // Recargar las citas
+                await loadAppointments();
+            } else {
+                const error = await response.text();
+                alert('Error al cancelar la cita: ' + error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al cancelar la cita');
+        }
+    }
+</script>
