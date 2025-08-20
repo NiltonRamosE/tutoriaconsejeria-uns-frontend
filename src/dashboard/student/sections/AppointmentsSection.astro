@@ -1,54 +1,96 @@
----
----
-
 <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
-    <h2 class="text-2xl font-bold mb-6 text-theme-rich-black">Gestión de Citas</h2>
+    <h2 class="text-2xl font-bold mb-6 text-theme-rich-black">Programación de Citas</h2>
     
     <div class="space-y-6">
-        <!-- Citas Programadas -->
-        <div>
-            <h3 class="text-lg font-semibold mb-4">Mis Citas Programadas</h3>
-            <div class="space-y-3">
-                <div class="p-4 border border-theme-rich-black/20 rounded-xl bg-white">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-medium">Tutoría de Matemáticas</h4>
-                            <p class="text-sm text-gray-500">Con: Prof. Juan Pérez</p>
-                            <p class="text-sm text-gray-500">15 Marzo, 3:00 PM - 4:00 PM</p>
-                        </div>
-                        <button class="text-red-500 hover:text-red-700 text-sm font-medium">Cancelar</button>
-                    </div>
-                </div>
-
-                <div class="p-4 border border-theme-rich-black/20 rounded-xl bg-white">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-medium">Consejería Académica</h4>
-                            <p class="text-sm text-gray-500">Con: Dra. María Gómez</p>
-                            <p class="text-sm text-gray-500">22 Marzo, 10:00 AM - 10:30 AM</p>
-                        </div>
-                        <button class="text-red-500 hover:text-red-700 text-sm font-medium">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Programar Nueva Cita -->
-        <div class="pt-4 border-t border-theme-rich-black/20">
-            <h3 class="text-lg font-semibold mb-4">Programar Nueva Cita</h3>
-            <form class="space-y-4">
+        <div class="pt-4">
+            <form id="appointmentForm" class="space-y-4">
+                <!-- Selección de Docente -->
                 <div>
-                    <label class="block text-sm font-medium mb-1">Tipo de Cita</label>
-                    <select class="w-full p-3 border rounded-lg border-theme-rich-black/40">
-                        <option>Tutoría Académica</option>
-                        <option>Consejería</option>
-                        <option>Asesoría de Proyecto</option>
+                    <label for="instructorSelect" class="block text-sm font-medium mb-1">Seleccionar Docente</label>
+                    <select id="instructorSelect" class="w-full p-3 border rounded-lg border-theme-rich-black/40" required>
+                        <option value="">Seleccione un docente</option>
+                        <!-- Las opciones se llenarán dinámicamente -->
                     </select>
                 </div>
 
+                <!-- Tipo de Actividad (solo visible cuando bothActivities es true) -->
+                <div id="typeActivityContainer" class="hidden">
+                    <label class="block text-sm font-medium mb-1">Tipo de Actividad</label>
+                    <select id="typeActivitySelect" class="w-full p-3 border rounded-lg border-theme-rich-black/40">
+                        <option value="T">Tutoría</option>
+                        <option value="C">Consejería</option>
+                    </select>
+                </div>
+
+                <!-- Modalidad de Cita -->
                 <div>
-                    <label class="block text-sm font-medium mb-1">Fecha</label>
-                    <input type="date" class="w-full p-3 border rounded-lg border-theme-rich-black/40">
+                    <label class="block text-sm font-medium mb-1">Modalidad de Cita</label>
+                    <select id="appointmentModalityCode" class="w-full p-3 border rounded-lg border-theme-rich-black/40" required>
+                        <option value="">Seleccione una modalidad</option>
+                        <option value="I">Individual</option>
+                        <option value="G">Grupal</option>
+                    </select>
+                </div>
+
+                <!-- Método de Cita -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Método de Cita</label>
+                    <select id="appointmentMethod" class="w-full p-3 border rounded-lg border-theme-rich-black/40">
+                        <option value="">Seleccione un método</option>
+                        <option value="A">Personal</option>
+                        <option value="B">Telefónica</option>
+                        <option value="C">Correo electrónico</option>
+                        <option value="D">Chat</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+
+                <!-- Método Específico de Cita -->
+                <div id="specificMethodContainer" class="hidden">
+                    <label for="specificAppointmentMethod" class="block text-sm font-medium mb-1">Método Específico</label>
+                    <input type="text" id="specificAppointmentMethod" class="w-full p-3 border rounded-lg border-theme-rich-black/40" placeholder="Ej: Google Meet, Zoom, etc.">
+                </div>
+
+                <!-- Razón de la Cita -->
+                <div>
+                    <label for="appointmentReason" class="block text-sm font-medium mb-1">Razón de la Cita</label>
+                    <select id="appointmentReason" class="w-full p-3 border rounded-lg border-theme-rich-black/40">
+                        <option value="">Seleccione una razón</option>
+                        <option value="A">Rendimiento académico</option>
+                        <option value="B">Mejorar técnicas de estudio</option>
+                        <option value="C">Problemas de aprendizaje</option>
+                        <option value="D">Problemas interpersonales con estudiantes</option>
+                        <option value="E">Problemas de salud</option>
+                        <option value="F">Problemas interpersonales con docentes</option>
+                        <option value="G">Problemas interpersonales con otras personas</option>
+                        <option value="H">Problemas económicos</option>
+                        <option value="I">Problemas afectivos</option>
+                        <option value="J">Problemas familiares</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+
+                <!-- Razón Específica de la Cita -->
+                <div id="specificReasonContainer" class="hidden">
+                    <label for="specificAppointmentReason" class="block text-sm font-medium mb-1">Razón Específica</label>
+                    <input type="text" id="specificAppointmentReason" class="w-full p-3 border rounded-lg border-theme-rich-black/40" placeholder="Describa brevemente la razón de la cita">
+                </div>
+
+                <!-- Horarios Alternativos -->
+                <div>
+                    <label for="altScheduleA" class="block text-sm font-medium mb-1">Primera Alternativa</label>
+                    <input type="datetime-local" id="altScheduleA" class="w-full p-3 border rounded-lg border-theme-rich-black/40" required>
+                </div>
+
+                <div>
+                    <label for="altScheduleB" class="block text-sm font-medium mb-1">Segunda Alternativa</label>
+                    <input type="datetime-local" id="altScheduleB" class="w-full p-3 border rounded-lg border-theme-rich-black/40" required>
+                </div>
+
+                <div>
+                    <label for="altScheduleC" class="block text-sm font-medium mb-1">Tercera Alternativa</label>
+                    <input type="datetime-local" id="altScheduleC" class="w-full p-3 border rounded-lg border-theme-rich-black/40" required>
                 </div>
 
                 <button type="submit" class="w-full bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-3 px-6 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200">
@@ -58,3 +100,184 @@
         </div>
     </div>
 </div>
+
+<script is:inline>
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadInstructors();
+        setupFormListeners();
+    });
+
+    // Cargar instructores asignados al estudiante
+    async function loadInstructors() {
+        try {
+            const studentData = JSON.parse(localStorage.getItem('user')) || null;
+            if (!studentData || !studentData.id) {
+                console.error('No se encontró información del estudiante');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No hay token de autenticación');
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8080/student/assigned/instructor/${studentData.id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const instructors = await response.json();
+                populateInstructorSelect(instructors);
+            } else {
+                console.error('Error al cargar los instructores:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Llenar el select de instructores
+    function populateInstructorSelect(instructors) {
+        const select = document.getElementById('instructorSelect');
+        
+        // Limpiar opciones excepto la primera
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+        
+        // Agregar instructores
+        instructors.forEach(instructor => {
+            const option = document.createElement('option');
+            option.value = instructor.id;
+            option.textContent = instructor.fullName;
+            option.dataset.typeActivity = instructor.typeActivity;
+            option.dataset.bothActivities = instructor.bothActivities;
+            select.appendChild(option);
+        });
+    }
+
+    // Configurar listeners para el formulario
+    function setupFormListeners() {
+        const form = document.getElementById('appointmentForm');
+        const instructorSelect = document.getElementById('instructorSelect');
+        const appointmentMethodSelect = document.getElementById('appointmentMethod');
+        const appointmentReasonSelect = document.getElementById('appointmentReason');
+        
+        // Listener para cambio de instructor
+        instructorSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const bothActivities = selectedOption.dataset.bothActivities === 'true';
+            
+            const typeActivityContainer = document.getElementById('typeActivityContainer');
+            const typeActivitySelect = document.getElementById('typeActivitySelect');
+            
+            if (bothActivities) {
+                typeActivityContainer.classList.remove('hidden');
+                typeActivitySelect.required = true;
+            } else {
+                typeActivityContainer.classList.add('hidden');
+                typeActivitySelect.required = false;
+            }
+        });
+        
+        // Listener para cambio de método de cita
+        appointmentMethodSelect.addEventListener('change', function() {
+            const specificMethodContainer = document.getElementById('specificMethodContainer');
+            if (this.value === 'Otro') {
+                specificMethodContainer.classList.remove('hidden');
+                document.getElementById('specificAppointmentMethod').required = true;
+            } else {
+                specificMethodContainer.classList.add('hidden');
+                document.getElementById('specificAppointmentMethod').required = false;
+            }
+        });
+        
+        // Listener para cambio de razón de cita
+        appointmentReasonSelect.addEventListener('change', function() {
+            const specificReasonContainer = document.getElementById('specificReasonContainer');
+            if (this.value === 'Otro') {
+                specificReasonContainer.classList.remove('hidden');
+                document.getElementById('specificAppointmentReason').required = true;
+            } else {
+                specificReasonContainer.classList.add('hidden');
+                document.getElementById('specificAppointmentReason').required = false;
+            }
+        });
+        
+        // Listener para envío del formulario
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await submitAppointmentForm();
+        });
+    }
+
+    // Enviar formulario de cita
+    async function submitAppointmentForm() {
+        try {
+            const studentData = JSON.parse(localStorage.getItem('user')) || null;
+            if (!studentData || !studentData.id) {
+                alert('No se encontró información del estudiante');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('No hay token de autenticación');
+                return;
+            }
+
+            // Obtener valores del formulario
+            const instructorSelect = document.getElementById('instructorSelect');
+            const selectedOption = instructorSelect.options[instructorSelect.selectedIndex];
+            const bothActivities = selectedOption.dataset.bothActivities === 'true';
+            
+            const appointmentModalityCodeResponse = document.getElementById('appointmentModalityCode').value;
+            const appointmentMethodResponse = document.getElementById('appointmentMethod').value;
+            const specificAppointmentMethodResponse = document.getElementById('specificAppointmentMethod').value || null;
+            const appointmentReasonResponse = document.getElementById('appointmentReason').value;
+            const specificAppointmentReasonResponse = document.getElementById('specificAppointmentReason').value || null;
+            const typeActivityCodeResponse = bothActivities ? document.getElementById('typeActivitySelect').value : selectedOption.dataset.typeActivity;
+            const altScheduleAResponse = document.getElementById('altScheduleA').value || null;
+            const altScheduleBResponse = document.getElementById('altScheduleB').value || null;
+            const altScheduleCResponse = document.getElementById('altScheduleC').value || null;
+
+            const requestData = {
+                appointmentModalityCode: appointmentModalityCodeResponse,
+                appointmentMethod: appointmentMethodResponse === 'Otro' ? null : appointmentMethodResponse,
+                specificAppointmentMethod: specificAppointmentMethodResponse,
+                appointmentReason: appointmentReasonResponse === 'Otro' ? null : appointmentReasonResponse,
+                specificAppointmentReason: specificAppointmentReasonResponse,
+                typeActivityCode: typeActivityCodeResponse,
+                studentId: studentData.id,
+                instructorId: parseInt(instructorSelect.value),
+                altScheduleA: altScheduleAResponse,
+                altScheduleB: altScheduleBResponse,
+                altScheduleC: altScheduleCResponse
+            };
+
+            const response = await fetch('http://localhost:8080/student/appointment/individual', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (response.ok) {
+                const appointment = await response.json();
+                document.getElementById('appointmentForm').reset();
+            } else {
+                const error = await response.text();
+                alert('Error al programar la cita: ' + error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al programar la cita');
+        }
+    }
+</script>
