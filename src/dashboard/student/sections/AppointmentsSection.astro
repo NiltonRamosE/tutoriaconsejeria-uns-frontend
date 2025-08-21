@@ -162,11 +162,7 @@ const idPrefix = 'studentSender';
         
         appointmentFormContainer.classList.remove('hidden');
         
-        if (modality === 'G') {
-            studentsContainer.classList.remove('hidden');
-        } else {
-            studentsContainer.classList.add('hidden');
-        }
+        toggleFieldVisibility(studentsContainer, modality === 'G');
     }
 
     // Resetear al paso 1
@@ -304,53 +300,36 @@ const idPrefix = 'studentSender';
 
     // Navegar al siguiente paso
     function nextStep() {
-        if (currentStep) {
-            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('hidden');
-            
-            if (selectedModality === 'I') {
-                if (currentStep === 1 && selectedInstructor && selectedInstructor.bothActivities) {
-                    // Para citas individuales con bothActivities=true, ir al paso 2
-                    currentStep = 2;
-                } else if (currentStep === 1) {
-                    // Para citas individuales con bothActivities=false, saltar al paso 3
-                    currentStep = 3;
-                } else if (currentStep === 2) {
-                    // Del paso 2 al 3 en citas individuales
-                    currentStep = 3;
-                }
-            } else {
-                // Para citas grupales, flujo normal
-                currentStep++;
-            }
-            
-            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('hidden');
-            updateFinalStepInfo();
-        }
+        if (!currentStep) return;
+
+        const el = s => document.querySelector(`.form-step[data-step="${s}"]`);
+        el(currentStep)?.classList?.add('hidden');
+
+        currentStep = (selectedModality === 'I')
+            ? (currentStep === 1
+                ? (selectedInstructor?.bothActivities ? 2 : 3)
+                : (currentStep === 2 ? 3 : currentStep))
+            : currentStep + 1;
+
+        el(currentStep)?.classList?.remove('hidden');
+        updateFinalStepInfo?.();
     }
 
     // Navegar al paso anterior
     function prevStep() {
-        document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('hidden');
-        
-        // Determinar el paso anterior según la modalidad y bothActivities
-        if (selectedModality === 'I') {
-            if (currentStep === 3 && selectedInstructor && selectedInstructor.bothActivities) {
-                // Volver del paso 3 al 2 en citas individuales con bothActivities=true
-                currentStep = 2;
-            } else if (currentStep === 3) {
-                // Volver del paso 3 al 1 en citas individuales con bothActivities=false
-                currentStep = 1;
-            } else if (currentStep === 2) {
-                // Volver del paso 2 al 1
-                currentStep = 1;
-            }
-        } else {
-            // Para citas grupales, flujo normal
-            currentStep--;
-        }
-        
-        document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('hidden');
-        updateFinalStepInfo();
+        if (!currentStep) return;
+
+        const el = s => document.querySelector(`.form-step[data-step="${s}"]`);
+        el(currentStep)?.classList?.add('hidden');
+
+        currentStep = (selectedModality === 'I')
+            ? (currentStep === 3
+                ? (selectedInstructor?.bothActivities ? 2 : 1)
+                : (currentStep === 2 ? 1 : currentStep))
+            : Math.max(1, currentStep - 1);
+
+        el(currentStep)?.classList?.remove('hidden');
+        updateFinalStepInfo?.();
     }
 
     // Enviar formulario
@@ -361,7 +340,6 @@ const idPrefix = 'studentSender';
                 return;
             }
 
-            // Obtener tipo de actividad
             activityTypeSelected();
 
             if (!activityType) {
@@ -369,7 +347,6 @@ const idPrefix = 'studentSender';
                 return;
             }
 
-            // Preparar datos base comunes
             const baseRequestData = {
                 appointmentModalityCode: selectedModality,
                 appointmentMethod: appointmentMethod.value === 'Otro' ? null : appointmentMethod.value,
