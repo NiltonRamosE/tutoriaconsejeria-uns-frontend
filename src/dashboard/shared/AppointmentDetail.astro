@@ -1,5 +1,6 @@
 ---
 import PrevStepButton from '@/shared/components/PrevStepButton.astro';
+import ScheduleSelector from '@/dashboard/shared/ScheduleSelector.astro';
 export interface Props {
   idPrefix: string;
 }
@@ -61,23 +62,7 @@ const { idPrefix } = Astro.props;
     </div>
 
     <!-- Horarios Alternativos -->
-    <div class="mb-4">
-        <span class="block text-sm font-medium mb-2 text-theme-rich-black/80">Horarios Alternativos</span>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-                <label for={`${idPrefix}-altScheduleA`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Primera Opción</label>
-                <input type="datetime-local" id={`${idPrefix}-altScheduleA`} class="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent" required>
-            </div>
-            <div>
-                <label for={`${idPrefix}-altScheduleB`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Segunda Opción</label>
-                <input type="datetime-local" id={`${idPrefix}-altScheduleB`} class="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent" required>
-            </div>
-            <div>
-                <label for={`${idPrefix}-altScheduleC`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Tercera Opción</label>
-                <input type="datetime-local" id={`${idPrefix}-altScheduleC`} class="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent" required>
-            </div>
-        </div>
-    </div>
+    <ScheduleSelector idPrefix={idPrefix} />
 
     <div class="flex justify-between">
         <PrevStepButton />
