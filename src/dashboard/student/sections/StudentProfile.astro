@@ -249,16 +249,17 @@
 </div>
 
 <script is:inline>
-    const studentData = JSON.parse(localStorage.getItem('user')) || null;
+    const studentProfileData = JSON.parse(localStorage.getItem('user')) || null;
+    const tokenProfileData = localStorage.getItem('token');
 
     document.addEventListener('DOMContentLoaded', async () => {
-        await loadStudentProfile(studentData ? studentData.id : null);
+        await loadStudentProfile(studentProfileData ? studentProfileData.id : null);
     });
 
     async function loadStudentProfile(id) {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
+            
+            if (!tokenProfileData) {
                 console.error('No hay token de autenticación');
                 return;
             }
@@ -266,7 +267,7 @@
             const response = await fetch(`http://localhost:8080/student/${id}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${tokenProfileData}`
                 }
             });
 
