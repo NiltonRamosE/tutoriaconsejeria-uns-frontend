@@ -1,0 +1,129 @@
+---
+export interface Props {
+  idPrefix: string;
+}
+const { idPrefix } = Astro.props;
+---
+
+<!-- Modal para selección de horarios -->
+<div id={`${idPrefix}-scheduleModal`} class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50" role="dialog" hidden aria-modal="true">
+    <div class="bg-white rounded-2xl p-6 w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-theme-keppel/20">
+        <div class="flex justify-between items-center mb-6 pb-4 border-b border-theme-rich-black/10">
+            <h3 class="text-xl font-bold text-theme-rich-black flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Selecciona tus horarios preferidos
+            </h3>
+            <button type="button" id={`${idPrefix}-closeModal`} class="text-theme-rich-black hover:text-red-500 transition-colors duration-200 p-1 rounded-full hover:bg-red-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Selector de fecha -->
+        <div class="mb-6">
+            <label for={`${idPrefix}-selectedDate`} class="block text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Selecciona la fecha
+            </label>
+            <input type="date" id={`${idPrefix}-selectedDate`} class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200 shadow-sm" min="">
+        </div>
+
+        <!-- Horarios seleccionados -->
+        <div class="mb-6 bg-gradient-to-br from-theme-seasalt to-theme-keppel/5 p-4 rounded-xl border border-theme-keppel/20 shadow-sm">
+            <h4 class="font-medium mb-3 text-theme-rich-black flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Horarios seleccionados:
+            </h4>
+            <div id={`${idPrefix}-selectedSlots`} class="space-y-2">
+                <p class="text-sm text-gray-500 italic">No hay horarios seleccionados</p>
+            </div>
+        </div>
+
+        <!-- Grid de horarios -->
+        <div class="overflow-x-auto rounded-lg border border-theme-rich-black/10 shadow-sm">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gradient-to-r from-theme-keppel/10 to-theme-keppel/5">
+                        <th class="p-3 border border-theme-rich-black/10 text-theme-rich-black font-semibold text-sm">Hora</th>
+                        <th class="p-3 border border-theme-rich-black/10 text-theme-rich-black font-semibold text-sm">Lunes</th>
+                        <th class="p-3 border border-theme-rich-black/10 text-theme-rich-black font-semibold text-sm">Martes</th>
+                        <th class="p-3 border border-theme-rich-black/10 text-theme-rich-black font-semibold text-sm">Miércoles</th>
+                        <th class="p-3 border border-theme-rich-black/10 text-theme-rich-black font-semibold text-sm">Jueves</th>
+                        <th class="p-3 border border-theme-rich-black/10 text-theme-rich-black font-semibold text-sm">Viernes</th>
+                        <th class="p-3 border border-theme-rich-black/10 text-theme-rich-black font-semibold text-sm">Sábado</th>
+                    </tr>
+                </thead>
+                <tbody id={`${idPrefix}-scheduleGrid`} class="divide-y divide-theme-rich-black/5">
+                    <!-- Las filas se generarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-end mt-6 space-x-3 pt-4 border-t border-theme-rich-black/10">
+            <button type="button" id={`${idPrefix}-cancelModal`} class="bg-theme-rich-black/5 text-theme-rich-black font-medium py-2.5 px-6 rounded-lg hover:bg-theme-rich-black/10 transition-all duration-200 border border-theme-rich-black/10 shadow-sm">
+                Cancelar
+            </button>
+            <button type="button" id={`${idPrefix}-confirmSlots`} class="bg-gradient-to-r from-theme-keppel to-theme-keppel-dark text-white font-medium py-2.5 px-6 rounded-lg hover:from-theme-keppel-dark hover:to-theme-keppel transition-all duration-200 shadow-md hover:shadow-lg">
+                Confirmar horarios
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Horarios Alternativos (solo para citas grupales) -->
+<div id={`${idPrefix}-groupScheduleContainer`} class="mb-4 hidden">
+    <span class="block text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Horarios Alternativos
+    </span>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
+            <label for={`${idPrefix}-altScheduleA`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Primera Opción</label>
+            <input type="datetime-local" id={`${idPrefix}-altScheduleA`} class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
+        </div>
+        <div class="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
+            <label for={`${idPrefix}-altScheduleB`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Segunda Opción</label>
+            <input type="datetime-local" id={`${idPrefix}-altScheduleB`} class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
+        </div>
+        <div class="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
+            <label for={`${idPrefix}-altScheduleC`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Tercera Opción</label>
+            <input type="datetime-local" id={`${idPrefix}-altScheduleC`} class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
+        </div>
+    </div>
+</div>
+
+<!-- Selector de horarios interactivo (solo para citas individuales) -->
+<div id={`${idPrefix}-individualScheduleContainer`} class="mb-4 hidden">
+    <span class="block text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Horarios Preferidos
+    </span>
+    <button id={`${idPrefix}-openScheduleModal`} type="button" class="w-full p-5 border-2 border-dashed border-theme-keppel/40 rounded-xl text-theme-keppel hover:bg-theme-keppel/5 transition-all duration-200 flex flex-col items-center bg-gradient-to-b from-white to-theme-seasalt hover:from-theme-keppel/5 hover:to-theme-keppel/10 shadow-sm hover:shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="font-medium">Seleccionar horarios en el calendario</span>
+        <span class="text-sm text-theme-rich-black/60 mt-1">Haz clic para abrir el selector de horarios</span>
+    </button>
+    
+    <div id={`${idPrefix}-selectedSchedulePreview`} class="mt-3 space-y-2 hidden">
+        <p class="text-sm font-medium text-theme-rich-black/80 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Horarios seleccionados:
+        </p>
+        <!-- Se llenará dinámicamente -->
+    </div>
+</div>
