@@ -1,20 +1,21 @@
-export function resetForm(appointmentForm, appointmentFormContainer, selectedModality, selectedInstructor, selectedStudents, currentStep) {
+export function resetForm(appointmentForm, appointmentFormContainer) {
     appointmentForm.reset();
-    selectedModality = '';
-    selectedInstructor = null;
-    selectedStudents = [];
-    currentStep = 1;
-    
-    // Reset UI
-    document.querySelectorAll('.modalidad-btn').forEach(btn => {
-        btn.classList.remove('bg-theme-keppel/20', 'border-theme-keppel');
-        btn.classList.add('bg-theme-seasalt', 'border-theme-rich-black/20');
-    });
-    
-    appointmentFormContainer.classList.add('hidden');
+    resetModalityButtons();
+    toggleFieldVisibility(appointmentFormContainer, false);
     resetFormSteps();
+}
 
-    return {selectedModality, selectedInstructor, selectedStudents, currentStep};
+export function resetModalityButtons() {
+  document.querySelectorAll('.modalidad-btn').forEach(btn => {
+    btn.classList.remove('bg-theme-keppel/20', 'border-theme-keppel');
+    btn.classList.add('bg-theme-seasalt', 'border-theme-rich-black/20');
+  });
+}
+
+export function setSelectedModalityButton(modality, individualBtn, groupBtn) {
+    const selectedBtn = modality === 'I' ? individualBtn : groupBtn;
+    selectedBtn.classList.remove('bg-theme-seasalt', 'border-theme-rich-black/20');
+    selectedBtn.classList.add('bg-theme-keppel/20', 'border-theme-keppel'); 
 }
 
 export function resetFormSteps() {
@@ -26,4 +27,22 @@ export function resetFormSteps() {
 
 export function toggleFieldVisibility(field, show) {
     field?.classList.toggle('hidden', !show);
+}
+
+export function initAppointmentFormListeners(nextStep, prevStep, appointmentMethod, specificMethodContainer, appointmentReason, specificReasonContainer) {
+    document.querySelectorAll('.next-step-btn').forEach(btn => {
+        btn.addEventListener('click', nextStep);
+    });
+    
+    document.querySelectorAll('.prev-step-btn').forEach(btn => {
+        btn.addEventListener('click', prevStep);
+    });
+    
+    appointmentMethod.addEventListener('change', function() {
+        toggleFieldVisibility(specificMethodContainer, this.value === 'Otro');
+    });
+    
+    appointmentReason.addEventListener('change', function() {
+        toggleFieldVisibility(specificReasonContainer, this.value === 'Otro');
+    });
 }
