@@ -72,13 +72,20 @@ const idPrefix = 'studentSender';
 <script type="module" is:inline>
 
     import { fetchAssignedInstructor, fetchStudentsAssignedByInstructor, submitIndividualAppointment, submitGroupAppointment } from '/src/dashboard/services/studentService.js';
-    import { resetFormSteps, resetForm, toggleFieldVisibility } from '/src/dashboard/shared/appointmentManager.js';
+    import { resetFormSteps, resetForm, toggleFieldVisibility, setSelectedModalityButton, resetModalityButtons, initAppointmentFormListeners } from '/src/dashboard/shared/appointmentManager.js';
+    import { fetchBusySchedules } from '/src/dashboard/services/academicScheduleService.js';
+    
     let currentStep = 1;
     let selectedModality = '';
     let selectedInstructor = null;
     let selectedStudents = [];
     let availableStudents = [];
     let activityType;
+
+    let busySchedules = [];
+    let selectedTimeSlots = [];
+    let currentStudentId = null;
+    let currentInstructorId = null;
 
     const studentData = JSON.parse(localStorage.getItem('user')) || null;
     const token = localStorage.getItem('token');
@@ -105,6 +112,19 @@ const idPrefix = 'studentSender';
     const studentsList = document.getElementById('studentsList');
     const noStudentsMessage = document.getElementById('noStudentsMessage');
 
+    const individualScheduleContainer = document.getElementById(`${idPrefix}-individualScheduleContainer`);
+    const groupScheduleContainer = document.getElementById(`${idPrefix}-groupScheduleContainer`);
+
+    const openScheduleModalBtn = document.getElementById(`${idPrefix}-openScheduleModal`);
+    const closeModal = document.getElementById(`${idPrefix}-closeModal`);
+    const cancelModal = document.getElementById(`${idPrefix}-cancelModal`);
+    const confirmSlots = document.getElementById(`${idPrefix}-confirmSlots`); 
+    const selectedDate = document.getElementById(`${idPrefix}-selectedDate`);
+    const scheduleModal = document.getElementById(`${idPrefix}-scheduleModal`);
+    const scheduleGrid = document.getElementById(`${idPrefix}-scheduleGrid`);
+    const selectedSlots = document.getElementById(`${idPrefix}-selectedSlots`);
+    const selectedSchedulePreview = document.getElementById(`${idPrefix}-selectedSchedulePreview`);
+
     document.addEventListener('DOMContentLoaded', async () => {
         await loadAssignedInstructors();
         setupEventListeners();
@@ -115,21 +135,7 @@ const idPrefix = 'studentSender';
         individualBtn.addEventListener('click', () => selectModality('I'));
         groupBtn.addEventListener('click', () => selectModality('G'));
         
-        document.querySelectorAll('.next-step-btn').forEach(btn => {
-            btn.addEventListener('click', nextStep);
-        });
-        
-        document.querySelectorAll('.prev-step-btn').forEach(btn => {
-            btn.addEventListener('click', prevStep);
-        });
-        
-        appointmentMethod.addEventListener('change', function() {
-            toggleFieldVisibility(specificMethodContainer, this.value === 'Otro');
-        });
-        
-        appointmentReason.addEventListener('change', function() {
-            toggleFieldVisibility(specificReasonContainer, this.value === 'Otro');
-        });
+        initAppointmentFormListeners(nextStep, prevStep, appointmentMethod, specificMethodContainer, appointmentReason, specificReasonContainer);
         
         document.querySelectorAll('.activity-type-option input').forEach(radio => {
             radio.addEventListener('change', () => {
@@ -143,26 +149,51 @@ const idPrefix = 'studentSender';
             e.preventDefault();
             await submitAppointmentForm();
         });
+
+        setupScheduleModalListeners();
+    
+        // Mostrar/ocultar contenedores de horarios según modalidad
+        individualBtn.addEventListener('click', () => {
+            toggleFieldVisibility(individualScheduleContainer, true);
+            toggleFieldVisibility(groupScheduleContainer, false);
+        });
+        
+        groupBtn.addEventListener('click', () => {
+            toggleFieldVisibility(individualScheduleContainer, false);
+            toggleFieldVisibility(groupScheduleContainer, true);
+        });
+    }
+
+    function setupScheduleModalListeners() {
+        openScheduleModalBtn.addEventListener('click', openScheduleModal);
+        closeModal.addEventListener('click', closeScheduleModal);
+        cancelModal.addEventListener('click', closeScheduleModal);
+        confirmSlots.addEventListener('click', confirmSelectedSlots);
+        selectedDate.addEventListener('change', updateSelectedDate);
     }
 
     // Seleccionar modalidad
     function selectModality(modality) {
         selectedModality = modality;
-        
         resetToStep1();
-        
-        document.querySelectorAll('.modalidad-btn').forEach(btn => {
-            btn.classList.remove('bg-theme-keppel/20', 'border-theme-keppel');
-            btn.classList.add('bg-theme-seasalt', 'border-theme-rich-black/20');
-        });
-        
-        const selectedBtn = modality === 'I' ? individualBtn : groupBtn;
-        selectedBtn.classList.remove('bg-theme-seasalt', 'border-theme-rich-black/20');
-        selectedBtn.classList.add('bg-theme-keppel/20', 'border-theme-keppel');
-        
-        appointmentFormContainer.classList.remove('hidden');
-        
+        resetModalityButtons();
+        setSelectedModalityButton(modality, individualBtn, groupBtn);
+        toggleFieldVisibility(appointmentFormContainer, true);
         toggleFieldVisibility(studentsContainer, modality === 'G');
+
+        if (studentData?.id) {
+            currentStudentId = studentData.id;
+        }
+
+        instructorSelect.addEventListener('change', async function() {
+            const selectedOption = this.options[this.selectedIndex];
+            selectedInstructor = {
+                id: selectedOption.value,
+                typeActivity: selectedOption.dataset.typeActivity,
+                bothActivities: selectedOption.dataset.bothActivities === 'true'
+            };
+            currentInstructorId = selectedInstructor.id;
+        });
     }
 
     // Resetear al paso 1
@@ -172,18 +203,6 @@ const idPrefix = 'studentSender';
         resetFormSteps();
         instructorSelect.selectedIndex = 0;
         updateFinalStepInfo();
-    }
-
-    // Actualizar información del paso final según la modalidad
-    function updateFinalStepInfo() {
-        if (selectedModality === 'I') {
-            const totalSteps = (selectedInstructor && selectedInstructor.bothActivities) ? 3 : 2;
-            stepNumber.textContent = totalSteps;
-            stepTitle.textContent = `Completa los detalles de la cita individual`;
-        } else {
-            stepNumber.textContent = '3';
-            stepTitle.textContent = 'Completa los detalles de la cita grupal';
-        }
     }
 
     // Cargar instructores
@@ -258,25 +277,18 @@ const idPrefix = 'studentSender';
         studentsList.innerHTML = '';
         
         activityTypeSelected();
-        
-        if (!activityType) {
-            noStudentsMessage.classList.remove('hidden');
-            return;
-        }
-        
+
+        if (!activityType) return toggleFieldVisibility(noStudentsMessage, true);
+
         const currentStudentId = studentData?.id ? studentData.id.toString() : null;
         
         const filteredStudents = availableStudents.filter(student => 
             student.typeActivityCode === activityType && 
             student.id.toString() !== currentStudentId
         );
-        
-        if (filteredStudents.length === 0) {
-            noStudentsMessage.classList.remove('hidden');
-            return;
-        }
-        
-        noStudentsMessage.classList.add('hidden');
+
+        toggleFieldVisibility(noStudentsMessage, filteredStudents.length === 0);
+
         filteredStudents.forEach(student => {
             const studentEl = document.createElement('div');
             studentEl.className = 'flex items-center p-2 border border-theme-rich-black/10 rounded hover:bg-theme-keppel/5 cursor-pointer transition-colors duration-200';
@@ -312,7 +324,7 @@ const idPrefix = 'studentSender';
             : currentStep + 1;
 
         el(currentStep)?.classList?.remove('hidden');
-        updateFinalStepInfo?.();
+        updateFinalStepInfo();
     }
 
     // Navegar al paso anterior
@@ -329,7 +341,15 @@ const idPrefix = 'studentSender';
             : Math.max(1, currentStep - 1);
 
         el(currentStep)?.classList?.remove('hidden');
-        updateFinalStepInfo?.();
+        updateFinalStepInfo();
+    }
+
+    function updateFinalStepInfo() {
+        const isIndividual = selectedModality === 'I';
+        const steps = isIndividual ? (selectedInstructor?.bothActivities ? 3 : 2) : 3;
+
+        stepNumber.textContent = String(steps);
+        stepTitle.textContent = `Completa los detalles de la cita ${isIndividual ? 'individual' : 'grupal'}`;
     }
 
     // Enviar formulario
@@ -347,6 +367,23 @@ const idPrefix = 'studentSender';
                 return;
             }
 
+            // Obtener horarios según la modalidad
+            let altScheduleAInput, altScheduleBAInput, altScheduleCAInput;
+            if (selectedModality === 'I') {
+                // Usar horarios del modal para citas individuales
+                if (window.selectedScheduleSlots && window.selectedScheduleSlots.length >= 3) {
+                    [altScheduleAInput, altScheduleBAInput, altScheduleCAInput] = window.selectedScheduleSlots;
+                } else {
+                    alert('Debes seleccionar 3 horarios para la cita individual');
+                    return;
+                }
+            } else {
+                // Usar inputs normales para citas grupales
+                altScheduleAInput = altScheduleA.value;
+                altScheduleBAInput = altScheduleB.value;
+                altScheduleCAInput = altScheduleC.value;
+            }
+
             const baseRequestData = {
                 appointmentModalityCode: selectedModality,
                 appointmentMethod: appointmentMethod.value === 'Otro' ? null : appointmentMethod.value,
@@ -355,11 +392,12 @@ const idPrefix = 'studentSender';
                 specificAppointmentReason: specificAppointmentReason.value || null,
                 typeActivityCode: activityType,
                 instructorId: parseInt(selectedInstructor.id),
-                altScheduleA: altScheduleA.value,
-                altScheduleB: altScheduleB.value,
-                altScheduleC: altScheduleC.value
+                altScheduleA: altScheduleAInput,
+                altScheduleB: altScheduleBAInput,
+                altScheduleC: altScheduleCAInput
             };
 
+            console.log('Datos de la cita:', baseRequestData);
             let result;
             if (selectedModality === 'I') {
                 const requestData = {
@@ -378,13 +416,234 @@ const idPrefix = 'studentSender';
                 alert(`Cita grupal programada exitosamente para ${result.length} participantes`);
             }
 
-            resetForm(appointmentForm, appointmentFormContainer, selectedModality, selectedInstructor, selectedStudents, currentStep);
+            resetForm(appointmentForm, appointmentFormContainer);
+            selectedSchedulePreview.innerHTML = '';
+            toggleFieldVisibility(selectedSchedulePreview, false);
+            selectedSlots.innerHTML = '';
+            window.selectedScheduleSlots = [];
+            selectedInstructor = null;
+            selectedModality = '';
+            selectedStudents = [];
+            currentStep = 1;
         } catch (error) {
             console.error('Error:', error);
             alert('Error al programar la cita: ' + error.message);
         }
     }
 
+    // Abrir modal y cargar horarios
+    async function openScheduleModal() {
+        if (!currentStudentId || !currentInstructorId) {
+            alert('Por favor selecciona un docente primero');
+            return;
+        }
+
+        try {
+            busySchedules = await fetchBusySchedules(currentStudentId, currentInstructorId, token);
+            generateScheduleGrid();
+
+            scheduleModal.hidden = false;
+
+            selectedDate.min = new Date().toISOString().split('T')[0];
+        } catch (error) {
+            alert('Error al cargar los horarios');
+        }
+    }
+
+    // Cerrar modal
+    function closeScheduleModal() {
+        scheduleModal.hidden = true;
+        selectedTimeSlots = [];
+    }
+
+    // Generar grid de horarios
+    function generateScheduleGrid() {
+        scheduleGrid.innerHTML = '';
+        
+        const days = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+        const hours = [];
+        
+        // Generar horas de 7:00 AM a 8:00 PM
+        for (let hour = 7; hour <= 20; hour++) {
+            hours.push(`${hour.toString().padStart(2, '0')}:00`);
+        }
+        
+        hours.forEach(time => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td class="p-2 border border-theme-rich-black/20 bg-theme-keppel/10 font-medium">${time}</td>`;
+            
+            days.forEach(day => {
+                const isBusy = isTimeSlotBusy(time, day);
+                const cell = document.createElement('td');
+                cell.className = `p-2 border border-theme-rich-black/20 text-center cursor-pointer transition-colors duration-200 ${isBusy ? 'bg-red-100 text-red-500 cursor-not-allowed' : 'hover:bg-theme-keppel/20'}`;
+                
+                if (!isBusy) {
+                    cell.addEventListener('click', () => toggleTimeSlot(time, day, cell));
+                }
+                
+                cell.textContent = isBusy ? '✗' : '○';
+                row.appendChild(cell);
+            });
+            
+            scheduleGrid.appendChild(row);
+        });
+    }
+
+    // Verificar si un horario está ocupado
+    function isTimeSlotBusy(time, day) {
+        return busySchedules.some(schedule => {
+            const [startTime, endTime, scheduleDay] = schedule;
+            return scheduleDay === day && isTimeInRange(time, startTime, endTime);
+        });
+    }
+
+    // Verificar si una hora está dentro de un rango
+    function isTimeInRange(time, startTime, endTime) {
+        const [timeHours] = time.split(':').map(Number);
+        const [startHours] = startTime.split(':').map(Number);
+        const [endHours] = endTime.split(':').map(Number);
+        
+        return timeHours >= startHours && timeHours < endHours;
+    }
+
+    // Alternar selección de horario
+    function toggleTimeSlot(time, day, cell) {
+        const slotIndex = selectedTimeSlots.findIndex(slot => slot.time === time && slot.day === day);
+        
+        if (slotIndex > -1) {
+            // Deseleccionar
+            selectedTimeSlots.splice(slotIndex, 1);
+            cell.textContent = '○';
+            cell.classList.remove('bg-theme-keppel', 'text-white');
+            cell.classList.add('hover:bg-theme-keppel/20');
+        } else {
+            // Seleccionar (máximo 3)
+            if (selectedTimeSlots.length >= 3) {
+                alert('Solo puedes seleccionar hasta 3 horarios');
+                return;
+            }
+            
+            selectedTimeSlots.push({ time, day });
+            cell.textContent = '✓';
+            cell.classList.remove('hover:bg-theme-keppel/20');
+            cell.classList.add('bg-theme-keppel', 'text-white');
+        }
+        
+        updateSelectedSlotsDisplay();
+    }
+
+    // Actualizar display de horarios seleccionados
+    function updateSelectedSlotsDisplay() {
+        if (selectedTimeSlots.length === 0) {
+            selectedSlots.innerHTML = '<p class="text-sm text-gray-500">No hay horarios seleccionados</p>';
+            return;
+        }
+
+        selectedSlots.innerHTML = selectedTimeSlots.map((slot, index) => `
+            <div class="flex items-center justify-between bg-gradient-to-r from-theme-seasalt to-theme-keppel/5 p-3 rounded-xl border border-theme-keppel/30 shadow-sm transition-all duration-200 hover:shadow-md">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-theme-keppel/10 p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font-medium text-theme-rich-black">${slot.day}</span>
+                        <span class="block text-sm text-theme-rich-black/70">${slot.time}</span>
+                    </div>
+                </div>
+                <button type="button" data-index="${index}" class="remove-slot bg-white/80 hover:bg-red-50 p-2 rounded-lg border border-red-200 transition-all duration-200 hover:scale-110 hover:shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        `).join('');
+
+        // Agregar event listeners a cada botón después de inyectar el HTML
+        selectedSlots.querySelectorAll('.remove-slot').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index, 10);
+                removeSelectedSlot(index);
+            });
+        });
+    }
+
+
+    // Remover horario seleccionado
+    function removeSelectedSlot(index) {
+        selectedTimeSlots.splice(index, 1);
+        generateScheduleGrid(); // Regenerar grid para actualizar selecciones
+        updateSelectedSlotsDisplay();
+    }
+
+    // Actualizar fecha seleccionada
+    function updateSelectedDate() {
+        updateSelectedSlotsDisplay();
+    }
+
+    // Confirmar horarios seleccionados
+    function confirmSelectedSlots() {
+        
+        if (!selectedDate.value) {
+            alert('Por favor selecciona una fecha');
+            return;
+        }
+        
+        if (selectedTimeSlots.length === 0) {
+            alert('Por favor selecciona al menos un horario');
+            return;
+        }
+        
+        // Convertir a formato datetime-local
+        const dateTimeSlots = selectedTimeSlots.map(slot => {
+            const dateTime = `${selectedDate.value}T${slot.time}`;
+            return dateTime;
+        });
+        
+        // Actualizar los campos ocultos o mostrar preview
+        updateSchedulePreview(dateTimeSlots, selectedDate.value);
+        closeScheduleModal();
+    }
+
+    // Actualizar preview de horarios seleccionados
+    function updateSchedulePreview(slots, date) {
+        selectedSchedulePreview.classList.remove('hidden');
+        
+        selectedSchedulePreview.innerHTML = `
+            <div class="bg-gradient-to-br from-theme-seasalt to-theme-keppel/5 p-4 rounded-xl border border-theme-keppel/20 shadow-sm">
+                <p class="text-sm font-medium text-theme-rich-black/80 flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Fecha: ${new Date(date).toLocaleDateString('es-ES')}
+                </p>
+                <div class="space-y-2">
+                    ${slots.map((slot, index) => `
+                        <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-theme-keppel/10 shadow-xs transition-all duration-200 hover:shadow-sm">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-theme-keppel/10 p-1.5 rounded-lg">
+                                    <span class="text-sm font-medium text-theme-keppel">${index + 1}</span>
+                                </div>
+                                <span class="text-theme-rich-black">${new Date(slot).toLocaleString('es-ES', { 
+                                    weekday: 'long', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                })}</span>
+                            </div>
+                            <span class="bg-theme-keppel/10 text-theme-keppel p-1 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        window.selectedScheduleSlots = slots;
+    }
 </script>
 
 <style>
