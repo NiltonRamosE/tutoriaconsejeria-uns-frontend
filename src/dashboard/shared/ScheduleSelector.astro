@@ -22,17 +22,6 @@ const { idPrefix } = Astro.props;
             </button>
         </div>
 
-        <!-- Selector de fecha -->
-        <div class="mb-6">
-            <label for={`${idPrefix}-selectedDate`} class="block text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Selecciona la fecha
-            </label>
-            <input type="date" id={`${idPrefix}-selectedDate`} class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200 shadow-sm" min="">
-        </div>
-
         <!-- Horarios seleccionados -->
         <div class="mb-6 bg-gradient-to-br from-theme-seasalt to-theme-keppel/5 p-4 rounded-xl border border-theme-keppel/20 shadow-sm">
             <h4 class="font-medium mb-3 text-theme-rich-black flex items-center">
@@ -79,7 +68,7 @@ const { idPrefix } = Astro.props;
 
 <!-- Horarios Alternativos (solo para citas grupales) -->
 <div id={`${idPrefix}-groupScheduleContainer`} class="mb-4 hidden">
-    <span class="block text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
+    <span class="text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
@@ -88,22 +77,36 @@ const { idPrefix } = Astro.props;
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
             <label for={`${idPrefix}-altScheduleA`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Primera Opción</label>
-            <input type="datetime-local" id={`${idPrefix}-altScheduleA`} class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
+            <input 
+                type="datetime-local" 
+                id={`${idPrefix}-altScheduleA`}
+                min={`${new Date(Date.now() + 24*60*60*1000).toISOString().slice(0,16)}`}
+                class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
         </div>
+
         <div class="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
             <label for={`${idPrefix}-altScheduleB`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Segunda Opción</label>
-            <input type="datetime-local" id={`${idPrefix}-altScheduleB`} class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
+            <input 
+                type="datetime-local" 
+                id={`${idPrefix}-altScheduleB`}
+                min={`${new Date(Date.now() + 24*60*60*1000).toISOString().slice(0,16)}`}
+                class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
         </div>
+
         <div class="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
             <label for={`${idPrefix}-altScheduleC`} class="block text-sm font-medium mb-1 text-theme-rich-black/70">Tercera Opción</label>
-            <input type="datetime-local" id={`${idPrefix}-altScheduleC`} class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
+            <input 
+                type="datetime-local" 
+                id={`${idPrefix}-altScheduleC`}
+                min={`${new Date(Date.now() + 24*60*60*1000).toISOString().slice(0,16)}`}
+                class="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
         </div>
     </div>
 </div>
 
 <!-- Selector de horarios interactivo (solo para citas individuales) -->
 <div id={`${idPrefix}-individualScheduleContainer`} class="mb-4 hidden">
-    <span class="block text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
+    <span class="text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
