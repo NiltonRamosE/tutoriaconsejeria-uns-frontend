@@ -119,7 +119,6 @@ const idPrefix = 'studentSender';
     const closeModal = document.getElementById(`${idPrefix}-closeModal`);
     const cancelModal = document.getElementById(`${idPrefix}-cancelModal`);
     const confirmSlots = document.getElementById(`${idPrefix}-confirmSlots`); 
-    const selectedDate = document.getElementById(`${idPrefix}-selectedDate`);
     const scheduleModal = document.getElementById(`${idPrefix}-scheduleModal`);
     const scheduleGrid = document.getElementById(`${idPrefix}-scheduleGrid`);
     const selectedSlots = document.getElementById(`${idPrefix}-selectedSlots`);
@@ -169,7 +168,6 @@ const idPrefix = 'studentSender';
         closeModal.addEventListener('click', closeScheduleModal);
         cancelModal.addEventListener('click', closeScheduleModal);
         confirmSlots.addEventListener('click', confirmSelectedSlots);
-        selectedDate.addEventListener('change', updateSelectedDate);
     }
 
     // Seleccionar modalidad
@@ -181,21 +179,22 @@ const idPrefix = 'studentSender';
         toggleFieldVisibility(appointmentFormContainer, true);
         toggleFieldVisibility(studentsContainer, modality === 'G');
 
-        if (studentData?.id) {
-            currentStudentId = studentData.id;
-        }
+        if (studentData?.id) currentStudentId = studentData.id;
 
         instructorSelect.addEventListener('change', async function() {
-            const selectedOption = this.options[this.selectedIndex];
-            selectedInstructor = {
-                id: selectedOption.value,
-                typeActivity: selectedOption.dataset.typeActivity,
-                bothActivities: selectedOption.dataset.bothActivities === 'true'
-            };
+            selectedInstructor = setSelectedInstructor(this.options[this.selectedIndex]);
             currentInstructorId = selectedInstructor.id;
         });
     }
 
+    function setSelectedInstructor(selectedOption) {
+        selectedInstructor = {
+            id: selectedOption.value,
+            typeActivity: selectedOption.dataset.typeActivity,
+            bothActivities: selectedOption.dataset.bothActivities === 'true'
+        };
+        return selectedInstructor;
+    }
     // Resetear al paso 1
     function resetToStep1() {
         currentStep = 1;
@@ -235,15 +234,8 @@ const idPrefix = 'studentSender';
         });
         
         instructorSelect.addEventListener('change', async function() {
-            const selectedOption = this.options[this.selectedIndex];
-            selectedInstructor = {
-                id: selectedOption.value,
-                typeActivity: selectedOption.dataset.typeActivity,
-                bothActivities: selectedOption.dataset.bothActivities === 'true'
-            };
-            
+            selectedInstructor = setSelectedInstructor(this.options[this.selectedIndex]);
             toggleFieldVisibility(typeActivityContainer, selectedInstructor.bothActivities);
-            
             if (selectedModality === 'G' && selectedInstructor.id) {
                 await loadStudentsAssignedByInstructor(selectedInstructor.id);
             }
@@ -370,14 +362,13 @@ const idPrefix = 'studentSender';
             // Obtener horarios según la modalidad
             let altScheduleAInput, altScheduleBAInput, altScheduleCAInput;
             if (selectedModality === 'I') {
-                // Usar horarios del modal para citas individuales
-                if (window.selectedScheduleSlots && window.selectedScheduleSlots.length >= 3) {
-                    [altScheduleAInput, altScheduleBAInput, altScheduleCAInput] = window.selectedScheduleSlots;
-                } else {
-                    alert('Debes seleccionar 3 horarios para la cita individual');
-                    return;
+                if (window.selectedScheduleSlots && window.selectedScheduleSlots.length >= 3) { 
+                    [altScheduleAInput, altScheduleBAInput, altScheduleCAInput] = window.selectedScheduleSlots; 
+                } else { 
+                    alert('Debes seleccionar 3 horarios para la cita individual'); 
+                    return; 
                 }
-            } else {
+            }else {
                 // Usar inputs normales para citas grupales
                 altScheduleAInput = altScheduleA.value;
                 altScheduleBAInput = altScheduleB.value;
@@ -397,7 +388,6 @@ const idPrefix = 'studentSender';
                 altScheduleC: altScheduleCAInput
             };
 
-            console.log('Datos de la cita:', baseRequestData);
             let result;
             if (selectedModality === 'I') {
                 const requestData = {
@@ -441,10 +431,7 @@ const idPrefix = 'studentSender';
         try {
             busySchedules = await fetchBusySchedules(currentStudentId, currentInstructorId, token);
             generateScheduleGrid();
-
             scheduleModal.hidden = false;
-
-            selectedDate.min = new Date().toISOString().split('T')[0];
         } catch (error) {
             alert('Error al cargar los horarios');
         }
@@ -539,28 +526,49 @@ const idPrefix = 'studentSender';
             return;
         }
 
-        selectedSlots.innerHTML = selectedTimeSlots.map((slot, index) => `
-            <div class="flex items-center justify-between bg-gradient-to-r from-theme-seasalt to-theme-keppel/5 p-3 rounded-xl border border-theme-keppel/30 shadow-sm transition-all duration-200 hover:shadow-md">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-theme-keppel/10 p-2 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <span class="font-medium text-theme-rich-black">${slot.day}</span>
-                        <span class="block text-sm text-theme-rich-black/70">${slot.time}</span>
-                    </div>
-                </div>
-                <button type="button" data-index="${index}" class="remove-slot bg-white/80 hover:bg-red-50 p-2 rounded-lg border border-red-200 transition-all duration-200 hover:scale-110 hover:shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        `).join('');
+        selectedSlots.innerHTML = selectedTimeSlots.map((slot, index) => {
+            // Calcular fecha automática sugerida
+            const suggestedDate = calculateDateForDay(slot.day);
 
-        // Agregar event listeners a cada botón después de inyectar el HTML
+            return `
+                <div class="flex flex-col bg-gradient-to-r from-theme-seasalt to-theme-keppel/5 p-3 rounded-xl border border-theme-keppel/30 shadow-sm transition-all duration-200 hover:shadow-md space-y-2">
+                    
+                    <!-- Info del slot -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-theme-keppel/10 p-2 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="font-medium text-theme-rich-black">${slot.day}</span>
+                                <span class="block text-sm text-theme-rich-black/70">${slot.time}</span>
+                            </div>
+                        </div>
+                        <button type="button" data-index="${index}" class="remove-slot bg-white/80 hover:bg-red-50 p-2 rounded-lg border border-red-200 transition-all duration-200 hover:scale-110 hover:shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Input de fecha -->
+                    <input 
+                        type="date" 
+                        id="slotDate-${index}" 
+                        value="${suggestedDate}" 
+                        min="${suggestedDate}" 
+                        step="7"
+                        class="p-2 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel"
+                        required
+                    >
+
+                </div>
+            `;
+        }).join('');
+
+        // Listeners para remover
         selectedSlots.querySelectorAll('.remove-slot').forEach(btn => {
             btn.addEventListener('click', () => {
                 const index = parseInt(btn.dataset.index, 10);
@@ -569,6 +577,27 @@ const idPrefix = 'studentSender';
         });
     }
 
+    function attachDayRestriction(input, expectedDay) {
+        input.addEventListener("change", () => {
+            if (!input.value) return;
+
+            const chosenDate = new Date(input.value);
+            const dayOfWeek = chosenDate.getDay(); // 0=Dom, 1=Lun, ..., 6=Sab
+            const daysMap = {
+                'LUNES': 1,
+                'MARTES': 2,
+                'MIERCOLES': 3,
+                'JUEVES': 4,
+                'VIERNES': 5,
+                'SABADO': 6
+            };
+
+            if (dayOfWeek !== daysMap[expectedDay]) {
+                alert(`Solo puedes escoger un ${expectedDay}`);
+                input.value = ""; // limpiar
+            }
+        });
+    }
 
     // Remover horario seleccionado
     function removeSelectedSlot(index) {
@@ -577,37 +606,81 @@ const idPrefix = 'studentSender';
         updateSelectedSlotsDisplay();
     }
 
-    // Actualizar fecha seleccionada
-    function updateSelectedDate() {
-        updateSelectedSlotsDisplay();
-    }
-
     // Confirmar horarios seleccionados
+    
     function confirmSelectedSlots() {
-        
-        if (!selectedDate.value) {
-            alert('Por favor selecciona una fecha');
-            return;
-        }
-        
         if (selectedTimeSlots.length === 0) {
             alert('Por favor selecciona al menos un horario');
             return;
         }
-        
-        // Convertir a formato datetime-local
-        const dateTimeSlots = selectedTimeSlots.map(slot => {
-            const dateTime = `${selectedDate.value}T${slot.time}`;
-            return dateTime;
+
+        const today = new Date();
+        const dateTimeSlots = selectedTimeSlots.map((slot, i) => {
+            // Buscar input asociado
+            const input = document.getElementById(`slotDate-${i}`);
+            let baseDate = input?.value;
+
+            if (!baseDate) {
+                // Si no hay input o está vacío → calcular automáticamente
+                baseDate = calculateDateForDay(slot.day);
+            } else {
+                const chosenDate = new Date(baseDate);
+                // Validar que no sea hoy o pasada
+                if (chosenDate <= today) {
+                    baseDate = calculateDateForDay(slot.day);
+                }
+            }
+
+            return `${baseDate}T${slot.time}`;
         });
-        
-        // Actualizar los campos ocultos o mostrar preview
-        updateSchedulePreview(dateTimeSlots, selectedDate.value);
+
+        // Validación: debe haber tantas fechas como slots
+        if (dateTimeSlots.some(d => !d)) {
+            alert("Debes seleccionar una fecha válida para cada horario");
+            return;
+        }
+        updateSchedulePreview(dateTimeSlots);
         closeScheduleModal();
     }
 
+
+
+    function calculateDateForDay(dayName) {
+        const today = new Date();
+        const currentDay = today.getDay();
+        const daysMap = {
+            'LUNES': 1,
+            'MARTES': 2,
+            'MIERCOLES': 3,
+            'JUEVES': 4,
+            'VIERNES': 5,
+            'SABADO': 6
+        };
+
+        const targetDay = daysMap[dayName];
+        if (targetDay === undefined) return null;
+
+        let diff = targetDay - currentDay;
+        if (diff <= 0) {
+            diff += 7;
+        }
+
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + diff);
+
+        return formatDateLocal(targetDate);
+    }
+
+
+    function formatDateLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     // Actualizar preview de horarios seleccionados
-    function updateSchedulePreview(slots, date) {
+    function updateSchedulePreview(slots) {
         selectedSchedulePreview.classList.remove('hidden');
         
         selectedSchedulePreview.innerHTML = `
@@ -616,7 +689,7 @@ const idPrefix = 'studentSender';
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    Fecha: ${new Date(date).toLocaleDateString('es-ES')}
+                    Días seleccionados
                 </p>
                 <div class="space-y-2">
                     ${slots.map((slot, index) => `
@@ -641,7 +714,6 @@ const idPrefix = 'studentSender';
                 </div>
             </div>
         `;
-        
         window.selectedScheduleSlots = slots;
     }
 </script>
