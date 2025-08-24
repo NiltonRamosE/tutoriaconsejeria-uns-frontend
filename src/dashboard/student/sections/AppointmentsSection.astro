@@ -400,6 +400,7 @@ const idPrefix = 'studentSender';
                 const allStudentIds = [...selectedStudents, studentData.id.toString()];
                 const requestData = {
                     ...baseRequestData,
+                    studentId: studentData.id,
                     studentsId: allStudentIds.map(id => parseInt(id))
                 };
                 result = await submitGroupAppointment(requestData, token);
