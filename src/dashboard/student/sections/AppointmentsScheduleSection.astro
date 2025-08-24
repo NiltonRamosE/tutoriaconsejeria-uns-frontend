@@ -58,7 +58,7 @@
             });
 
             // Cargar citas recibidas
-            const receivedResponse = await fetch(`http://localhost:8080/student/appointments/received/${studentData.id}`, {
+            /*const receivedResponse = await fetch(`http://localhost:8080/student/appointments/received/${studentData.id}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -71,6 +71,15 @@
                 
                 displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
                 displayAppointments(receivedAppointments, 'receivedAppointmentsContainer', false);
+            } else {
+                console.error('Error al cargar las citas');
+                showError('Error al cargar las citas');
+            }*/
+
+            if (sentResponse.ok) {
+                const sentAppointments = await sentResponse.json();
+                
+                displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
             } else {
                 console.error('Error al cargar las citas');
                 showError('Error al cargar las citas');
@@ -87,15 +96,20 @@
         
         if (!appointments || appointments.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-8 text-gray-500">
-                    <p>No hay citas ${isSent ? 'solicitadas' : 'recibidas'}</p>
+                <div class="text-center py-12 text-gray-500 bg-gradient-to-br from-theme-seasalt to-white rounded-2xl border border-dashed border-theme-rich-black/20">
+                    <img src="/src/assets/icons/calendar-blank.svg" class="h-12 w-12 mx-auto text-gray-400 mb-3" alt="Calendar icon"/>
+                    <p class="text-lg font-medium">No hay citas ${isSent ? 'solicitadas' : 'recibidas'}</p>
+                    <p class="text-sm mt-1">Cuando tengas citas, aparecerán aquí</p>
                 </div>
             `;
             return;
         }
 
+        // Configurar grid responsivo
+        container.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+        
         container.innerHTML = appointments.map(appointment => {
-            const { appointment: apptDetails, instructorFullName } = appointment;
+            const { appointmentResponse: apptDetails, senderFullName, receiverFullName, receiverStudentsFullNames } = appointment;
             
             // Formatear fecha y hora
             const formattedDate = apptDetails.date ? formatDate(apptDetails.date) : '--';
@@ -104,82 +118,162 @@
             
             // Determinar clase de estado
             let statusClass = '';
+            let statusIcon = '';
             switch (apptDetails.state) {
                 case 'PENDIENTE':
-                    statusClass = 'bg-yellow-100 text-yellow-800';
+                    statusClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                    statusIcon = '⏳';
                     break;
                 case 'ACEPTADA':
-                    statusClass = 'bg-green-100 text-green-800';
+                    statusClass = 'bg-green-100 text-green-800 border-green-200';
+                    statusIcon = '✅';
                     break;
                 case 'EN_PROCESO':
-                    statusClass = 'bg-orange-100 text-orange-800';
+                    statusClass = 'bg-orange-100 text-orange-800 border-orange-200';
+                    statusIcon = '🔄';
                     break;
                 case 'FINALIZADA':
-                    statusClass = 'bg-blue-100 text-blue-800';
+                    statusClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                    statusIcon = '✔️';
                     break;
                 case 'CANCELADA':
-                    statusClass = 'bg-red-100 text-red-800';
+                    statusClass = 'bg-red-100 text-red-800 border-red-200';
+                    statusIcon = '❌';
                     break;
                 default:
-                    statusClass = 'bg-gray-100 text-gray-800';
+                    statusClass = 'bg-gray-100 text-gray-800 border-gray-200';
+                    statusIcon = '❓';
             }
 
+            const maxStudentsToShow = 1;
+            const hasMoreStudents = receiverStudentsFullNames && receiverStudentsFullNames.length > maxStudentsToShow;
+            const studentsToShow = receiverStudentsFullNames ? receiverStudentsFullNames.slice(0, maxStudentsToShow) : [];
+            
+            const studentsList = receiverStudentsFullNames && receiverStudentsFullNames.length > 0
+                ? `<div class="mt-3 bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/10">
+                    <div class="flex justify-between items-center mb-2">
+                        <h5 class="font-medium text-sm text-theme-rich-black/80 flex items-center">
+                            <img src="/src/assets/icons/group-users.svg" alt="Group Users Icon" class="h-4 w-4 mr-2"/>
+                            Participantes (${receiverStudentsFullNames.length})
+                        </h5>
+                        ${hasMoreStudents ? `
+                            <button type="button" class="text-theme-keppel text-xs font-medium hover:underline view-more-btn" data-appointment-id="${apptDetails.id}">
+                                Ver todos
+                            </button>
+                        ` : ''}
+                    </div>
+                    <ul class="space-y-1" id="students-list-${apptDetails.id}">
+                        ${studentsToShow.map(s => `
+                            <li class="flex items-center text-sm text-theme-rich-black/70">
+                                <span class="w-1.5 h-1.5 bg-theme-keppel rounded-full mr-2"></span>
+                                ${s}
+                            </li>
+                        `).join('')}
+                    </ul>
+                    ${hasMoreStudents ? `
+                        <ul class="space-y-1 hidden mt-2" id="all-students-list-${apptDetails.id}">
+                            ${receiverStudentsFullNames.map(s => `
+                                <li class="flex items-center text-sm text-theme-rich-black/70">
+                                    <span class="w-1.5 h-1.5 bg-theme-keppel rounded-full mr-2"></span>
+                                    ${s}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    ` : ''}
+                </div>`
+                : '';
+
             return `
-                <div class="p-4 border border-theme-rich-black/20 rounded-xl bg-white">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex-1">
-                            <h4 class="font-medium text-theme-rich-black">${apptDetails.typeActivity || 'Cita'}</h4>
-                            <p class="text-sm text-gray-500">Con: ${instructorFullName || 'Docente'}</p>
-                            
-                            <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                                <div>
-                                    <span class="font-medium">Fecha:</span> ${formattedDate}
-                                </div>
-                                <div>
-                                    <span class="font-medium">Horario:</span> ${formattedStartTime} - ${formattedEndTime}
-                                </div>
-                                <div>
-                                    <span class="font-medium">Modalidad:</span> ${apptDetails.appointmentModality || '--'}
-                                </div>
-                                <div>
-                                    <span class="font-medium">Método:</span> ${apptDetails.appointmentMethod || '--'}
-                                </div>
+                <div class="bg-white rounded-xl border border-theme-rich-black/10 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden h-fit">
+                    <!-- Header con fecha/hora y estado -->
+                    <div class="bg-gradient-to-r from-theme-keppel/5 to-theme-seasalt p-4 border-b border-theme-rich-black/10">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <img src="/src/assets/icons/calendar-blank.svg" alt="Calendar Icon" class="h-4 w-4 text-theme-keppel"/>
+                                <span class="text-sm font-medium text-theme-rich-black">${formattedDate}</span>
                             </div>
-                            
-                            ${apptDetails.specificAppointmentMethod ? `
-                                <div class="mt-1">
-                                    <span class="font-medium">Método específico:</span> ${apptDetails.specificAppointmentMethod}
-                                </div>
-                            ` : ''}
-                            
-                            <div class="mt-2">
-                                <span class="font-medium">Razón:</span> ${apptDetails.appointmentReason || '--'}
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass} border flex items-center gap-1">
+                                ${statusIcon} ${apptDetails.state || 'PENDIENTE'}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-theme-rich-black/70">
+                            <img src="/src/assets/icons/clock.svg" alt="Clock Icon" class="h-4 w-4"/>
+                            <span>${formattedStartTime} - ${formattedEndTime}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenido principal -->
+                    <div class="p-4">
+                        <!-- Tipo de actividad -->
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="bg-theme-keppel/10 p-2 rounded-lg">
+                                <img src="/src/assets/icons/writing-in-paper.svg" alt="Writing in Paper Icon" class="h-4 w-4"/>
                             </div>
-                            
-                            ${apptDetails.specificAppointmentReason ? `
-                                <div class="mt-1">
-                                    <span class="font-medium">Razón específica:</span> ${apptDetails.specificAppointmentReason}
-                                </div>
-                            ` : ''}
+                            <h4 class="font-semibold text-theme-rich-black">${apptDetails.typeActivity || 'Cita'}</h4>
                         </div>
                         
-                        <div class="flex flex-col items-end gap-2">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">
-                                ${apptDetails.state || 'PENDIENTE'}
-                            </span>
-                            
-                            ${apptDetails.state === 'PENDIENTE' && isSent ? `
-                                <button class="text-red-500 hover:text-red-700 text-sm font-medium cancel-btn" data-appointment-id="${apptDetails.id}">
-                                    Cancelar
-                                </button>
-                            ` : ''}
+                        <!-- Información de personas -->
+                        <div class="grid grid-cols-1 gap-2 mb-3 text-sm">
+                            <div class="flex items-center text-theme-rich-black/70">
+                                <img src="/src/assets/icons/instructor-outline.svg" alt="Instructor Icon" class="h-4 w-4 mr-2"/>
+                                <span><strong class="text-theme-rich-black">Con:</strong> ${receiverFullName || 'Docente'}</span>
+                            </div>
+                            <div class="flex items-center text-theme-rich-black/70">
+                                <img src="/src/assets/icons/student-outline.svg" alt="Student Icon" class="h-4 w-4 mr-2"/>
+                                <span><strong class="text-theme-rich-black">De:</strong> ${senderFullName || '--'}</span>
+                            </div>
                         </div>
+                        
+                        <!-- Detalles en formato tabla compacta -->
+                        <div class="bg-theme-seasalt rounded-lg p-3 mb-3">
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    <tr>
+                                        <td class="py-1 text-theme-rich-black/70 font-medium w-1/3">Modalidad:</td>
+                                        <td class="py-1 text-theme-rich-black">${apptDetails.appointmentModality || '--'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1 text-theme-rich-black/70 font-medium">Método:</td>
+                                        <td class="py-1 text-theme-rich-black">${apptDetails.appointmentMethod || '--'}</td>
+                                    </tr>
+                                    ${apptDetails.specificAppointmentMethod ? `
+                                    <tr>
+                                        <td class="py-1 text-theme-rich-black/70 font-medium">Método esp.:</td>
+                                        <td class="py-1 text-theme-rich-black">${apptDetails.specificAppointmentMethod}</td>
+                                    </tr>
+                                    ` : ''}
+                                    <tr>
+                                        <td class="py-1 text-theme-rich-black/70 font-medium">Razón:</td>
+                                        <td class="py-1 text-theme-rich-black">${apptDetails.appointmentReason || '--'}</td>
+                                    </tr>
+                                    ${apptDetails.specificAppointmentReason ? `
+                                    <tr>
+                                        <td class="py-1 text-theme-rich-black/70 font-medium">Detalles:</td>
+                                        <td class="py-1 text-theme-rich-black">${apptDetails.specificAppointmentReason}</td>
+                                    </tr>
+                                    ` : ''}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        ${studentsList}
+                        
+                        <!-- Botón de cancelar (solo para citas pendientes enviadas) -->
+                        ${apptDetails.state === 'PENDIENTE' && isSent ? `
+                        <div class="mt-3 pt-3 border-t border-theme-rich-black/10">
+                            <button class="w-full bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 cancel-btn" data-appointment-id="${apptDetails.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Cancelar cita
+                            </button>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
         }).join('');
 
-        // Agregar event listeners a los botones de cancelar
         if (isSent) {
             document.querySelectorAll('.cancel-btn').forEach(button => {
                 button.addEventListener('click', function() {
@@ -188,9 +282,22 @@
                 });
             });
         }
+
+        document.querySelectorAll('.view-more-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const appointmentId = this.getAttribute('data-appointment-id');
+                const studentsList = document.getElementById(`students-list-${appointmentId}`);
+                const allStudentsList = document.getElementById(`all-students-list-${appointmentId}`);
+                
+                if (studentsList && allStudentsList) {
+                    studentsList.classList.toggle('hidden');
+                    allStudentsList.classList.toggle('hidden');
+                    this.textContent = allStudentsList.classList.contains('hidden') ? 'Ver todos' : 'Ver menos';
+                }
+            });
+        });
     }
 
-    // Formatear fecha
     function formatDate(dateString) {
         if (!dateString) return '--';
         
@@ -207,12 +314,10 @@
         }
     }
 
-    // Formatear hora
     function formatTime(timeString) {
         if (!timeString) return '--:--';
         
         try {
-            // Asumiendo que el tiempo viene en formato HH:mm:ss o similar
             const timeParts = timeString.split(':');
             if (timeParts.length >= 2) {
                 return `${timeParts[0]}:${timeParts[1]}`;
@@ -224,7 +329,6 @@
         }
     }
 
-    // Mostrar error
     function showError(message) {
         const sentContainer = document.getElementById('sentAppointmentsContainer');
         const receivedContainer = document.getElementById('receivedAppointmentsContainer');
@@ -240,39 +344,5 @@
                 <p>${message}</p>
             </div>
         `;
-    }
-
-    // Cancelar cita
-    async function cancelAppointment(appointmentId) {
-        if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) {
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert('No hay token de autenticación');
-                return;
-            }
-
-            const response = await fetch(`http://localhost:8080/appointments/cancel/${appointmentId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                alert('Cita cancelada exitosamente');
-                // Recargar las citas
-                await loadAppointments();
-            } else {
-                const error = await response.text();
-                alert('Error al cancelar la cita: ' + error);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al cancelar la cita');
-        }
     }
 </script>
