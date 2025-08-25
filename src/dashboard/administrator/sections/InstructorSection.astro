@@ -52,17 +52,19 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 </div>
 
 <script type="module" is:inline>
+    import { createPagination } from "/src/dashboard/shared/paginationManager";
+    import { fetchInstructorsList } from '/src/dashboard/services/administratorService.js';
+    import { getToken, isTokenPresent } from "/src/dashboard/shared/auth.js";
 
     let allInstructors = [];
-
-    import { createPagination } from "/src/dashboard/shared/paginationManager";
+    
     const pgn = createPagination('instructors', 5);
+    const token = getToken();
 
     document.addEventListener('DOMContentLoaded', async () => {
         await loadInstructors();
         pgn.setupPagination(loadInstructors);
 
-        // Evento de búsqueda
         document.getElementById('searchInstructorBtn').addEventListener('click', () => {
             const searchTerm = document.getElementById('instructorSearchInput').value.toLowerCase();
             if (searchTerm) {
@@ -75,7 +77,6 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
         });
     });
 
-    // 2. Función para actualizar la tabla con paginación
     function updateInstructorsTable(allInstructors) {
         const tableBody = document.getElementById('instructorsTableBody');        
         if (!allInstructors || allInstructors.length === 0) {
@@ -134,29 +135,12 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
         pgn.updateIndicators(allInstructors.length);
     }
 
-    // Endpoint para cargar asignaciones
     async function loadInstructors() {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No hay token de autenticación');
-                return;
-            }
-
-            const response = await fetch('http://localhost:8080/administrator/instructors/list', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                allInstructors = await response.json();
-                updateInstructorsTable(allInstructors);
-                pgn.updatePaginationControls(loadInstructors, allInstructors.length);
-            } else {
-                console.error('Error al cargar los docentes');
-            }
+            isTokenPresent(token);
+            allInstructors = await fetchInstructorsList(token);
+            updateInstructorsTable(allInstructors);
+            pgn.updatePaginationControls(loadInstructors, allInstructors.length);
         } catch (error) {
             console.error('Error:', error);
         }

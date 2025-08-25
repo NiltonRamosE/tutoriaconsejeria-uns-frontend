@@ -32,3 +32,20 @@ export async function fetchDistributeStudentsAmongInstructors(token) {
         throw error;
     }
 }
+
+// Función para listar a docentes
+export async function fetchInstructorsList(token) {
+    try {
+        const response = await fetch(`http://localhost:8080/administrator/instructors/list`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        return await response.json();
+    } catch (error) {
+        console.error('Error al cargar los docentes:', error);
+        throw error;
+    }
+}
