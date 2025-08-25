@@ -578,28 +578,6 @@ const idPrefix = 'studentSender';
         });
     }
 
-    function attachDayRestriction(input, expectedDay) {
-        input.addEventListener("change", () => {
-            if (!input.value) return;
-
-            const chosenDate = new Date(input.value);
-            const dayOfWeek = chosenDate.getDay(); // 0=Dom, 1=Lun, ..., 6=Sab
-            const daysMap = {
-                'LUNES': 1,
-                'MARTES': 2,
-                'MIERCOLES': 3,
-                'JUEVES': 4,
-                'VIERNES': 5,
-                'SABADO': 6
-            };
-
-            if (dayOfWeek !== daysMap[expectedDay]) {
-                alert(`Solo puedes escoger un ${expectedDay}`);
-                input.value = ""; // limpiar
-            }
-        });
-    }
-
     // Remover horario seleccionado
     function removeSelectedSlot(index) {
         selectedTimeSlots.splice(index, 1);
@@ -608,7 +586,6 @@ const idPrefix = 'studentSender';
     }
 
     // Confirmar horarios seleccionados
-    
     function confirmSelectedSlots() {
         if (selectedTimeSlots.length === 0) {
             alert('Por favor selecciona al menos un horario');
@@ -644,8 +621,6 @@ const idPrefix = 'studentSender';
         closeScheduleModal();
     }
 
-
-
     function calculateDateForDay(dayName) {
         const today = new Date();
         const currentDay = today.getDay();
@@ -671,7 +646,6 @@ const idPrefix = 'studentSender';
 
         return formatDateLocal(targetDate);
     }
-
 
     function formatDateLocal(date) {
         const year = date.getFullYear();
