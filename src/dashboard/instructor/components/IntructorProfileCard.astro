@@ -1,20 +1,29 @@
 ---
-const { user = { name: "Docente", email: "docente@institucion.edu", role: "Tutor" } } = Astro.props;
 ---
 
 <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
     <div class="flex items-center">
         <div class="mr-4 w-16 h-16 bg-theme-blue/20 rounded-2xl flex items-center justify-center">
-            <span class="text-2xl text-theme-blue">👩‍🏫</span>
+            <span class="text-2xl text-theme-blue">
+                <img src="/src/assets/icons/instructor-outline.svg" alt="Icono de Estudiante" class="h-5 w-5" />
+            </span>
         </div>
         <div>
-            <h2 class="text-xl font-bold text-theme-rich-black">{user.name}</h2>
-            <p class="text-sm text-gray-600">{user.email}</p>
+            <h2 id="profileCardFullName" class="text-xl font-bold text-theme-rich-black"></h2>
+            <p id="profileCardInstitutionalEmail" class="text-sm text-gray-600"></p>
         </div>
     </div>
     <div class="mt-4 pt-4 border-t border-theme-rich-black/20">
-        <p class="text-sm font-light text-gray-600">Rol: {user.role}</p>
-        <p class="text-sm font-light text-gray-600">Departamento: Ciencias Exactas</p>
-        <p class="text-sm font-light text-gray-600">Tutorados: 12 estudiantes</p>
+        <p class="text-sm font-light text-gray-600">Rol: Tutor y Consejero</p>
+        <p class="text-sm font-light text-gray-600">Departamento: CIVIL Y SISTEMAS</p>
     </div>
 </div>
+
+<script is:inline>
+    const userData = JSON.parse(localStorage.getItem('user')) || null;
+
+    if (userData) {
+        document.getElementById('profileCardFullName').textContent = userData.fullName || 'Instructor';
+        document.getElementById('profileCardInstitutionalEmail').textContent = userData.institutionalEmail || 'No se encontró el correo institucional';
+    }
+</script>
