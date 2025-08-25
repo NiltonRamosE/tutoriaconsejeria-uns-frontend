@@ -38,8 +38,11 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 </div>
 
 <script type="module" is:inline>
-
     import { createPagination } from "/src/dashboard/shared/paginationManager";
+    import { getToken, isTokenPresent } from '/src/dashboard/shared/auth.js';
+    import { fetchDistributeStudentsAmongInstructors, fetchStudentsList } from '/src/dashboard/services/administratorService.js';
+
+    const token = getToken();
     const pgn = createPagination('assign', 5);
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -47,7 +50,6 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
         pgn.setupPagination(loadAssignments);
     });
 
-    // 2. Función para actualizar la tabla con paginación
     function updateAssignmentsTable(assignments) {
         const tableBody = document.getElementById('assignTableBody');        
         if (!assignments || assignments.length === 0) {
@@ -117,26 +119,10 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
     // Endpoint para cargar asignaciones
     async function loadAssignments() {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No hay token de autenticación');
-                return;
-            }
-
-            const response = await fetch('http://localhost:8080/administrator/assign/list', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const assignments = await response.json();
-                updateAssignmentsTable(assignments);
-                pgn.updatePaginationControls(loadAssignments, assignments.length);
-            } else {
-                console.error('Error al cargar asignaciones');
-            }
+            isTokenPresent(token);
+            const assignments = await fetchStudentsList(token);
+            updateAssignmentsTable(assignments);
+            pgn.updatePaginationControls(loadAssignments, assignments.length);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -157,37 +143,17 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
                 Asignando...
             `;
 
-            const token = localStorage.getItem('token');
-            if (!token) throw new Error('No se encontró el token');
-
-            const assignResponse = await fetch('http://localhost:8080/administrator/students/assign', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
+            isTokenPresent(token);
+            const assignResponse = await fetchDistributeStudentsAmongInstructors();
             if (!assignResponse.ok) {
                 const errorData = await assignResponse.json();
                 throw new Error(errorData.message || 'Error en asignación');
             }
 
             await loadAssignments();
-            alert('Asignación completada');
-
-        } catch (error) {
-            console.error('Error:', error);
-            alert(`Error: ${error.message}`);
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalBtnText;
         }
     });
-
-    // Endpoint para asignar estudiante a instructor
-    window.handleAssign = async function(studentId, instructorId) {
-        console.log(`Asignando estudiante ${studentId} a instructor ${instructorId}`);
-        // Implementar lógica de asignación
-    };
 </script>

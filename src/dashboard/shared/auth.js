@@ -5,3 +5,10 @@ export function getUser() {
 export function getToken() {
     return localStorage.getItem('token');
 }
+
+export function isTokenPresent(token){
+    if (!token) {
+        console.error('No hay token de autenticación');
+        return;
+    }
+}
