@@ -248,35 +248,22 @@
     </div>
 </div>
 
-<script is:inline>
-    const studentProfileData = JSON.parse(localStorage.getItem('user')) || null;
-    const tokenProfileData = localStorage.getItem('token');
+<script type="module" is:inline>
+    import {getToken, getUser, isTokenPresent} from '/src/dashboard/shared/auth.js';
+    import { fetchStudentById } from '/src/dashboard/services/studentService.js';
+
+    const studentData = getUser();
+    const token = getToken();
 
     document.addEventListener('DOMContentLoaded', async () => {
-        await loadStudentProfile(studentProfileData ? studentProfileData.id : null);
+        await loadStudentProfile(studentData ? studentData.id : null);
     });
 
     async function loadStudentProfile(id) {
         try {
-            
-            if (!tokenProfileData) {
-                console.error('No hay token de autenticación');
-                return;
-            }
-
-            const response = await fetch(`http://localhost:8080/student/${id}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${tokenProfileData}`
-                }
-            });
-
-            if (response.ok) {
-                const student = await response.json();
-                updateStudentProfileItems(student);
-            } else {
-                console.error('Error al cargar el perfil del estudiante:', response.statusText);
-            }
+            isTokenPresent(token);
+            const student = await fetchStudentById(id, token);
+            updateStudentProfileItems(student);
         } catch (error) {
             console.error('Error:', error);
         }

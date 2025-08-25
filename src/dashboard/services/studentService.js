@@ -69,3 +69,20 @@ export async function submitGroupAppointment(data, token) {
         throw error;
     }
 }
+
+// Función para cargar estudiante específico
+export async function fetchStudentById(id, token) {
+    try {
+        const response = await fetch(`http://localhost:8080/student/${id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        return await response.json();
+    } catch (error) {
+        console.error('Error al cargar el perfil del estudiante:', error);
+        throw error;
+    }
+}
