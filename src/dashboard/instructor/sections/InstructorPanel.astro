@@ -4,7 +4,7 @@ import DashboardSection from '@/dashboard/instructor/sections/DashboardSection.a
 import EvaluateSection from '@/dashboard/instructor/sections/EvaluateSection.astro';
 import ManageStudentsSection from '@/dashboard/instructor/sections/ManageStudentsSection.astro';
 import AppointmentsSection from '@/dashboard/instructor/sections/AppointmentsSection.astro';
-
+import AppointmentsScheduleSection from '@/dashboard/instructor/sections/AppointmentsScheduleSection.astro';
 ---
 
 <section class="min-h-screen bg-theme-seasalt p-6 md:p-10">
@@ -28,6 +28,9 @@ import AppointmentsSection from '@/dashboard/instructor/sections/AppointmentsSec
             </div>
             <div id="surveys-section" class="content-section">
                 <ManageStudentsSection />
+            </div>
+            <div id="appointments-schedule-section" class="content-section">
+                <AppointmentsScheduleSection />
             </div>
             <div id="appointments-section" class="content-section">
                 <AppointmentsSection />
