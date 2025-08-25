@@ -61,7 +61,7 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
 <script type="module" is:inline>
     import { createScheduleRenderer, getCycleName } from "/src/dashboard/shared/scheduleManager.js";
     import { fetchAcademicSchedules } from "/src/dashboard/services/academicScheduleService.js";
-    import { getToken } from '/src/dashboard/shared/auth.js';
+    import { getToken, isTokenPresent } from '/src/dashboard/shared/auth.js';
 
     const token = getToken();
     const sched = createScheduleRenderer('academic');
@@ -79,7 +79,7 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
         emptyState.classList.add('hidden');
 
         try {
-            if (!token) throw new Error('No autenticado');
+            isTokenPresent(token);
 
             const scheduleData = await fetchAcademicSchedules(selectedCycle, token);
 
