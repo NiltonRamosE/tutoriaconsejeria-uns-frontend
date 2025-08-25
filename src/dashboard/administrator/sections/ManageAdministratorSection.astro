@@ -119,12 +119,14 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 </div>
 
 <script type="module" is:inline>
+    import { createPagination } from "/src/dashboard/shared/paginationManager";
+    import { getToken, isTokenPresent } from "/src/dashboard/shared/auth.js";
+    import { fetchDeleteAdministrator, fetchCreateAdministrator, fetchUpdateAdministrator, fetchAdministratorsList } from '/src/dashboard/services/administratorService.js';
     let allAdministrators = [];
     let currentAdministratorId = null;
     const modal = document.getElementById('administratorModal');
-
-    import { createPagination } from "/src/dashboard/shared/paginationManager";
     const pgn = createPagination('administrators', 5);
+    const token = getToken();
 
     document.addEventListener('DOMContentLoaded', async () => {
         await loadAdministrators();
@@ -185,19 +187,9 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
         if (!confirm('¿Estás seguro de eliminar este administrador?')) return;
         
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/administrator/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            if (response.ok) {
-                await loadAdministrators();
-            } else {
-                throw new Error('Error al eliminar');
-            }
+            isTokenPresent(token);
+            await fetchDeleteAdministrator(id, token);
+            await loadAdministrators();
         } catch (error) {
             console.error('Error:', error);
             alert('Error al eliminar el administrador');
@@ -216,21 +208,8 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
         };
         
         try {
-            const token = localStorage.getItem('token');
-            const url = currentAdministratorId ? 'http://localhost:8080/administrator/update' : 'http://localhost:8080/administrator';
-            const method = currentAdministratorId ? 'PUT' : 'POST';
-            
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-            
-            if (!response.ok) throw new Error('Error en la operación');
-            
+            isTokenPresent(token);
+            currentAdministratorId ? await fetchUpdateAdministrator(formData, token) : await fetchCreateAdministrator(formData, token);
             await loadAdministrators();
             closeModal();
         } catch (error) {
@@ -310,26 +289,10 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 
     async function loadAdministrators() {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No hay token de autenticación');
-                return;
-            }
-
-            const response = await fetch('http://localhost:8080/administrator', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                allAdministrators = await response.json();
-                updateAdministratorsTable(allAdministrators);
-                pgn.updatePaginationControls(loadAdministrators, allAdministrators.length);
-            } else {
-                console.error('Error al cargar los administradores');
-            }
+            isTokenPresent(token);
+            allAdministrators = await fetchAdministratorsList(token);
+            updateAdministratorsTable(allAdministrators);
+            pgn.updatePaginationControls(loadAdministrators, allAdministrators.length);
         } catch (error) {
             console.error('Error:', error);
         }
