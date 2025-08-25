@@ -28,8 +28,11 @@
 </div>
 
 <script type="module" is:inline>
-    const instructorData = JSON.parse(localStorage.getItem('user')) || null;
-    const token = localStorage.getItem('token');
+
+    import {getToken, getUser} from '/src/dashboard/shared/auth.js';
+
+    const instructorData = getUser();
+    const token = getToken();
 
     document.addEventListener('DOMContentLoaded', async () => {
         await loadAppointments();
@@ -39,8 +42,8 @@
     async function loadAppointments() {
         try {
             if (!instructorData || !instructorData.id) {
-                console.error('No se encontró información del estudiante');
-                showError('No se encontró información del estudiante');
+                console.error('No se encontró información del instructor');
+                showError('No se encontró información del instructor');
                 return;
             }
 

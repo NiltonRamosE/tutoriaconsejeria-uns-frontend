@@ -71,6 +71,7 @@ const idPrefix = 'instructorSender';
     import { resetFormSteps, resetForm, toggleFieldVisibility, setSelectedModalityButton, resetModalityButtons, initAppointmentFormListeners } from '/src/dashboard/shared/appointmentManager.js';
     import { fetchStudentsAssignedByInstructor, submitIndividualAppointment, submitGroupAppointment } from '/src/dashboard/services/instructorService.js';
     import { fetchBusySchedules } from '/src/dashboard/services/academicScheduleService.js';
+    import {getToken, getUser} from '/src/dashboard/shared/auth.js';
 
     let selectedModality = '';
     let selectedIndividualStudentId = null;
@@ -81,8 +82,8 @@ const idPrefix = 'instructorSender';
     let busySchedules = [];
     let selectedTimeSlots = [];
 
-    const instructorData = JSON.parse(localStorage.getItem('user')) || null;
-    const token = localStorage.getItem('token');
+    const instructorData = getUser();
+    const token = getToken();
 
     const idPrefix = 'instructorSender';
     const individualBtn = document.getElementById(`${idPrefix}-individualBtn`);
