@@ -28,8 +28,8 @@
 </div>
 
 <script type="module" is:inline>
-
-    import {getToken, getUser} from '/src/dashboard/shared/auth.js';
+    import { fetchAppointmentsSent } from '/src/dashboard/services/instructorService.js'
+    import {getToken, getUser, isTokenPresent} from '/src/dashboard/shared/auth.js';
 
     const instructorData = getUser();
     const token = getToken();
@@ -47,21 +47,9 @@
                 return;
             }
 
-            
-
-            if (!token) {
-                console.error('No hay token de autenticación');
-                showError('No hay token de autenticación');
-                return;
-            }
-
-            // Cargar citas enviadas
-            const sentResponse = await fetch(`http://localhost:8080/instructor/appointments/sent/${instructorData.id}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            isTokenPresent(token);
+            const sentAppointments = await fetchAppointmentsSent(instructorData.id, token);
+            displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
 
             // Cargar citas recibidas
             /*const receivedResponse = await fetch(`http://localhost:8080/instructor/appointments/received/${instructorData.id}`, {
@@ -81,15 +69,6 @@
                 console.error('Error al cargar las citas');
                 showError('Error al cargar las citas');
             }*/
-
-            if (sentResponse.ok) {
-                const sentAppointments = await sentResponse.json();
-                
-                displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
-            } else {
-                console.error('Error al cargar las citas');
-                showError('Error al cargar las citas');
-            }
         } catch (error) {
             console.error('Error:', error);
             showError('Error al cargar las citas');
