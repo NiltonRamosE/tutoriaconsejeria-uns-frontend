@@ -145,10 +145,6 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 
             isTokenPresent(token);
             const assignResponse = await fetchDistributeStudentsAmongInstructors();
-            if (!assignResponse.ok) {
-                const errorData = await assignResponse.json();
-                throw new Error(errorData.message || 'Error en asignación');
-            }
 
             await loadAssignments();
         } finally {

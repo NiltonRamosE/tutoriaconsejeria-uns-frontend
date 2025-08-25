@@ -43,7 +43,10 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
 
 <script type="module" is:inline>
     import { createScheduleRenderer } from "/src/dashboard/shared/scheduleManager.js";
+    import { getToken, isTokenPresent } from '/src/dashboard/shared/auth.js';
+    import { fetchFindInstructorScheduleByInstructor } from '/src/dashboard/services/instructorScheduleService.js';
     const sched = createScheduleRenderer('instructor');
+    const token = getToken();
 
     document.getElementById('searchInstructorScheduleBtn').addEventListener('click', loadInstructorSchedule);
 
@@ -59,15 +62,8 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
         if (emptyState) emptyState.classList.add('hidden');
 
         try {
-            const token = localStorage.getItem('token');
-            if (!token) throw new Error('No autenticado');
-
-            const resp = await fetch(`http://localhost:8080/instructor-schedule?emailInstructor=${emailInstructor}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!resp.ok) throw new Error('Error al cargar horario del docente');
-
-            const data = await resp.json(); // { instructorName, academicSchedule: ScheduleItem[] }
+            isTokenPresent(token);
+            const data = await fetchFindInstructorScheduleByInstructor(emailInstructor, token);
 
             sched.setTitle(`Horario - ${data.instructorName || emailInstructor}`);
             sched.render(data.academicSchedule || [], { emptyStateId: 'instructorEmptyState' });
