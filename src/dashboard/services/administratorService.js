@@ -123,3 +123,21 @@ export async function fetchAdministratorsList(token) {
         throw error;
     }
 }
+
+// Listar estudiantes según un filtro
+export async function fetchStudentsByFilter(endpoint, token) {
+    try {
+        const response = await fetch(`http://localhost:8080/administrator/${endpoint}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+        });
+
+        if (!response.ok) throw new Error(response.statusText);
+        return await response.json();
+    } catch (error) {
+        console.error('Error al cargar los estudiantes:', error);
+        throw error;
+    }
+}

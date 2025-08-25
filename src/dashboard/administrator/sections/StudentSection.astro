@@ -94,9 +94,11 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 </div>
 
 <script type="module" is:inline>
+    import { getToken, isTokenPresent } from "/src/dashboard/shared/auth.js";
     import { createPagination } from "/src/dashboard/shared/paginationManager";
+    import { fetchStudentsByFilter } from '/src/dashboard/services/administratorService.js';
     const pgn = createPagination('students', 5);
-
+    const token = getToken();
     // Estado global
     let currentFilter = 'students/list';
     let allStudents = [];
@@ -198,26 +200,10 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
     // Función para cargar estudiantes según filtro
     async function loadStudents(endpoint) {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No hay token de autenticación');
-                return;
-            }
-
-            const response = await fetch(`http://localhost:8080/administrator/${endpoint}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                allStudents = await response.json();
-                updateStudentsTable(allStudents);
-                pgn.updatePaginationControls(() => loadStudents(currentFilter), allStudents.length);
-            } else {
-                console.error('Error al cargar los estudiantes');
-            }
+            isTokenPresent(token)
+            allStudents = await fetchStudentsByFilter(endpoint, token);
+            updateStudentsTable(allStudents);
+            pgn.updatePaginationControls(() => loadStudents(currentFilter), allStudents.length);
         } catch (error) {
             console.error('Error:', error);
         }
