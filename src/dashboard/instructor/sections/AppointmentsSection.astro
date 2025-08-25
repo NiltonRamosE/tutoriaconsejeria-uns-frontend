@@ -1,124 +1,623 @@
 ---
+import AppointmentModality from '@/dashboard/shared/AppointmentModality.astro';
+import TypeActivity from '@/dashboard/shared/TypeActivity.astro';
+import NextStepButton from '@/shared/components/NextStepButton.astro';
+import AppointmentDetail from '@/dashboard/shared/AppointmentDetail.astro';
+const idPrefix = 'instructorSender';
 ---
 
 <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
-    <h2 class="text-2xl font-bold mb-6 text-theme-rich-black">Gestión de Tutorías</h2>
+    <h2 class="text-2xl font-bold mb-6 text-theme-rich-black">Programación de Citas</h2>
     
-    <div class="space-y-6">
-        <!-- Citas Programadas -->
-        <div>
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Sesiones Programadas</h3>
-                <span class="text-sm bg-theme-blue/10 text-theme-blue px-3 py-1 rounded-full">5 tutorías esta semana</span>
-            </div>
-            
-            <div class="space-y-3">
-                <!-- Tarjeta de cita 1 -->
-                <div class="p-4 border border-theme-rich-black/20 rounded-xl bg-white hover:bg-theme-blue/5 transition-colors">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-1">
-                                <span class="w-3 h-3 bg-theme-keppel rounded-full mr-2"></span>
-                                <h4 class="font-medium">Tutoría Individual</h4>
-                            </div>
-                            <p class="text-sm text-gray-500 mb-1">Estudiante: Ana López (Matemáticas Avanzadas)</p>
-                            <p class="text-sm text-gray-500">Hoy, 3:00 PM - 4:00 PM | Oficina D-205</p>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="p-2 text-theme-blue hover:bg-theme-blue/10 rounded-full transition-colors" title="Confirmar asistencia">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                            <button class="p-2 text-red-500 hover:bg-red-500/10 rounded-full transition-colors" title="Cancelar tutoría">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+    <!-- Selector de Modalidad -->
+    <AppointmentModality idPrefix={idPrefix}/>
+    
+    <TypeActivity idPrefix={idPrefix}/>
+
+    <!-- Formulario de Cita -->
+    <div id="appointmentFormContainer" class="hidden">
+        <form id="appointmentForm" class="space-y-6">
+            <!-- Paso 1 Cita Individual: Selección de Estudiante -->
+            <div class="form-step hidden" data-step="1" id="individualStep">
+                
+                <h3 class="text-lg font-semibold mb-4 text-theme-rich-black flex items-center">
+                    <span class="bg-theme-keppel text-white rounded-full h-8 w-8 flex items-center justify-center mr-2">1</span>
+                    Selecciona un estudiante
+                </h3>
+                
+                <div class="mb-4">
+                    <label for="studentSelect" class="block text-sm font-medium mb-2 text-theme-rich-black/80">Estudiante</label>
+                    <select id="studentSelect" class="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200">
+                        <option value="">Seleccione un estudiante</option>
+                        <!-- Las opciones se llenarán dinámicamente -->
+                    </select>
                 </div>
 
-                <!-- Tarjeta de cita 2 -->
-                <div class="p-4 border border-theme-rich-black/20 rounded-xl bg-white hover:bg-theme-blue/5 transition-colors">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-1">
-                                <span class="w-3 h-3 bg-theme-yellow rounded-full mr-2"></span>
-                                <h4 class="font-medium">Sesión de Grupo</h4>
-                            </div>
-                            <p class="text-sm text-gray-500 mb-1">3 estudiantes (Física Cuántica)</p>
-                            <p class="text-sm text-gray-500">Mañana, 10:00 AM - 11:30 AM | Aula 302</p>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="p-2 text-theme-blue hover:bg-theme-blue/10 rounded-full transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                </svg>
-                            </button>
-                            <button class="p-2 text-red-500 hover:bg-red-500/10 rounded-full transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                <div class="flex justify-end">
+                    <NextStepButton />
                 </div>
             </div>
-        </div>
 
-        <!-- Programar Nueva Disponibilidad -->
-        <div class="pt-4 border-t border-theme-rich-black/20">
-            <h3 class="text-lg font-semibold mb-4">Agregar Horario Disponible</h3>
-            <form class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Fecha</label>
-                        <input type="date" class="w-full p-3 border rounded-lg border-theme-rich-black/40">
+            <!-- Paso 2 Cita Grupal: Selección de Estudiantes-->
+            <div class="form-step hidden" data-step="2" id="groupStep">
+                <h3 class="text-lg font-semibold mb-4 text-theme-rich-black flex items-center">
+                    <span class="bg-theme-keppel text-white rounded-full h-8 w-8 flex items-center justify-center mr-2">1</span>
+                    Selecciona estudiantes para la cita grupal
+                </h3>
+
+                <div class="mb-6">
+                    <span class="block text-sm font-medium mb-2 text-theme-rich-black/80">Selecciona estudiantes</span>
+                    <div class="border border-theme-rich-black/20 rounded-lg p-3 max-h-60 overflow-y-auto">
+                        <div id="studentsList" class="space-y-2">
+                            <!-- Los estudiantes se cargarán dinámicamente -->
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Hora de inicio</label>
-                        <input type="time" class="w-full p-3 border rounded-lg border-theme-rich-black/40">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Duración</label>
-                        <select class="w-full p-3 border rounded-lg border-theme-rich-black/40">
-                            <option>30 minutos</option>
-                            <option>45 minutos</option>
-                            <option>1 hora</option>
-                            <option>1.5 horas</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Tipo de sesión</label>
-                        <select class="w-full p-3 border rounded-lg border-theme-rich-black/40">
-                            <option>Individual</option>
-                            <option>Grupo (max 3)</option>
-                            <option>Grupo (max 5)</option>
-                        </select>
-                    </div>
+                    <p id="noStudentsMessage" class="text-sm text-gray-500 mt-2 hidden">No hay estudiantes disponibles para este docente y tipo de actividad.</p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button type="submit" class="flex-1 bg-theme-blue text-white border-2 border-b-8 border-theme-rich-black font-medium py-3 px-6 rounded-2xl hover:bg-theme-blue/90 transition-colors duration-200">
-                        Publicar Disponibilidad
-                    </button>
-                    <button type="button" class="flex-1 bg-white text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-3 px-6 rounded-2xl hover:bg-gray-50 transition-colors duration-200">
-                        Cancelar
-                    </button>
+                <div class="flex justify-between">
+                    <NextStepButton />
                 </div>
-            </form>
-        </div>
-
-        <!-- Calendario de disponibilidad -->
-        <div class="pt-4 border-t border-theme-rich-black/20">
-            <h3 class="text-lg font-semibold mb-4">Mi Calendario</h3>
-            <div class="bg-gray-50 p-4 rounded-xl border border-dashed border-theme-rich-black/30 text-center">
-                <p class="text-gray-500">Integración con calendario próximamente</p>
-                <button class="mt-2 text-theme-blue hover:underline font-medium">
-                    Ver calendario completo
-                </button>
             </div>
-        </div>
+
+            <!-- Paso 3: Detalles de la cita -->
+            <AppointmentDetail idPrefix={idPrefix} />
+        </form>
     </div>
 </div>
+
+<script type="module" is:inline>
+
+    import { resetFormSteps, resetForm, toggleFieldVisibility, setSelectedModalityButton, resetModalityButtons, initAppointmentFormListeners } from '/src/dashboard/shared/appointmentManager.js';
+    import { fetchStudentsAssignedByInstructor, submitIndividualAppointment, submitGroupAppointment } from '/src/dashboard/services/instructorService.js';
+    import { fetchBusySchedules } from '/src/dashboard/services/academicScheduleService.js';
+
+    let selectedModality = '';
+    let selectedIndividualStudentId = null;
+    let selectedStudents = [];
+    let availableStudents = [];
+    let activityType;
+
+    let busySchedules = [];
+    let selectedTimeSlots = [];
+
+    const instructorData = JSON.parse(localStorage.getItem('user')) || null;
+    const token = localStorage.getItem('token');
+
+    const idPrefix = 'instructorSender';
+    const individualBtn = document.getElementById(`${idPrefix}-individualBtn`);
+    const groupBtn = document.getElementById(`${idPrefix}-groupBtn`);
+    const studentSelect = document.getElementById('studentSelect');
+    const typeActivityContainer = document.getElementById(`${idPrefix}-typeActivityContainer`);
+    const appointmentForm = document.getElementById('appointmentForm');
+    const appointmentFormContainer = document.getElementById('appointmentFormContainer');
+    const individualStep = document.getElementById('individualStep');
+    const groupStep = document.getElementById('groupStep');
+    const studentsList = document.getElementById('studentsList');
+    const stepNumber = document.getElementById(`${idPrefix}-stepNumber`);
+    const stepTitle = document.getElementById(`${idPrefix}-stepTitle`);
+    const appointmentMethod = document.getElementById(`${idPrefix}-appointmentMethod`);
+    const specificAppointmentMethod = document.getElementById(`${idPrefix}-specificAppointmentMethod`);
+    const specificMethodContainer = document.getElementById(`${idPrefix}-specificMethodContainer`);
+    const appointmentReason = document.getElementById(`${idPrefix}-appointmentReason`);
+    const specificAppointmentReason = document.getElementById(`${idPrefix}-specificAppointmentReason`);
+    const specificReasonContainer = document.getElementById(`${idPrefix}-specificReasonContainer`);
+    const altScheduleA = document.getElementById(`${idPrefix}-altScheduleA`);
+    const altScheduleB = document.getElementById(`${idPrefix}-altScheduleB`);
+    const altScheduleC = document.getElementById(`${idPrefix}-altScheduleC`);
+    const noStudentsMessage = document.getElementById('noStudentsMessage');
+    const detailsStep = document.getElementById(`${idPrefix}-detailsStep`);
+
+    const individualScheduleContainer = document.getElementById(`${idPrefix}-individualScheduleContainer`);
+    const groupScheduleContainer = document.getElementById(`${idPrefix}-groupScheduleContainer`);
+
+    const openScheduleModalBtn = document.getElementById(`${idPrefix}-openScheduleModal`);
+    const closeModal = document.getElementById(`${idPrefix}-closeModal`);
+    const cancelModal = document.getElementById(`${idPrefix}-cancelModal`);
+    const confirmSlots = document.getElementById(`${idPrefix}-confirmSlots`); 
+    const scheduleModal = document.getElementById(`${idPrefix}-scheduleModal`);
+    const scheduleGrid = document.getElementById(`${idPrefix}-scheduleGrid`);
+    const selectedSlots = document.getElementById(`${idPrefix}-selectedSlots`);
+    const selectedSchedulePreview = document.getElementById(`${idPrefix}-selectedSchedulePreview`);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        setupEventListeners();
+    });
+
+    function setupEventListeners() {
+        individualBtn.addEventListener('click', () => selectModality('I'));
+        groupBtn.addEventListener('click', () => selectModality('G'));
+
+        document.querySelectorAll('.activity-type-option input').forEach(radio => {
+            radio.addEventListener('click', () => selectActivityType());
+        });
+
+        initAppointmentFormListeners(nextStep, prevStep, appointmentMethod, specificMethodContainer, appointmentReason, specificReasonContainer);
+
+        appointmentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitAppointmentForm();
+        });
+
+        setupScheduleModalListeners();
+    
+        individualBtn.addEventListener('click', () => {
+            toggleFieldVisibility(individualScheduleContainer, true);
+            toggleFieldVisibility(groupScheduleContainer, false);
+        });
+        
+        groupBtn.addEventListener('click', () => {
+            toggleFieldVisibility(individualScheduleContainer, false);
+            toggleFieldVisibility(groupScheduleContainer, true);
+        });
+    }
+
+    function setupScheduleModalListeners() {
+        openScheduleModalBtn.addEventListener('click', openScheduleModal);
+        closeModal.addEventListener('click', closeScheduleModal);
+        cancelModal.addEventListener('click', closeScheduleModal);
+        confirmSlots.addEventListener('click', confirmSelectedSlots);
+    }
+
+    function selectModality(modality) {
+        selectedModality = modality;
+        resetToStep1();
+        resetModalityButtons();
+        setSelectedModalityButton(modality, individualBtn, groupBtn);
+        toggleFieldVisibility(typeActivityContainer, true);
+        toggleFieldVisibility(individualStep, false);
+        toggleFieldVisibility(groupStep, false);
+    }
+
+    function selectActivityType(){
+        activityType = document.querySelector('input[name="typeActivity"]:checked')?.value;
+        toggleFieldVisibility(appointmentFormContainer, true);
+        
+        selectedModality === 'I' ? toggleFieldVisibility(individualStep, true) : toggleFieldVisibility(groupStep, true);
+        toggleFieldVisibility(detailsStep, false);
+
+        loadStudentsAssignedByInstructor();
+    }
+
+    function resetToStep1() {
+        selectedStudents = [];
+        resetFormSteps();
+        studentSelect.selectedIndex = 0;
+    }
+
+    function populateStudentSelect(students) {
+        while (studentSelect.options.length > 1) {
+            studentSelect.remove(1);
+        }
+        
+        students.forEach(student => {
+            const option = document.createElement('option');
+            option.value = student.id;
+            option.textContent = student.fullName;
+            studentSelect.appendChild(option);
+        });
+        
+        studentSelect.addEventListener('change', async function() {
+            selectedIndividualStudentId = this.options[this.selectedIndex].value;
+        });
+    }
+
+    async function loadStudentsAssignedByInstructor() {
+        try {
+            if (!token) {
+                console.error('No hay token de autenticación');
+                return;
+            }
+            availableStudents = await fetchStudentsAssignedByInstructor(instructorData.id, token);
+
+            const filteredStudents = availableStudents.filter(student => student.typeActivityCode === activityType);
+
+            if(selectedModality === 'I'){
+                populateStudentSelect(filteredStudents);
+            }else{
+                populateStudentCheckBoxes(filteredStudents);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function populateStudentCheckBoxes(students) {
+        studentsList.innerHTML = '';
+        
+        if (!activityType) return toggleFieldVisibility(noStudentsMessage, true);
+
+        toggleFieldVisibility(noStudentsMessage, students.length === 0);
+
+        students.forEach(student => {
+            const studentEl = document.createElement('div');
+            studentEl.className = 'flex items-center p-2 border border-theme-rich-black/10 rounded hover:bg-theme-keppel/5 cursor-pointer transition-colors duration-200';
+            studentEl.innerHTML = `
+                <input type="checkbox" id="student-${student.id}" value="${student.id}" class="mr-2 student-checkbox">
+                <label for="student-${student.id}" class="cursor-pointer flex-1">${student.fullName}</label>
+            `;
+            studentsList.appendChild(studentEl);
+        });
+        
+        document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    selectedStudents.push(e.target.value);
+                } else {
+                    selectedStudents = selectedStudents.filter(id => id !== e.target.value);
+                }
+            });
+        });
+    }
+
+    // Navegar al siguiente paso
+    function nextStep() {
+        toggleFieldVisibility(individualStep, false);
+        toggleFieldVisibility(groupStep, false);
+        toggleFieldVisibility(detailsStep, true);
+
+        updateFinalStepInfo();
+    }
+
+    // Navegar al paso anterior
+    function prevStep() {
+        selectedModality === 'I' ? toggleFieldVisibility(individualStep, true) : toggleFieldVisibility(groupStep, true);
+        toggleFieldVisibility(detailsStep, false);
+        updateFinalStepInfo();
+    }
+
+    function updateFinalStepInfo() {
+        const isIndividual = selectedModality === 'I';
+        stepNumber.textContent = selectedModality === 'I' ? 1 : 2;
+        stepTitle.textContent = `Completa los detalles de la cita ${isIndividual ? 'individual' : 'grupal'}`;
+    }
+
+    async function submitAppointmentForm() {
+        try {
+            if (!instructorData?.id || !token) {
+                alert('No se encontró información del instructor o token de autenticación');
+                return;
+            }
+
+            if (!activityType) {
+                alert('Por favor selecciona un tipo de actividad');
+                return;
+            }
+
+            // Obtener horarios según la modalidad
+            let altScheduleAInput, altScheduleBAInput, altScheduleCAInput;
+            if (selectedModality === 'I') {
+                if (window.selectedScheduleSlots && window.selectedScheduleSlots.length >= 3) { 
+                    [altScheduleAInput, altScheduleBAInput, altScheduleCAInput] = window.selectedScheduleSlots; 
+                } else { 
+                    alert('Debes seleccionar 3 horarios para la cita individual'); 
+                    return; 
+                }
+            }else {
+                // Usar inputs normales para citas grupales
+                altScheduleAInput = altScheduleA.value;
+                altScheduleBAInput = altScheduleB.value;
+                altScheduleCAInput = altScheduleC.value;
+            }
+
+            const baseRequestData = {
+                appointmentModalityCode: selectedModality,
+                appointmentMethod: appointmentMethod.value === 'Otro' ? null : appointmentMethod.value,
+                specificAppointmentMethod: specificAppointmentMethod.value || null,
+                appointmentReason: appointmentReason.value === 'Otro' ? null : appointmentReason.value,
+                specificAppointmentReason: specificAppointmentReason.value || null,
+                typeActivityCode: activityType,
+                instructorId: instructorData.id,
+                altScheduleA: altScheduleAInput,
+                altScheduleB: altScheduleBAInput,
+                altScheduleC: altScheduleCAInput
+            };
+
+            let result;
+            if (selectedModality === 'I') {
+                const requestData = {
+                    ...baseRequestData,
+                    studentId: selectedIndividualStudentId
+                };
+                result = await submitIndividualAppointment(requestData, token);
+                alert('Cita individual programada exitosamente');
+            } else {
+                const allStudentIds = [...selectedStudents];
+                const requestData = {
+                    ...baseRequestData,
+                    studentsId: allStudentIds.map(id => parseInt(id))
+                };
+                result = await submitGroupAppointment(requestData, token);
+                alert(`Cita grupal programada exitosamente para ${result.length} participantes`);
+            }
+
+            resetForm(appointmentForm, appointmentFormContainer);
+            selectedSchedulePreview.innerHTML = '';
+            toggleFieldVisibility(selectedSchedulePreview, false);
+            toggleFieldVisibility(typeActivityContainer, false);
+            selectedSlots.innerHTML = '';
+            window.selectedScheduleSlots = [];
+            selectedModality = '';
+            selectedStudents = [];
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al programar la cita: ' + error.message);
+        }
+    }
+
+    // Abrir modal y cargar horarios
+    async function openScheduleModal() {
+        if (!selectedIndividualStudentId) {
+            alert('Por favor selecciona un estudiante primero');
+            return;
+        }
+
+        try {
+            busySchedules = await fetchBusySchedules(selectedIndividualStudentId, instructorData.id, token);
+            generateScheduleGrid();
+            scheduleModal.hidden = false;
+        } catch (error) {
+            alert('Error al cargar los horarios');
+        }
+    }
+
+    // Cerrar modal
+    function closeScheduleModal() {
+        scheduleModal.hidden = true;
+        selectedTimeSlots = [];
+    }
+
+    // Generar grid de horarios
+    function generateScheduleGrid() {
+        scheduleGrid.innerHTML = '';
+        
+        const days = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+        const hours = [];
+        
+        // Generar horas de 7:00 AM a 8:00 PM
+        for (let hour = 7; hour <= 20; hour++) {
+            hours.push(`${hour.toString().padStart(2, '0')}:00`);
+        }
+        
+        hours.forEach(time => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td class="p-2 border border-theme-rich-black/20 bg-theme-keppel/10 font-medium">${time}</td>`;
+            
+            days.forEach(day => {
+                const isBusy = isTimeSlotBusy(time, day);
+                const cell = document.createElement('td');
+                cell.className = `p-2 border border-theme-rich-black/20 text-center cursor-pointer transition-colors duration-200 ${isBusy ? 'bg-red-100 text-red-500 cursor-not-allowed' : 'hover:bg-theme-keppel/20'}`;
+                
+                if (!isBusy) {
+                    cell.addEventListener('click', () => toggleTimeSlot(time, day, cell));
+                }
+                
+                cell.textContent = isBusy ? '✗' : '○';
+                row.appendChild(cell);
+            });
+            
+            scheduleGrid.appendChild(row);
+        });
+    }
+
+    // Verificar si un horario está ocupado
+    function isTimeSlotBusy(time, day) {
+        return busySchedules.some(schedule => {
+            const [startTime, endTime, scheduleDay] = schedule;
+            return scheduleDay === day && isTimeInRange(time, startTime, endTime);
+        });
+    }
+
+    // Verificar si una hora está dentro de un rango
+    function isTimeInRange(time, startTime, endTime) {
+        const [timeHours] = time.split(':').map(Number);
+        const [startHours] = startTime.split(':').map(Number);
+        const [endHours] = endTime.split(':').map(Number);
+        
+        return timeHours >= startHours && timeHours < endHours;
+    }
+
+    // Alternar selección de horario
+    function toggleTimeSlot(time, day, cell) {
+        const slotIndex = selectedTimeSlots.findIndex(slot => slot.time === time && slot.day === day);
+        
+        if (slotIndex > -1) {
+            // Deseleccionar
+            selectedTimeSlots.splice(slotIndex, 1);
+            cell.textContent = '○';
+            cell.classList.remove('bg-theme-keppel', 'text-white');
+            cell.classList.add('hover:bg-theme-keppel/20');
+        } else {
+            // Seleccionar (máximo 3)
+            if (selectedTimeSlots.length >= 3) {
+                alert('Solo puedes seleccionar hasta 3 horarios');
+                return;
+            }
+            
+            selectedTimeSlots.push({ time, day });
+            cell.textContent = '✓';
+            cell.classList.remove('hover:bg-theme-keppel/20');
+            cell.classList.add('bg-theme-keppel', 'text-white');
+        }
+        
+        updateSelectedSlotsDisplay();
+    }
+
+    // Actualizar display de horarios seleccionados
+    function updateSelectedSlotsDisplay() {
+        if (selectedTimeSlots.length === 0) {
+            selectedSlots.innerHTML = '<p class="text-sm text-gray-500">No hay horarios seleccionados</p>';
+            return;
+        }
+
+        selectedSlots.innerHTML = selectedTimeSlots.map((slot, index) => {
+            // Calcular fecha automática sugerida
+            const suggestedDate = calculateDateForDay(slot.day);
+
+            return `
+                <div class="flex flex-col bg-gradient-to-r from-theme-seasalt to-theme-keppel/5 p-3 rounded-xl border border-theme-keppel/30 shadow-sm transition-all duration-200 hover:shadow-md space-y-2">
+                    
+                    <!-- Info del slot -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-theme-keppel/10 p-2 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="font-medium text-theme-rich-black">${slot.day}</span>
+                                <span class="block text-sm text-theme-rich-black/70">${slot.time}</span>
+                            </div>
+                        </div>
+                        <button type="button" data-index="${index}" class="remove-slot bg-white/80 hover:bg-red-50 p-2 rounded-lg border border-red-200 transition-all duration-200 hover:scale-110 hover:shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Input de fecha -->
+                    <input 
+                        type="date" 
+                        id="slotDate-${index}" 
+                        value="${suggestedDate}" 
+                        min="${suggestedDate}" 
+                        step="7"
+                        class="p-2 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel"
+                        required
+                    >
+
+                </div>
+            `;
+        }).join('');
+
+        // Listeners para remover
+        selectedSlots.querySelectorAll('.remove-slot').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index, 10);
+                removeSelectedSlot(index);
+            });
+        });
+    }
+
+    // Remover horario seleccionado
+    function removeSelectedSlot(index) {
+        selectedTimeSlots.splice(index, 1);
+        generateScheduleGrid(); // Regenerar grid para actualizar selecciones
+        updateSelectedSlotsDisplay();
+    }
+
+    // Confirmar horarios seleccionados
+    function confirmSelectedSlots() {
+        if (selectedTimeSlots.length === 0) {
+            alert('Por favor selecciona al menos un horario');
+            return;
+        }
+
+        const today = new Date();
+        const dateTimeSlots = selectedTimeSlots.map((slot, i) => {
+            // Buscar input asociado
+            const input = document.getElementById(`slotDate-${i}`);
+            let baseDate = input?.value;
+
+            if (!baseDate) {
+                // Si no hay input o está vacío → calcular automáticamente
+                baseDate = calculateDateForDay(slot.day);
+            } else {
+                const chosenDate = new Date(baseDate);
+                // Validar que no sea hoy o pasada
+                if (chosenDate <= today) {
+                    baseDate = calculateDateForDay(slot.day);
+                }
+            }
+
+            return `${baseDate}T${slot.time}`;
+        });
+
+        // Validación: debe haber tantas fechas como slots
+        if (dateTimeSlots.some(d => !d)) {
+            alert("Debes seleccionar una fecha válida para cada horario");
+            return;
+        }
+        updateSchedulePreview(dateTimeSlots);
+        closeScheduleModal();
+    }
+
+    function calculateDateForDay(dayName) {
+        const today = new Date();
+        const currentDay = today.getDay();
+        const daysMap = {
+            'LUNES': 1,
+            'MARTES': 2,
+            'MIERCOLES': 3,
+            'JUEVES': 4,
+            'VIERNES': 5,
+            'SABADO': 6
+        };
+
+        const targetDay = daysMap[dayName];
+        if (targetDay === undefined) return null;
+
+        let diff = targetDay - currentDay;
+        if (diff <= 0) {
+            diff += 7;
+        }
+
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + diff);
+
+        return formatDateLocal(targetDate);
+    }
+
+    function formatDateLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Actualizar preview de horarios seleccionados
+    function updateSchedulePreview(slots) {
+        selectedSchedulePreview.classList.remove('hidden');
+        
+        selectedSchedulePreview.innerHTML = `
+            <div class="bg-gradient-to-br from-theme-seasalt to-theme-keppel/5 p-4 rounded-xl border border-theme-keppel/20 shadow-sm">
+                <p class="text-sm font-medium text-theme-rich-black/80 flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Días seleccionados
+                </p>
+                <div class="space-y-2">
+                    ${slots.map((slot, index) => `
+                        <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-theme-keppel/10 shadow-xs transition-all duration-200 hover:shadow-sm">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-theme-keppel/10 p-1.5 rounded-lg">
+                                    <span class="text-sm font-medium text-theme-keppel">${index + 1}</span>
+                                </div>
+                                <span class="text-theme-rich-black">${new Date(slot).toLocaleString('es-ES', { 
+                                    weekday: 'long', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                })}</span>
+                            </div>
+                            <span class="bg-theme-keppel/10 text-theme-keppel p-1 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        window.selectedScheduleSlots = slots;
+    }
+</script>
+
+<style>
+    .form-step {
+        transition: opacity 0.3s ease;
+    }
+</style>
