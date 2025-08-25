@@ -86,3 +86,20 @@ export async function fetchStudentById(id, token) {
         throw error;
     }
 }
+
+// Función para cargar citas enviadas por el estudiante
+export async function fetchAppointmentsSent(studentId, token) {
+    try {
+        const response = await fetch(`http://localhost:8080/student/appointments/sent/${studentId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        return await response.json();
+    } catch (error) {
+        console.error('Error al cargar las citas enviadas por el estudiante:', error);
+        throw error;
+    }
+}

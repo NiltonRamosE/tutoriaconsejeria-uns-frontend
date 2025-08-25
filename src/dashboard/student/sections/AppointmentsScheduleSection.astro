@@ -27,7 +27,13 @@
     </div>
 </div>
 
-<script is:inline>
+<script type="module" is:inline>
+    import { fetchAppointmentsSent } from '/src/dashboard/services/studentService.js'
+    import {getToken, getUser, isTokenPresent} from '/src/dashboard/shared/auth.js';
+
+    const studentData = getUser();
+    const token = getToken();
+
     document.addEventListener('DOMContentLoaded', async () => {
         await loadAppointments();
     });
@@ -35,27 +41,15 @@
     // Cargar citas del estudiante
     async function loadAppointments() {
         try {
-            const studentData = JSON.parse(localStorage.getItem('user')) || null;
             if (!studentData || !studentData.id) {
                 console.error('No se encontró información del estudiante');
                 showError('No se encontró información del estudiante');
                 return;
             }
 
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No hay token de autenticación');
-                showError('No hay token de autenticación');
-                return;
-            }
-
-            // Cargar citas enviadas
-            const sentResponse = await fetch(`http://localhost:8080/student/appointments/sent/${studentData.id}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            isTokenPresent(token);
+            const sentAppointments = await fetchAppointmentsSent(studentData.id, token);
+            displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
 
             // Cargar citas recibidas
             /*const receivedResponse = await fetch(`http://localhost:8080/student/appointments/received/${studentData.id}`, {
@@ -75,15 +69,6 @@
                 console.error('Error al cargar las citas');
                 showError('Error al cargar las citas');
             }*/
-
-            if (sentResponse.ok) {
-                const sentAppointments = await sentResponse.json();
-                
-                displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
-            } else {
-                console.error('Error al cargar las citas');
-                showError('Error al cargar las citas');
-            }
         } catch (error) {
             console.error('Error:', error);
             showError('Error al cargar las citas');
