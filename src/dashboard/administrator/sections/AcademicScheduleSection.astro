@@ -60,8 +60,15 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
 
 <script type="module" is:inline>
     import { createScheduleRenderer } from "/src/dashboard/shared/scheduleManager.js";
-    const sched = createScheduleRenderer('academic');
+    import { fetchAcademicSchedules } from "/src/dashboard/services/academicScheduleService.js";
+    import { getToken } from '/src/dashboard/shared/auth.js';
 
+    const token = getToken();
+    const sched = createScheduleRenderer('academic');
+    const cycleSelect = document.getElementById('cycleSelect');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const emptyState = document.getElementById('emptyState');
+    
     document.getElementById('loadScheduleBtn').addEventListener('click', loadSchedule);
 
     function getCycleName(cycleNumber) {
@@ -70,10 +77,6 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
     }
 
     async function loadSchedule() {
-        const cycleSelect = document.getElementById('cycleSelect');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const emptyState = document.getElementById('emptyState');
-
         const selectedCycle = cycleSelect.value;
 
         loadingIndicator.classList.remove('hidden');
@@ -81,22 +84,13 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
         emptyState.classList.add('hidden');
 
         try {
-            const token = localStorage.getItem('token');
             if (!token) throw new Error('No autenticado');
 
-            const resp = await fetch(`http://localhost:8080/academic-schedule?cycle=${selectedCycle}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!resp.ok) throw new Error('Error al cargar horarios');
-
-            const scheduleData = await resp.json();
+            const scheduleData = await fetchAcademicSchedules(selectedCycle, token);
 
             sched.setTitle(`Horario - Ciclo ${getCycleName(selectedCycle)}`);
             sched.render(scheduleData, { emptyStateId: 'emptyState' });
             sched.show();
-        } catch (err) {
-            console.error(err);
-            alert(`Error al cargar horarios: ${err.message}`);
         } finally {
             loadingIndicator.classList.add('hidden');
         }

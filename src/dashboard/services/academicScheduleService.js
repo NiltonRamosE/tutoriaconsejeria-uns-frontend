@@ -18,3 +18,24 @@ export async function fetchBusySchedules(studentId, instructorId, token) {
     throw error;
   }
 }
+
+export async function fetchAcademicSchedules(selectedCycle, token) {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/academic-schedule?cycle=${selectedCycle}`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error al cargar los horarios:', error);
+    throw error;
+  }
+}
