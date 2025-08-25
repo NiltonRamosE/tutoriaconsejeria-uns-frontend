@@ -35,8 +35,10 @@
     </div>
 </div>
 
-<script is:inline>
-    const administratorData = JSON.parse(localStorage.getItem('user')) || null;
+<script type="module" is:inline>
+    import { getUser } from '/src/dashboard/shared/auth.js';
+
+    const administratorData = getUser();
 
     if (administratorData) {
         document.getElementById('administratorNameProfileSection').textContent = administratorData.fullName || 'Administrador';
@@ -54,11 +56,6 @@
             altText = 'Icono Femenino';
         }
 
-        // Insertar el SVG correspondiente
-        genderIconContainer.innerHTML = `
-            <img src="${iconPath}" 
-                    alt="${altText}" 
-                    class="w-16 h-16 object-contain" />
-        `;
+        genderIconContainer.innerHTML = `<img src="${iconPath}" alt="${altText}" class="w-16 h-16 object-contain" />`;
     }
 </script>
