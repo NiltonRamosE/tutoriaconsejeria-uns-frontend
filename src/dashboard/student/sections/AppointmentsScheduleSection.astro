@@ -28,7 +28,7 @@
 </div>
 
 <script type="module" is:inline>
-    import { fetchAppointmentsSent } from '/src/dashboard/services/studentService.js'
+    import { fetchAppointmentsSent, fetchAppointmentsReceived } from '/src/dashboard/services/studentService.js'
     import {getToken, getUser, isTokenPresent} from '/src/dashboard/shared/auth.js';
 
     const studentData = getUser();
@@ -51,24 +51,9 @@
             const sentAppointments = await fetchAppointmentsSent(studentData.id, token);
             displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
 
-            // Cargar citas recibidas
-            /*const receivedResponse = await fetch(`http://localhost:8080/student/appointments/received/${studentData.id}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const receivedResponse = await fetchAppointmentsReceived(studentData.id, token);
+            displayAppointments(receivedResponse, 'receivedAppointmentsContainer', false);
 
-            if (sentResponse.ok && receivedResponse.ok) {
-                const sentAppointments = await sentResponse.json();
-                const receivedAppointments = await receivedResponse.json();
-                
-                displayAppointments(sentAppointments, 'sentAppointmentsContainer', true);
-                displayAppointments(receivedAppointments, 'receivedAppointmentsContainer', false);
-            } else {
-                console.error('Error al cargar las citas');
-                showError('Error al cargar las citas');
-            }*/
         } catch (error) {
             console.error('Error:', error);
             showError('Error al cargar las citas');
@@ -244,7 +229,7 @@
                         ${studentsList}
                         
                         <!-- Botón de cancelar (solo para citas pendientes enviadas) -->
-                        ${apptDetails.state === 'PENDIENTE' && isSent ? `
+                        ${apptDetails.state === 'PENDIENTE' ? `
                         <div class="mt-3 pt-3 border-t border-theme-rich-black/10">
                             <button class="w-full bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 cancel-btn" data-appointment-id="${apptDetails.id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
