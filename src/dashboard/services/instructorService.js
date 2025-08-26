@@ -69,3 +69,20 @@ export async function fetchAppointmentsSent(instructorId, token) {
         throw error;
     }
 }
+
+// Función para cargar citas recibidas por el instructor
+export async function fetchAppointmentsReceived(instructorId, token) {
+    try {
+        const response = await fetch(`http://localhost:8080/instructor/appointments/received/${instructorId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        return await response.json();
+    } catch (error) {
+        console.error('Error al cargar las citas recibidas por el instructor:', error);
+        throw error;
+    }
+}
