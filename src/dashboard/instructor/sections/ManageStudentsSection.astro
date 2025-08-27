@@ -139,18 +139,5 @@
 </div>
 
 <script is:inline>
-// Mostrar/ocultar detalles del estudiante
-document.querySelectorAll('[class*="hover:bg-theme-blue"]').forEach(card => {
-    const btn = card.querySelector('button');
-    const details = card.querySelector('.detail-content');
-    
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        details.classList.toggle('hidden');
-        
-        // Rotar ícono
-        const icon = btn.querySelector('svg');
-        icon.classList.toggle('rotate-90');
-    });
-});
+
 </script>
