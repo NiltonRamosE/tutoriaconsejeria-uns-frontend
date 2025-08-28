@@ -30,7 +30,7 @@
 <script type="module" is:inline>
     import { fetchAppointmentsSent, fetchAppointmentsReceived, fetchPutAppointmentConfirm, fetchPutAppointmentCancel } from '/src/dashboard/services/instructorService.js'
     import {getToken, getUser} from '/src/dashboard/shared/auth.js';
-
+    import { formatDate, formatTime, showError, getDayName, getAppointmentStatusInfo } from '/src/dashboard/shared/appointmentScheduleManager.js';
     const instructorData = getUser();
     const token = getToken();
 
@@ -79,7 +79,6 @@
         }
     }
 
-    // Mostrar citas en el contenedor correspondiente
     function displayAppointments(appointments, containerId, isSent) {
         const container = document.getElementById(containerId);
 
@@ -94,45 +93,18 @@
             return;
         }
 
-        // Configurar grid responsivo
         container.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
         
         container.innerHTML = appointments.map(appointment => {
             const { appointmentResponse: apptDetails, senderFullName, receiverFullName, receiverStudentsFullNames } = appointment;
             
-            // Formatear fecha y hora
             const formattedDate = apptDetails.date ? formatDate(apptDetails.date) : '--';
             const formattedStartTime = apptDetails.startTime ? formatTime(apptDetails.startTime) : '--:--';
             const formattedEndTime = apptDetails.endTime ? formatTime(apptDetails.endTime) : '--:--';
             
-            // Determinar clase de estado
             let statusClass = '';
             let statusIcon = '';
-            switch (apptDetails.state) {
-                case 'PENDIENTE':
-                    statusClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-                    statusIcon = '⏳';
-                    break;
-                case 'ACEPTADA':
-                    statusClass = 'bg-green-100 text-green-800 border-green-200';
-                    statusIcon = '✅';
-                    break;
-                case 'EN_PROCESO':
-                    statusClass = 'bg-orange-100 text-orange-800 border-orange-200';
-                    statusIcon = '🔄';
-                    break;
-                case 'FINALIZADA':
-                    statusClass = 'bg-blue-100 text-blue-800 border-blue-200';
-                    statusIcon = '✔️';
-                    break;
-                case 'CANCELADA':
-                    statusClass = 'bg-red-100 text-red-800 border-red-200';
-                    statusIcon = '❌';
-                    break;
-                default:
-                    statusClass = 'bg-gray-100 text-gray-800 border-gray-200';
-                    statusIcon = '❓';
-            }
+            ({ statusClass, statusIcon } = getAppointmentStatusInfo(apptDetails.state));
 
             const maxStudentsToShow = 1;
             const hasMoreStudents = receiverStudentsFullNames && receiverStudentsFullNames.length > maxStudentsToShow;
@@ -250,17 +222,50 @@
                         ${apptDetails.state === 'PENDIENTE' ? `
                         <div class="mt-3 pt-3 border-t border-theme-rich-black/10 space-y-3">
                             ${!isSent ? `
-                            <div>
-                                <p class="text-sm font-medium text-theme-rich-black mb-2">Selecciona un horario:</p>
-                                <div class="space-y-1">
+                            <div class="bg-gradient-to-br from-theme-seasalt to-theme-keppel/5 p-4 rounded-xl border border-theme-keppel/20">
+                                <p class="text-sm font-medium text-theme-rich-black mb-3 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Selecciona un horario disponible:
+                                </p>
+                                <div class="space-y-2">
                                     ${['altScheduleA', 'altScheduleB', 'altScheduleC']
                                         .filter(key => apptDetails[key])
-                                        .map(key => `
-                                            <label class="flex items-center space-x-2 text-sm">
-                                                <input type="radio" name="confirm-slot-${apptDetails.id}" value="${apptDetails[key]}" class="text-theme-keppel focus:ring-theme-keppel">
-                                                <span>${formatDateTime(apptDetails[key])}</span>
-                                            </label>
-                                        `).join('')}
+                                        .map((key, index) => {
+                                            const dateTime = apptDetails[key];
+                                            const formattedDate = formatDate(dateTime.split('T')[0]);
+                                            const formattedTime = formatTime(dateTime.split('T')[1]);
+                                            const dayName = getDayName(dateTime);
+                                            
+                                            return `
+                                                <label class="flex items-start p-3 rounded-lg border-2 border-theme-rich-black/10 hover:border-theme-keppel/50 cursor-pointer transition-all duration-200 bg-white hover:shadow-md group">
+                                                    <input type="radio" name="confirm-slot-${apptDetails.id}" value="${dateTime}" class="mt-0.5 text-theme-keppel focus:ring-theme-keppel mr-3 transform group-hover:scale-110 transition-transform">
+                                                    <div class="flex-1">
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="font-medium text-theme-rich-black">Opción ${index + 1}</span>
+                                                            <span class="px-2 py-1 bg-theme-keppel/10 text-theme-keppel text-xs font-medium rounded-full">
+                                                                ${dayName}
+                                                            </span>
+                                                        </div>
+                                                        <div class="flex items-center space-x-3 mt-1 text-sm text-theme-rich-black/70">
+                                                            <span class="flex items-center">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                </svg>
+                                                                ${formattedDate}
+                                                            </span>
+                                                            <span class="flex items-center">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                                ${formattedTime}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            `;
+                                        }).join('')}
                                 </div>
                             </div>
                             <button class="w-full bg-theme-keppel hover:bg-theme-keppel-dark text-white py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 confirm-btn" data-appointment-id="${apptDetails.id}">
@@ -314,65 +319,4 @@
             });
         });
     }
-
-    function formatDate(dateString) {
-        if (!dateString) return '--';
-
-        try {
-            const [year, month, day] = dateString.split('-');
-            return `${day}/${month}/${year}`;
-        } catch (error) {
-            console.error('Error formateando fecha:', error);
-            return '--';
-        }
-    }
-
-
-    function formatTime(timeString) {
-        if (!timeString) return '--:--';
-        
-        try {
-            const timeParts = timeString.split(':');
-            if (timeParts.length >= 2) {
-                return `${timeParts[0]}:${timeParts[1]}`;
-            }
-            return timeString;
-        } catch (error) {
-            console.error('Error formateando hora:', error);
-            return '--:--';
-        }
-    }
-
-    function showError(message) {
-        const sentContainer = document.getElementById('sentAppointmentsContainer');
-        const receivedContainer = document.getElementById('receivedAppointmentsContainer');
-        
-        sentContainer.innerHTML = `
-            <div class="text-center py-8 text-red-500">
-                <p>${message}</p>
-            </div>
-        `;
-        
-        receivedContainer.innerHTML = `
-            <div class="text-center py-8 text-red-500">
-                <p>${message}</p>
-            </div>
-        `;
-    }
-
-    function formatDateTime(datetimeStr) {
-        try {
-            const dt = new Date(datetimeStr);
-            return dt.toLocaleString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-            });
-        } catch {
-            return datetimeStr;
-        }
-    }
-
 </script>
