@@ -142,7 +142,8 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
                 </svg>
                 Asignando...
             `;
-            await fetchDistributeStudentsAmongInstructors();
+            await fetchDistributeStudentsAmongInstructors(token);
+            alert("Asignaciones realizadas correctamente.");
             await loadAssignments();
         } catch (error) {
             console.error('Error al efectuar las asignaciones:', error);
