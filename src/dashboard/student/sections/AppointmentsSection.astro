@@ -215,7 +215,8 @@ const idPrefix = 'studentSender';
             const instructors = await fetchAssignedInstructor(studentData.id, token);
             populateInstructorSelect(instructors);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error al cargar los instructores:', error);
+            throw error;
         }
     }
 
@@ -248,14 +249,11 @@ const idPrefix = 'studentSender';
     // Cargar estudiantes para cita grupal
     async function loadStudentsAssignedByInstructor(instructorId) {
         try {
-            if (!token) {
-                console.error('No hay token de autenticación');
-                return;
-            }
             availableStudents = await fetchStudentsAssignedByInstructor(instructorId, token);
             filterStudentsByActivity();
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error al cargar los estudiantes:', error);
+            throw error;
         }
     }
 

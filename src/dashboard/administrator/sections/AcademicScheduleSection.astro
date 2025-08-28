@@ -61,7 +61,7 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
 <script type="module" is:inline>
     import { createScheduleRenderer, getCycleName } from "/src/dashboard/shared/scheduleManager.js";
     import { fetchAcademicSchedules } from "/src/dashboard/services/academicScheduleService.js";
-    import { getToken, isTokenPresent } from '/src/dashboard/shared/auth.js';
+    import { getToken } from '/src/dashboard/shared/auth.js';
 
     const token = getToken();
     const sched = createScheduleRenderer('academic');
@@ -79,13 +79,14 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
         emptyState.classList.add('hidden');
 
         try {
-            isTokenPresent(token);
-
             const scheduleData = await fetchAcademicSchedules(selectedCycle, token);
 
             sched.setTitle(`Horario - Ciclo ${getCycleName(selectedCycle)}`);
             sched.render(scheduleData, { emptyStateId: 'emptyState' });
             sched.show();
+        }catch (error) {
+            console.error('Error al cargar los horarios:', error);
+            throw error;
         } finally {
             loadingIndicator.classList.add('hidden');
         }

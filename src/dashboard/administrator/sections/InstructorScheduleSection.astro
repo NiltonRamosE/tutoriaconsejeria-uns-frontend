@@ -43,7 +43,7 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
 
 <script type="module" is:inline>
     import { createScheduleRenderer } from "/src/dashboard/shared/scheduleManager.js";
-    import { getToken, isTokenPresent } from '/src/dashboard/shared/auth.js';
+    import { getToken } from '/src/dashboard/shared/auth.js';
     import { fetchFindInstructorScheduleByInstructor } from '/src/dashboard/services/instructorScheduleService.js';
     const sched = createScheduleRenderer('instructor');
     const token = getToken();
@@ -62,15 +62,13 @@ import ScheduleTable from "@/dashboard/shared/ScheduleTable.astro";
         if (emptyState) emptyState.classList.add('hidden');
 
         try {
-            isTokenPresent(token);
             const data = await fetchFindInstructorScheduleByInstructor(emailInstructor, token);
-
             sched.setTitle(`Horario - ${data.instructorName || emailInstructor}`);
             sched.render(data.academicSchedule || [], { emptyStateId: 'instructorEmptyState' });
             sched.show();
-        } catch (err) {
-            console.error(err);
-            alert(`Error al cargar horarios: ${err.message}`);
+        } catch (error) {
+            console.error('Error al cargar horarios de docentes:', error);
+            throw error;
         }
     }
 </script>

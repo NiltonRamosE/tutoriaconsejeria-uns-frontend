@@ -249,7 +249,7 @@
 </div>
 
 <script type="module" is:inline>
-    import {getToken, getUser, isTokenPresent} from '/src/dashboard/shared/auth.js';
+    import {getToken, getUser} from '/src/dashboard/shared/auth.js';
     import { fetchStudentById } from '/src/dashboard/services/studentService.js';
 
     const studentData = getUser();
@@ -261,11 +261,11 @@
 
     async function loadStudentProfile(id) {
         try {
-            isTokenPresent(token);
             const student = await fetchStudentById(id, token);
             updateStudentProfileItems(student);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error al cargar el perfil del estudiante:', error);
+            throw error;
         }
     }
 

@@ -39,7 +39,7 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 
 <script type="module" is:inline>
     import { createPagination } from "/src/dashboard/shared/paginationManager";
-    import { getToken, isTokenPresent } from '/src/dashboard/shared/auth.js';
+    import { getToken } from '/src/dashboard/shared/auth.js';
     import { fetchDistributeStudentsAmongInstructors, fetchStudentsList } from '/src/dashboard/services/administratorService.js';
 
     const token = getToken();
@@ -119,12 +119,12 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
     // Endpoint para cargar asignaciones
     async function loadAssignments() {
         try {
-            isTokenPresent(token);
             const assignments = await fetchStudentsList(token);
             updateAssignmentsTable(assignments);
             pgn.updatePaginationControls(loadAssignments, assignments.length);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error al cargar la lista de asignaciones:', error);
+            throw error;
         }
     }
 
@@ -142,11 +142,11 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
                 </svg>
                 Asignando...
             `;
-
-            isTokenPresent(token);
-            const assignResponse = await fetchDistributeStudentsAmongInstructors();
-
+            await fetchDistributeStudentsAmongInstructors();
             await loadAssignments();
+        } catch (error) {
+            console.error('Error al efectuar las asignaciones:', error);
+            throw error;
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalBtnText;

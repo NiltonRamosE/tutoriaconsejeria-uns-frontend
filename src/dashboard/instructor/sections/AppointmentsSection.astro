@@ -205,21 +205,16 @@ const idPrefix = 'instructorSender';
 
     async function loadStudentsAssignedByInstructor() {
         try {
-            if (!token) {
-                console.error('No hay token de autenticación');
-                return;
-            }
             availableStudents = await fetchStudentsAssignedByInstructor(instructorData.id, token);
-
             const filteredStudents = availableStudents.filter(student => student.typeActivityCode === activityType);
-
             if(selectedModality === 'I'){
                 populateStudentSelect(filteredStudents);
             }else{
                 populateStudentCheckBoxes(filteredStudents);
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error al cargar los estudiantes:', error);
+            throw error;
         }
     }
 
@@ -358,7 +353,8 @@ const idPrefix = 'instructorSender';
             generateScheduleGrid();
             scheduleModal.hidden = false;
         } catch (error) {
-            alert('Error al cargar los horarios');
+            console.error('Error al cargar los horarios ocupados:', error);
+            throw error;
         }
     }
 

@@ -54,7 +54,7 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 <script type="module" is:inline>
     import { createPagination } from "/src/dashboard/shared/paginationManager";
     import { fetchInstructorsList } from '/src/dashboard/services/administratorService.js';
-    import { getToken, isTokenPresent } from "/src/dashboard/shared/auth.js";
+    import { getToken } from "/src/dashboard/shared/auth.js";
 
     let allInstructors = [];
     
@@ -137,12 +137,12 @@ import Pagination from "@/dashboard/shared/Pagination.astro";
 
     async function loadInstructors() {
         try {
-            isTokenPresent(token);
             allInstructors = await fetchInstructorsList(token);
             updateInstructorsTable(allInstructors);
             pgn.updatePaginationControls(loadInstructors, allInstructors.length);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error al cargar los docentes:', error);
+            throw error;
         }
     }
 </script>

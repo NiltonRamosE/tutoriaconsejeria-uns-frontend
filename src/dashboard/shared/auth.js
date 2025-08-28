@@ -7,8 +7,7 @@ export function getToken() {
 }
 
 export function isTokenPresent(token){
-    if (!token) {
-        console.error('No hay token de autenticación');
-        return;
+    if (!token || token !== getToken()) {
+        throw new Error('No hay token de autenticación o es inválido');
     }
 }
