@@ -24,7 +24,6 @@ export async function fetchDistributeStudentsAmongInstructors(token) {
         }
     });
     if (!response.ok) throw new Error(response.statusText);
-    return await response.json();
 }
 
 // Función para listar a docentes
