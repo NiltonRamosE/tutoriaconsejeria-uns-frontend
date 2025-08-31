@@ -94,3 +94,43 @@ export async function fetchAppointmentsReceived(studentId, token) {
     if (!response.ok) throw new Error(response.statusText);
     return await response.json();
 }
+
+// Función para confirmar citas
+export async function fetchPutAppointmentConfirm(appointmentId, chosenDateTime, token) {
+    isTokenPresent(token);
+    const response = await fetch(`http://localhost:8080/student/appointments/confirm/${appointmentId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ chosenDateTime })
+    });
+    if (!response.ok) throw new Error(response.statusText);
+}
+
+// Función para cancelar citas individuales
+export async function fetchCancelIndividualAppointment(appointmentId, token) {
+    isTokenPresent(token);
+    const response = await fetch(`http://localhost:8080/student/appointments/cancel/${appointmentId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) throw new Error(response.statusText);
+}
+
+// Función para cancelar asistencia a citas grupales
+export async function fetchCancelGroupAppointmentAttendance(appointmentId, studentId, token) {
+    isTokenPresent(token);
+    const response = await fetch(`http://localhost:8080/student/appointments/cancel/${appointmentId}/${studentId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) throw new Error(response.statusText);
+}
