@@ -30,7 +30,7 @@
 <script type="module" is:inline>
     import { fetchAppointmentsSent, fetchAppointmentsReceived, fetchPutAppointmentConfirm, fetchPutAppointmentCancel } from '/src/dashboard/services/instructorService.js'
     import {getToken, getUser} from '/src/dashboard/shared/auth.js';
-    import { formatDate, formatTime, showError, getDayName, getAppointmentStatusInfo } from '/src/dashboard/shared/appointmentScheduleManager.js';
+    import { formatDate, formatTime, showError, getDayName, getAppointmentStatusInfo, getAttendanceInfo } from '/src/dashboard/shared/appointmentScheduleManager.js';
     const instructorData = getUser();
     const token = getToken();
 
@@ -96,7 +96,7 @@
         container.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
         
         container.innerHTML = appointments.map(appointment => {
-            const { appointmentResponse: apptDetails, senderFullName, receiverFullName, receiverStudentsFullNames } = appointment;
+            const { appointmentResponse: apptDetails, senderFullName, receiverFullName, receiverStudents } = appointment;
             
             const formattedDate = apptDetails.date ? formatDate(apptDetails.date) : '--';
             const formattedStartTime = apptDetails.startTime ? formatTime(apptDetails.startTime) : '--:--';
@@ -107,42 +107,105 @@
             ({ statusClass, statusIcon } = getAppointmentStatusInfo(apptDetails.state));
 
             const maxStudentsToShow = 1;
-            const hasMoreStudents = receiverStudentsFullNames && receiverStudentsFullNames.length > maxStudentsToShow;
-            const studentsToShow = receiverStudentsFullNames ? receiverStudentsFullNames.slice(0, maxStudentsToShow) : [];
+            const hasMoreStudents = receiverStudents && receiverStudents.length > maxStudentsToShow;
+            const studentsToShow = receiverStudents ? receiverStudents.slice(0, maxStudentsToShow) : [];
             
-            const studentsList = receiverStudentsFullNames && receiverStudentsFullNames.length > 0
-                ? `<div class="mt-3 bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/10">
-                    <div class="flex justify-between items-center mb-2">
-                        <h5 class="font-medium text-sm text-theme-rich-black/80 flex items-center">
-                            <img src="/src/assets/icons/group-users.svg" alt="Group Users Icon" class="h-4 w-4 mr-2"/>
-                            Participantes (${receiverStudentsFullNames.length})
+            const voteStats = appointment.altScheduleCounts && Object.keys(appointment.altScheduleCounts).length > 0 && apptDetails.appointmentModality === 'GRUPAL'
+                ? `
+                    <div class="mt-3 bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                        <h5 class="font-medium text-sm text-blue-800 mb-3 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Preferencias de horario del grupo
                         </h5>
+                        <div class="grid grid-cols-1 gap-2">
+                            ${Object.entries(appointment.altScheduleCounts)
+                                .sort(([,a], [,b]) => b - a)
+                                .map(([dateTime, count]) => {
+                                    const formattedDate = formatDate(dateTime.split('T')[0]);
+                                    const formattedTime = formatTime(dateTime.split('T')[1]);
+                                    const dayName = getDayName(dateTime);
+                                    
+                                    return `
+                                        <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-blue-100">
+                                            <div class="flex-1">
+                                                <div class="flex items-center text-sm text-blue-900">
+                                                    <span class="font-medium">${formattedDate}</span>
+                                                    <span class="mx-2">•</span>
+                                                    <span>${formattedTime}</span>
+                                                    <span class="ml-2 px-1.5 py-0.5 bg-blue-200 text-blue-800 text-xs rounded">
+                                                        ${dayName}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-sm font-medium text-blue-800">${count}</span>
+                                                <span class="text-blue-600">👥</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                        </div>
+                        <p class="text-xs text-blue-600 mt-2 italic">
+                            ${Object.values(appointment.altScheduleCounts).reduce((sum, count) => sum + count, 0)} voto(s) en total
+                        </p>
+                    </div>
+                `
+                : '';
+
+            const studentsList = receiverStudents && receiverStudents.length > 0
+                ? `
+                    ${voteStats}
+                    <div class="mt-3 bg-theme-seasalt p-3 rounded-lg border border-theme-rich-black/10">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="font-medium text-sm text-theme-rich-black/80 flex items-center">
+                                <img src="/src/assets/icons/group-users.svg" alt="Group Users Icon" class="h-4 w-4 mr-2"/>
+                                Participantes (${receiverStudents.length})
+                            </h5>
+                            ${hasMoreStudents ? `
+                                <button type="button" class="text-theme-keppel text-xs font-medium hover:underline view-more-btn" data-appointment-id="${apptDetails.id}">
+                                    Ver todos
+                                </button>
+                            ` : ''}
+                        </div>
+                        <ul class="space-y-2" id="students-list-${apptDetails.id}">
+                            ${studentsToShow.map(student => {
+                                const { badgeClass, icon } = getAttendanceInfo(student.attendance);
+                                return `
+                                    <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-theme-rich-black/10">
+                                        <div class="flex items-center">
+                                            <span class="w-1.5 h-1.5 bg-theme-keppel rounded-full mr-2"></span>
+                                            <span class="text-sm text-theme-rich-black/70" data-student-id="${student.studentId}">${student.fullName}</span>
+                                        </div>
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium ${badgeClass} border flex items-center gap-1">
+                                            ${icon}
+                                        </span>
+                                    </li>
+                                `;
+                            }).join('')}
+                        </ul>
                         ${hasMoreStudents ? `
-                            <button type="button" class="text-theme-keppel text-xs font-medium hover:underline view-more-btn" data-appointment-id="${apptDetails.id}">
-                                Ver todos
-                            </button>
+                            <ul class="space-y-2 hidden mt-2" id="all-students-list-${apptDetails.id}">
+                                ${receiverStudents.map(student => {
+                                    const { badgeClass, icon } = getAttendanceInfo(student.attendance);
+                                    return `
+                                        <li class="flex items-center justify-between p-2 bg-white rounded-lg border border-theme-rich-black/10">
+                                            <div class="flex items-center">
+                                                <span class="w-1.5 h-1.5 bg-theme-keppel rounded-full mr-2"></span>
+                                                <span class="text-sm text-theme-rich-black/70" data-student-id="${student.studentId}">${student.fullName}</span>
+                                            </div>
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium ${badgeClass} border flex items-center gap-1">
+                                                ${icon}
+                                            </span>
+                                        </li>
+                                    `;
+                                }).join('')}
+                            </ul>
                         ` : ''}
                     </div>
-                    <ul class="space-y-1" id="students-list-${apptDetails.id}">
-                        ${studentsToShow.map(s => `
-                            <li class="flex items-center text-sm text-theme-rich-black/70">
-                                <span class="w-1.5 h-1.5 bg-theme-keppel rounded-full mr-2"></span>
-                                ${s}
-                            </li>
-                        `).join('')}
-                    </ul>
-                    ${hasMoreStudents ? `
-                        <ul class="space-y-1 hidden mt-2" id="all-students-list-${apptDetails.id}">
-                            ${receiverStudentsFullNames.map(s => `
-                                <li class="flex items-center text-sm text-theme-rich-black/70">
-                                    <span class="w-1.5 h-1.5 bg-theme-keppel rounded-full mr-2"></span>
-                                    ${s}
-                                </li>
-                            `).join('')}
-                        </ul>
-                    ` : ''}
-                </div>`
-                : '';
+                `
+                : voteStats;
 
             return `
                 <div class="bg-white rounded-xl border border-theme-rich-black/10 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden h-fit">
