@@ -95,10 +95,24 @@ export async function fetchAppointmentsReceived(studentId, token) {
     return await response.json();
 }
 
-// Función para confirmar citas
-export async function fetchPutAppointmentConfirm(appointmentId, chosenDateTime, token) {
+// Función para confirmar citas individuales
+export async function fetchConfirmIndividualAppointment(appointmentId, chosenDateTime, token) {
     isTokenPresent(token);
     const response = await fetch(`http://localhost:8080/student/appointments/confirm/${appointmentId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ chosenDateTime })
+    });
+    if (!response.ok) throw new Error(response.statusText);
+}
+
+// Función para confirmar asistencia a citas grupales
+export async function fetchConfirmGroupAppointment(appointmentId, studentId, chosenDateTime, token) {
+    isTokenPresent(token);
+    const response = await fetch(`http://localhost:8080/student/appointments/confirm/${appointmentId}/${studentId}`, {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`,

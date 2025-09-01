@@ -59,3 +59,28 @@ export function getAppointmentStatusInfo(state) {
 
     return statusMap[state] || { statusClass: 'bg-gray-100 text-gray-800 border-gray-200', statusIcon: '❓' };
 }
+
+export function getAttendanceInfo(attendance) {
+    let badgeClass = '';
+    let icon = '';
+    
+    switch (attendance) {
+        case 'CONFIRMADA':
+            badgeClass = 'bg-green-100 text-green-800 border-green-200';
+            icon = '✅';
+            break;
+        case 'RECHAZADA':
+            badgeClass = 'bg-red-100 text-red-800 border-red-200';
+            icon = '❌';
+            break;
+        case 'SIN_CONFIRMAR':
+            badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            icon = '⏳';
+            break;
+        default:
+            badgeClass = 'bg-gray-100 text-gray-800 border-gray-200';
+            icon = '❓';
+    }
+    
+    return { badgeClass, icon };
+}
