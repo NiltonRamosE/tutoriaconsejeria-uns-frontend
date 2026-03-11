@@ -45,14 +45,14 @@
         document.getElementById('administratorInstitutionalEmailProfileSection').textContent = administratorData.institutionalEmail || 'Administrador';
 
         const genderIconContainer = document.getElementById('genderIcon');
-        let iconPath = '/src/assets/icons/administrator-outline.svg';
+        let iconPath = '/icons/administrator-outline.svg';
         let altText = 'Icono de Administrador';
 
         if (administratorData.gender === 'M') {
-            iconPath = '/src/assets/icons/male-user.svg';
+            iconPath = '/icons/male-user.svg';
             altText = 'Icono Masculino';
         } else if (administratorData.gender === 'F') {
-            iconPath = '/src/assets/icons/female-user.svg';
+            iconPath = '/icons/female-user.svg';
             altText = 'Icono Femenino';
         }
 
