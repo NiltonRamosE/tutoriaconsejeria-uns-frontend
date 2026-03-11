@@ -4,6 +4,7 @@ import type { LoginRequest } from '@/infrastructure/dto/auth/LoginRequest';
 import { login } from '@/infrastructure/api/auth';
 
 export function LoginSection() {
+  const [isLoading, setIsLoading] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState<UserType>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +33,7 @@ export function LoginSection() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+    setIsLoading(true);
     const payload = {
       institutionalEmail: formData.institutionalEmail,
       password: formData.password
@@ -48,6 +49,8 @@ export function LoginSection() {
       }
     } catch (error) {
       console.error('Error en la petición:', error);
+    }finally {
+      setIsLoading(false);
     }
   };
 
@@ -262,9 +265,10 @@ export function LoginSection() {
 
                   <button
                     type="submit"
-                    className="w-full md:w-xs lg:w-full bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-3 px-6 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200"
+                    disabled={isLoading}
+                    className={`${isLoading ? 'opacity-50 cursor-not-allowed' : ''} w-full md:w-xs lg:w-full bg-theme-keppel text-theme-rich-black border-2 border-b-8 border-theme-rich-black font-medium py-3 px-6 rounded-2xl hover:bg-theme-keppel/90 transition-colors duration-200`}
                   >
-                    Iniciar sesión
+                    {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                   </button>
                 </form>
 
