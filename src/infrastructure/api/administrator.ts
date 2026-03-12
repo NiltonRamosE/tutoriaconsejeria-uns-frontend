@@ -1,4 +1,4 @@
-import { getToken, isTokenPresent } from '@/dashboard/shared/auth';
+import { getToken, isTokenPresent } from '@/dashboard/shared/authUtils';
 import { config } from 'config';
 import type { AssignmentResponse } from '@/infrastructure/dto/assigment/AssignmentResponse';
 import type { InstructorResponse } from '@/infrastructure/dto/administrator/InstructorResponse';
