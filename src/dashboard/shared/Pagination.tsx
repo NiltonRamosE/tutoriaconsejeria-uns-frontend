@@ -19,9 +19,7 @@ const Pagination: React.FC<PaginationProps> = ({ idPrefix }) => {
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700">
-            Mostrando <span id={`${idPrefix}-currentPageStart`} className="font-medium"></span>
-            a <span id={`${idPrefix}-currentPageEnd`} className="font-medium"></span>
-            de <span id={`${idPrefix}-totalItems`} className="font-medium"></span> resultados
+            Mostrando <span id={`${idPrefix}-currentPageStart`} className="font-medium"></span> a <span id={`${idPrefix}-currentPageEnd`} className="font-medium"></span> de <span id={`${idPrefix}-totalItems`} className="font-medium"></span> resultados
           </p>
         </div>
         <div>
