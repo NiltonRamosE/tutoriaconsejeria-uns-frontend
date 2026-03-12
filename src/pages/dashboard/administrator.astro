@@ -1,6 +1,6 @@
 ---
 import ProtectedLayout from '@/layouts/ProtectedLayout.astro';
-import AdministratorPanel from '@/dashboard/administrator/sections/AdministratorPanel.astro';
+import { AdministratorPanel } from '@/dashboard/administrator/sections/AdministratorPanel.tsx';
 const robots = ["noindex", "nofollow"];
 const title = "Plataforma de Administrador";
 const description = "Plataforma de Administrador de Tutoría y Consejería UNS. Administra usuarios, gestiona recursos y optimiza la plataforma.";
@@ -11,5 +11,5 @@ const imagetwt = "/card-twt.webp";
 ---
 
 <ProtectedLayout {robots} {title} {description} {keywords} {url} {imageOG} {imagetwt}>
-    <AdministratorPanel />
+    <AdministratorPanel client:load/>
 </ProtectedLayout>
