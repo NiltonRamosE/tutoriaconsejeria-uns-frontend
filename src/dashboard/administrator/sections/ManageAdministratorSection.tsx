@@ -34,6 +34,7 @@ const ManageAdministratorSection: React.FC = () => {
   // Cargar administradores al montar el componente
   useEffect(() => {
     loadAdministrators();
+    paginationRef.current.setupPagination(loadAdministrators);
   }, []);
 
   // Actualizar tabla cuando cambien los filtros o la página
