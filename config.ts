@@ -24,6 +24,19 @@ export const config = {
       compare: "/academic-schedule/compare/:studentId/:instructorId",
       byCycle: "/academic-schedule",
       instructorSchedule: "/instructor-schedule",
-    }
+    },
+    student: {
+      assignedInstructor: "/student/assigned/instructor/:studentId",
+      assignedByInstructor: "/student/assigned/:instructorId",
+      individualAppointment: "/student/appointment/individual",
+      groupAppointment: "/student/appointment/group",
+      getById: "/student/:id",
+      appointmentsSent: "/student/appointments/sent/:studentId",
+      appointmentsReceived: "/student/appointments/received/:studentId",
+      confirmIndividual: "/student/appointments/confirm/:appointmentId",
+      confirmGroup: "/student/appointments/confirm/:appointmentId/:studentId",
+      cancelIndividual: "/student/appointments/cancel/:appointmentId",
+      cancelGroup: "/student/appointments/cancel/:appointmentId/:studentId",
+    },
   },
 };

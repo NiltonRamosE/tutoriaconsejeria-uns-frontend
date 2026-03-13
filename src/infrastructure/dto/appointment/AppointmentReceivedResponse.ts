@@ -1,0 +1,16 @@
+export interface AppointmentReceivedResponse {
+    id: number;
+    date: string;
+    startTime: string;
+    endTime: string;
+    appointmentModality: string;
+    appointmentMethod: string;
+    specificAppointmentMethod: string;
+    appointmentReason: string;
+    specificAppointmentReason: string;
+    typeActivity: string;
+    state: string;
+    altScheduleA: string;
+    altScheduleB: string;
+    altScheduleC: string;
+}

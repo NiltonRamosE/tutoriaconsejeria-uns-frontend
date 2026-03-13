@@ -69,5 +69,37 @@ export const siteConfig = {
       description: 'Verifica horarios de docentes en el semestre lectivo',
       iconSrc: '/icons/schedule-fill.svg'
     }
+  ],
+  studentSidebarItems: [
+      {
+        section: 'dashboard' as Section,
+        title: 'Inicio',
+        description: 'Resumen de actividades',
+        iconSrc: '/icons/four-square.svg'
+      },
+      {
+        section: 'evaluate' as Section,
+        title: "Evaluar Docente",
+        description: "Comparte tu retroalimentación",
+        iconSrc: "/icons/writing-in-paper.svg",
+      },
+      {
+        section: 'surveys' as Section,
+        title: 'Cuestionarios',
+        description: 'Registro de evaluaciones',
+        iconSrc: '/icons/paper.svg'
+      },
+      {
+        section: 'appointments-schedule' as Section,
+        title: 'Ver Citas Programadas',
+        description: 'Consulta tus citas',
+        iconSrc: '/icons/calendar-blank.svg'
+      },
+      {
+        section: 'appointments' as Section,
+        title: 'Programar Cita',
+        description: 'Agenda tutorías o consejería',
+        iconSrc: '/icons/calendar-blank.svg'
+      },
   ]
 };
