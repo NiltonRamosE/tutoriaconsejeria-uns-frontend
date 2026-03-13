@@ -1,3 +1,5 @@
+import type { Section } from "@/domain/types/SectionType";
+
 export const siteConfig = {
   name: "Tutoría y Consejería EPISI",
   description:
@@ -32,37 +34,37 @@ export const siteConfig = {
   ],
   administratorSidebarItems: [
     {
-      section: 'manage-administrator',
+      section: 'manage' as Section,
       title: 'Gestión de Administradores',
       description: 'Administración de cuentas de administradores',
       iconSrc: '/icons/administrator-outline.svg'
     },
     {
-      section: 'assign',
+      section: 'assign' as Section,
       title: 'Asignar Estudiantes',
       description: 'Gestiona la asignación de tutorados',
       iconSrc: '/icons/team-person-outline.svg'
     },
     {
-      section: 'students',
+      section: 'students' as Section,
       title: 'Gestión de Estudiantes',
       description: 'Administra estudiantes',
       iconSrc: '/icons/student-outline.svg'
     },
     {
-      section: 'instructors',
+      section: 'instructors' as Section,
       title: 'Gestión de Docentes',
       description: 'Administra docentes',
       iconSrc: '/icons/instructor-outline.svg'
     },
     {
-      section: 'academic-schedule',
+      section: 'academic-schedule' as Section,
       title: 'Horarios Académicos Estudiantes',
       description: 'Verifica horarios de estudiantes en el semestre lectivo',
       iconSrc: '/icons/schedule-double-fill.svg'
     },
     {
-      section: 'instructor-schedule',
+      section: 'instructor-schedule' as Section,
       title: 'Horarios Académicos Docentes',
       description: 'Verifica horarios de docentes en el semestre lectivo',
       iconSrc: '/icons/schedule-fill.svg'
