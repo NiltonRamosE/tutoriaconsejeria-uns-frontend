@@ -1,3 +1,4 @@
+// src/dashboard/shared/paginationManager.ts
 export interface PaginationManager {
   showPagination: () => void;
   hiddenPagination: () => void;
@@ -5,6 +6,7 @@ export interface PaginationManager {
   updateIndicators: (dataLength: number) => void;
   setupPagination: (loadData: () => void) => void;
   updatePaginationControls: (loadData: () => void, count: number) => void;
+  goToPage: (page: number, loadData: () => void) => void;
 }
 
 export function createPagination(
@@ -13,6 +15,7 @@ export function createPagination(
 ): PaginationManager {
   let currentPage: number = 1;
   let totalItems: number = 0;
+  let currentLoadData: (() => void) | null = null;
 
   // Función auxiliar para obtener elementos por ID
   const el = (suffix: string): HTMLElement | null => 
@@ -51,26 +54,52 @@ export function createPagination(
     safe('totalItems', (n) => n.textContent = String(dataLength));
   }
 
-  function setupPagination(loadData: () => void): void {
-    // Evita listeners duplicados: primero limpia
-    const ids = ['prevPage', 'nextPage', 'prevPageMobile', 'nextPageMobile'] as const;
+  // Función para actualizar todos los listeners
+  function refreshListeners(loadData: () => void): void {
+    // Remover listeners existentes (opcional, pero no necesario si usamos nuevas funciones)
     
-    ids.forEach(id => {
-      const node = el(id);
-      if (!node) return;
-      const clone = node.cloneNode(true);
-      node.parentNode?.replaceChild(clone, node);
+    // Agregar listeners a los botones de navegación
+    safe('prevPage', (n) => {
+      n.onclick = (e) => {
+        e.preventDefault();
+        goToPreviousPage(loadData);
+      };
     });
+    
+    safe('nextPage', (n) => {
+      n.onclick = (e) => {
+        e.preventDefault();
+        goToNextPage(loadData);
+      };
+    });
+    
+    safe('prevPageMobile', (n) => {
+      n.onclick = (e) => {
+        e.preventDefault();
+        goToPreviousPage(loadData);
+      };
+    });
+    
+    safe('nextPageMobile', (n) => {
+      n.onclick = (e) => {
+        e.preventDefault();
+        goToNextPage(loadData);
+      };
+    });
+  }
 
-    safe('prevPage', (n) => n.addEventListener('click', () => goToPreviousPage(loadData)));
-    safe('nextPage', (n) => n.addEventListener('click', () => goToNextPage(loadData)));
-    safe('prevPageMobile', (n) => n.addEventListener('click', () => goToPreviousPage(loadData)));
-    safe('nextPageMobile', (n) => n.addEventListener('click', () => goToNextPage(loadData)));
+  function setupPagination(loadData: () => void): void {
+    currentLoadData = loadData;
+    
+    // Inicializar la paginación
+    refreshListeners(loadData);
   }
 
   function updatePaginationControls(loadData: () => void, count: number): void {
     const totalPages = Math.ceil(count / itemsPerPage);
+    currentLoadData = loadData;
 
+    // Actualizar números de página
     safe('pageNumbers', (container) => {
       container.innerHTML = '';
       if (totalPages <= 1) return;
@@ -89,7 +118,10 @@ export function createPagination(
         const first = document.createElement('button');
         first.textContent = '1';
         first.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50';
-        first.addEventListener('click', () => goToPage(1, loadData));
+        first.onclick = (e) => {
+          e.preventDefault();
+          goToPage(1, loadData);
+        };
         container.appendChild(first);
         
         if (startPage > 2) {
@@ -109,7 +141,10 @@ export function createPagination(
             ? 'z-10 bg-theme-keppel border-theme-keppel text-white' 
             : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
         }`;
-        btn.addEventListener('click', () => goToPage(i, loadData));
+        btn.onclick = (e) => {
+          e.preventDefault();
+          goToPage(i, loadData);
+        };
         container.appendChild(btn);
       }
 
@@ -125,7 +160,10 @@ export function createPagination(
         const last = document.createElement('button');
         last.textContent = totalPages.toString();
         last.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50';
-        last.addEventListener('click', () => goToPage(totalPages, loadData));
+        last.onclick = (e) => {
+          e.preventDefault();
+          goToPage(totalPages, loadData);
+        };
         container.appendChild(last);
       }
     });
@@ -146,12 +184,16 @@ export function createPagination(
   }
 
   function goToPreviousPage(loadData: () => void): void {
-    if (currentPage > 1) goToPage(currentPage - 1, loadData);
+    if (currentPage > 1) {
+      goToPage(currentPage - 1, loadData);
+    }
   }
 
   function goToNextPage(loadData: () => void): void {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    if (currentPage < totalPages) goToPage(currentPage + 1, loadData);
+    if (currentPage < totalPages) {
+      goToPage(currentPage + 1, loadData);
+    }
   }
 
   function goToPage(page: number, loadData: () => void): void {
@@ -166,6 +208,6 @@ export function createPagination(
     updateIndicators,
     setupPagination,
     updatePaginationControls,
-    
+    goToPage,
   };
 }
