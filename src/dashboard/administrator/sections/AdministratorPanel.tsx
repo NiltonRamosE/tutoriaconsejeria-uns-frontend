@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { AdminSidebar } from '@/dashboard/administrator/components/AdminSidebar';
 import { AdministratorProfile } from '@/dashboard/administrator/sections/AdministratorProfile';
 import ManageAdministratorSection from '@/dashboard/administrator/sections/ManageAdministratorSection';
 import { useAdministratorSection } from '@/dashboard/shared/hooks/useAdministratorSection';
-// import AssignSection from './sections/AssignSection';
-// import StudentSection from './sections/StudentSection';
-// import InstructorSection from './sections/InstructorSection';
-// import AcademicScheduleSection from './sections/AcademicScheduleSection';
-// import InstructorScheduleSection from './sections/InstructorScheduleSection';
+import AssignSection from '@/dashboard/administrator/sections/AssignSection';
+import StudentSection from '@/dashboard/administrator/sections/StudentSection';
+import InstructorSection from '@/dashboard/administrator/sections/InstructorSection';
+import AcademicScheduleSection from '@/dashboard/administrator/sections/AcademicScheduleSection';
+import InstructorScheduleSection from '@/dashboard/administrator/sections/InstructorScheduleSection';
 
 
 export function AdministratorPanel() {
@@ -18,16 +18,16 @@ export function AdministratorPanel() {
         return <AdministratorProfile />;
       case 'manage':
         return <ManageAdministratorSection />;
-      // case 'assign':
-      //   return <AssignSection />;
-      // case 'students':
-      //   return <StudentSection />;
-      // case 'instructors':
-      //   return <InstructorSection />;
-      // case 'academic-schedule':
-      //   return <AcademicScheduleSection />;
-      // case 'instructor-schedule':
-      //   return <InstructorScheduleSection />;
+      case 'assign':
+        return <AssignSection />;
+      case 'students':
+        return <StudentSection />;
+      case 'instructors':
+        return <InstructorSection />;
+      case 'academic-schedule':
+        return <AcademicScheduleSection />;
+      case 'instructor-schedule':
+        return <InstructorScheduleSection />;
       default:
         return <ManageAdministratorSection />;
     }

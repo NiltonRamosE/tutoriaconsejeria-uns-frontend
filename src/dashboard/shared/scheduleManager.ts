@@ -1,6 +1,28 @@
-// src/components/shared/scheduleManager.js
+import type { AcademicScheduleResponse } from "@/infrastructure/dto/academic-schedule/AcademicScheduleResponse";
 
-export function createScheduleRenderer(idPrefix, options = {}) {
+export interface CourseScheduleItem extends AcademicScheduleResponse {
+  isFirstHour?: boolean;
+}
+
+export interface ScheduleRendererOptions {
+  daysOrder?: string[];
+  courseColors?: string[];
+}
+
+export interface ScheduleRenderer {
+  setTitle: (text: string) => void;
+  show: () => void;
+  hide: () => void;
+  render: (schedules?: AcademicScheduleResponse[], options?: { emptyStateId?: string }) => void;
+  generateTimeSlots: (startHour?: number, endHour?: number) => string[];
+  calculateDuration: (startTime: string, endTime: string) => number;
+  formatDisplayTime: (time: string) => string;
+}
+
+export function createScheduleRenderer(
+  idPrefix: string, 
+  options: ScheduleRendererOptions = {}
+): ScheduleRenderer {
   const daysOrder = options.daysOrder || ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
   // Paleta por curso
@@ -16,50 +38,54 @@ export function createScheduleRenderer(idPrefix, options = {}) {
     'bg-lime-100 border-lime-300'
   ];
 
-  const el = (suffix) => document.getElementById(`${idPrefix}-${suffix}`);
+  const el = (suffix: string): HTMLElement | null => 
+    document.getElementById(`${idPrefix}-${suffix}`);
 
   // Utilidades
-  function generateTimeSlots(startHour = 7, endHour = 20) {
-    const hours = [];
+  function generateTimeSlots(startHour: number = 7, endHour: number = 20): string[] {
+    const hours: string[] = [];
     for (let i = startHour; i <= endHour; i++) {
       hours.push(`${i.toString().padStart(2, '0')}:00`);
     }
     return hours;
   }
 
-  function calculateDuration(startTime, endTime) {
+  function calculateDuration(startTime: string, endTime: string): number {
     const start = new Date(`2000-01-01T${startTime}`);
-    const end   = new Date(`2000-01-01T${endTime}`);
-    const diffHours = (end - start) / (1000 * 60 * 60);
+    const end = new Date(`2000-01-01T${endTime}`);
+    const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
     return Math.max(1, Math.round(diffHours));
   }
 
-  function formatDisplayTime(time) {
+  function formatDisplayTime(time: string): string {
     const [hour, minute] = time.split(':');
-    const hourNum = parseInt(hour);
-    return `${hourNum <= 12 ? hourNum : hourNum - 12}:${minute} ${hourNum < 12 ? 'AM' : 'PM'}`;
+    const hourNum = parseInt(hour, 10);
+    const period = hourNum < 12 ? 'AM' : 'PM';
+    const displayHour = hourNum <= 12 ? hourNum : hourNum - 12;
+    return `${displayHour}:${minute} ${period}`;
   }
 
-  function setTitle(text) {
+  function setTitle(text: string): void {
     const titleNode = el('scheduleTitle');
     if (titleNode) titleNode.textContent = text || '';
   }
 
-  function show() {
+  function show(): void {
     const container = el('scheduleContainer');
     if (container) container.classList.remove('hidden');
   }
 
-  function hide() {
+  function hide(): void {
     const container = el('scheduleContainer');
     if (container) container.classList.add('hidden');
   }
 
   /**
    * Renderiza el calendario semanal.
-   * @param {Array<{day:string, course:string, type:'TEO'|'LAB', startTime:string, endTime:string}>} schedules
+   * @param schedules - Lista de horarios a renderizar
+   * @param options - Opciones adicionales como emptyStateId
    */
-  function render(schedules = [], { emptyStateId } = {}) {
+  function render(schedules: AcademicScheduleResponse[] = [], { emptyStateId }: { emptyStateId?: string } = {}): void {
     const timeSlotsContainer = el('timeSlots');
     if (!timeSlotsContainer) return;
 
@@ -77,7 +103,7 @@ export function createScheduleRenderer(idPrefix, options = {}) {
     if (!schedules || schedules.length === 0) return;
 
     // Mapeo curso->color
-    const courseColorMap = {};
+    const courseColorMap: Record<string, string> = {};
     const allCourses = [...new Set(schedules.map(s => s.course))];
     allCourses.forEach((course, idx) => {
       courseColorMap[course] = courseColors[idx % courseColors.length];
@@ -86,7 +112,7 @@ export function createScheduleRenderer(idPrefix, options = {}) {
     const timeSlots = generateTimeSlots();
 
     // Matriz [día][hora] -> array de cursos concurrentes
-    const scheduleMatrix = {};
+    const scheduleMatrix: Record<string, Record<string, CourseScheduleItem[]>> = {};
     daysOrder.forEach(day => {
       scheduleMatrix[day] = {};
       timeSlots.forEach(time => {
@@ -97,7 +123,7 @@ export function createScheduleRenderer(idPrefix, options = {}) {
     // Llenar matriz
     schedules.forEach(item => {
       if (!daysOrder.includes(item.day)) return;
-      const startHour = parseInt(item.startTime.split(':')[0]);
+      const startHour = parseInt(item.startTime.split(':')[0], 10);
       const duration = calculateDuration(item.startTime, item.endTime);
       for (let i = 0; i < duration; i++) {
         const currentHour = startHour + i;
@@ -160,7 +186,31 @@ export function createScheduleRenderer(idPrefix, options = {}) {
   };
 }
 
-export function getCycleName(cycleNumber) {
-  const cycleNames = { '1':'I','2':'II','3':'III','4':'IV','5':'V','6':'VI','7':'VII','8':'VIII','9':'IX','10':'X' };
+export function getCycleName(cycleNumber: string): string {
+  const cycleNames: Record<string, string> = { 
+    '1': 'I', 
+    '2': 'II', 
+    '3': 'III', 
+    '4': 'IV', 
+    '5': 'V', 
+    '6': 'VI', 
+    '7': 'VII', 
+    '8': 'VIII', 
+    '9': 'IX', 
+    '10': 'X' 
+  };
   return cycleNames[cycleNumber] || cycleNumber;
+}
+
+// Tipos adicionales para uso en componentes
+export interface ScheduleMatrix {
+  [day: string]: {
+    [time: string]: CourseScheduleItem[];
+  };
+}
+
+export interface TimeSlotInfo {
+  time: string;
+  displayTime: string;
+  hour: number;
 }

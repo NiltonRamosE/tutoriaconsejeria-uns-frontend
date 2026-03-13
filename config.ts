@@ -19,6 +19,11 @@ export const config = {
       delete: "/administrator/:id",
       list: "/administrator",
       studentsByFilter: "/administrator/:endpoint",
+    },
+    schedule:{
+      compare: "/academic-schedule/compare/:studentId/:instructorId",
+      byCycle: "/academic-schedule",
+      instructorSchedule: "/instructor-schedule",
     }
   },
 };
