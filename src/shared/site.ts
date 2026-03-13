@@ -101,5 +101,37 @@ export const siteConfig = {
         description: 'Agenda tutorías o consejería',
         iconSrc: '/icons/calendar-blank.svg'
       },
+  ],
+  instructorSidebarItems: [
+    {
+        section: 'dashboard' as Section,
+        title: 'Inicio',
+        description: 'Resumen de actividades',
+        iconSrc: '/icons/four-square.svg'
+      },
+      {
+        section: 'evaluate' as Section,
+        title: "Evaluar Estudiante",
+        description: "Comparte tu retroalimentación",
+        iconSrc: "/icons/writing-in-paper.svg",
+      },
+      {
+        section: 'surveys' as Section,
+        title: 'Gestionar Estudiantes',
+        description: 'Consultar estudiantes y horarios',
+        iconSrc: '/icons/paper.svg'
+      },
+      {
+        section: 'appointments-schedule' as Section,
+        title: 'Ver Citas Programadas',
+        description: 'Consulta tus citas',
+        iconSrc: '/icons/calendar-blank.svg'
+      },
+      {
+        section: 'appointments' as Section,
+        title: 'Programar Cita',
+        description: 'Agenda tutorías o consejería',
+        iconSrc: '/icons/calendar-blank.svg'
+      },
   ]
 };

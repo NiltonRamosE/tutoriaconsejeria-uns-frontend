@@ -38,5 +38,14 @@ export const config = {
       cancelIndividual: "/student/appointments/cancel/:appointmentId",
       cancelGroup: "/student/appointments/cancel/:appointmentId/:studentId",
     },
+    instructor: {
+      assignedStudents: "/instructor/assigned/:instructorId",
+      individualAppointment: "/instructor/appointment/individual",
+      groupAppointment: "/instructor/appointment/group",
+      appointmentsSent: "/instructor/appointments/sent/:instructorId",
+      appointmentsReceived: "/instructor/appointments/received/:instructorId",
+      confirmAppointment: "/instructor/appointments/confirm/:appointmentId",
+      cancelAppointment: "/instructor/appointments/cancel/:appointmentId",
+    },
   },
 };
