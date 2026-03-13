@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { type User } from '@/domain/entities/User';
 import { getUser } from '@/dashboard/shared/authUtils';
 
-export function AdminProfileCard() {
+interface AdminProfileCardProps {
+  onViewProfile?: () => void;
+}
+
+export function AdminProfileCard({ onViewProfile }: AdminProfileCardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,6 +17,13 @@ export function AdminProfileCard() {
   }, []);
 
   const displayName = user?.fullName || 'Administrador';
+
+  const handleViewProfile = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (onViewProfile) {
+      onViewProfile();
+    }
+  };
 
   if (loading) {
     return (
@@ -41,8 +52,8 @@ export function AdminProfileCard() {
         </p>
         <a 
           href="#" 
-          data-section="administrator-profile" 
-          className="text-sm text-theme-keppel hover:underline"
+          onClick={handleViewProfile}
+          className="text-sm text-theme-keppel hover:underline cursor-pointer"
         >
           Ver perfil
         </a>
