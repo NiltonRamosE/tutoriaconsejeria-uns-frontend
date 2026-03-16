@@ -3,7 +3,7 @@ import { StudentSidebar } from '@/dashboard/student/components/StudentSidebar';
 import { DashboardSection } from '@/dashboard/student/sections/DashboardSection';
 import { EvaluateSection } from '@/dashboard/student/sections/EvaluateSection';
 import { SurveysSection } from '@/dashboard/student/sections/SurveysSection';
-//import AppointmentsSection from '@/dashboard/student/sections/AppointmentsSection.astro';
+import AppointmentsSection from '@/dashboard/student/sections/AppointmentSection';
 import { StudentProfile } from '@/dashboard/student/sections/StudentProfile';
 //import AppointmentsScheduleSection from '@/dashboard/student/sections/AppointmentsScheduleSection.astro';
 import { useStudentSection } from '@/dashboard/shared/hooks/useStudentSection';
@@ -22,9 +22,9 @@ export function StudentPanel() {
       case 'surveys':
         return <SurveysSection />;
       /*case 'appointments-schedule':
-        return <AppointmentsScheduleSection />;
+        return <AppointmentsScheduleSection />;*/
       case 'appointments':
-        return <AppointmentsSection />;*/
+        return <AppointmentsSection />;
       default:
         return <DashboardSection />;
     }

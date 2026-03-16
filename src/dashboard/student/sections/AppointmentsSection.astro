@@ -1,8 +1,8 @@
 ---
 import AppointmentModality from '@/dashboard/shared/AppointmentModality.astro';
 import TypeActivity from '@/dashboard/shared/TypeActivity.astro';
-import PrevStepButton from '@/shared/components/PrevStepButton.astro';
-import NextStepButton from '@/shared/components/NextStepButton.astro';
+import PrevStepButton from '@/shared/components/PrevStepButton';
+import NextStepButton from '@/shared/components/NextStepButton';
 import AppointmentDetail from '@/dashboard/shared/AppointmentDetail.astro';
 const idPrefix = 'studentSender';
 ---
@@ -691,9 +691,3 @@ const idPrefix = 'studentSender';
         window.selectedScheduleSlots = slots;
     }
 </script>
-
-<style>
-    .form-step {
-        transition: opacity 0.3s ease;
-    }
-</style>
