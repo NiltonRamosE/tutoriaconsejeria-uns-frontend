@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import AppointmentModality from '@/dashboard/shared/AppointmentModality';
 import TypeActivity from '@/dashboard/shared/TypeActivity';
@@ -12,6 +12,8 @@ import { fetchBusySchedules } from '@/infrastructure/api/academicSchedule';
 import { getUser } from '@/dashboard/shared/authUtils';
 import { type User } from '@/domain/entities/User';
 import { type AssignedInstructorResponse } from '@/infrastructure/dto/student/AssignedInstructorResponse';
+import { type AssignedStudentResponse } from '@/infrastructure/dto/student/AssignedStudentResponse';
+
 const idPrefix = 'studentSender';
 
 export default function AppointmentsSection() {
@@ -23,6 +25,9 @@ export default function AppointmentsSection() {
   const [assignedInstructor, setAssignedInstructor ] = useState<AssignedInstructorResponse[] | null>(null);
   const [instructorSelected, setInstructorSelected] = useState<number| null>(null);
   const [activityType, setActivityType] = useState<string| undefined>(undefined);
+  const [availableStudents, setAvailableStudents] = useState<AssignedStudentResponse[]>([]);
+  const studentsListRef = useRef<HTMLDivElement>(null);
+  const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
 
   useEffect(() => {
     const loadInstructor = async () => {
@@ -43,8 +48,21 @@ export default function AppointmentsSection() {
     loadInstructor();
   }, []);
 
+  useEffect(() => {
+    const loadStudents = async () => {
+      if (selectedModality !== 'G' || !instructorSelected) return;
+      try {
+        const students = await fetchStudentsAssignedByInstructor(instructorSelected);
+        setAvailableStudents(students);
+      } catch (error) {
+        console.error('Error loading students:', error);
+      }
+    };
+    loadStudents();
+  }, [instructorSelected, selectedModality]);
+
   const nextStep = () => {
-    if (selectedModality === 'I' && currentStep === 1) {
+    if (selectedModality === 'I' && currentStep === 1 && !assignedInstructor?.find(instr => instr.id === instructorSelected)?.bothActivities) {
       setCurrentStep(prev => Math.min(3, prev + 2));
     }else{
       setCurrentStep(prev => Math.min(3, prev + 1));
@@ -52,7 +70,7 @@ export default function AppointmentsSection() {
   };
 
   const prevStep = () => {
-    if (selectedModality === 'I' && currentStep === 3) {
+    if (selectedModality === 'I' && currentStep === 3 && !assignedInstructor?.find(instr => instr.id === instructorSelected)?.bothActivities) {
       setCurrentStep(prev => Math.max(1, prev - 2));
     }else{
       setCurrentStep(prev => Math.max(1, prev - 1));
@@ -81,12 +99,47 @@ export default function AppointmentsSection() {
 
   }, [selectedInstructor]);
 
+  useEffect(() => {
+    if (currentStep !== 2 || selectedModality !== 'G') return;
+    
+    const currentActivity = selectedInstructor?.bothActivities ? activityType : selectedInstructor?.typeActivity;
+    if (!currentActivity || !availableStudents.length || !student?.id) return;
+
+    const filtered = availableStudents.filter(
+      s => s.typeActivityCode === currentActivity && s.id !== student.id
+    );
+
+    if (studentsListRef.current) {
+      studentsListRef.current.innerHTML = '';
+      filtered.forEach(student => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center p-2 border border-theme-rich-black/10 rounded hover:bg-theme-keppel/5 cursor-pointer';
+        div.innerHTML = `
+          <input type="checkbox" id="student-${student.id}" value="${student.id}" class="mr-2 student-checkbox">
+          <label for="student-${student.id}" class="cursor-pointer flex-1">${student.fullName}</label>
+        `;
+        studentsListRef.current?.appendChild(div);
+      });
+
+      document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+          const target = e.target as HTMLInputElement;
+          const id = parseInt(target.value);
+          setSelectedStudents(prev =>
+            target.checked ? [...prev, id] : prev.filter(s => s !== id)
+          );
+        });
+      });
+    }
+  }, [currentStep, selectedModality, availableStudents, selectedInstructor, activityType, student?.id]);
+
   console.log('Student data:', student);
   console.log('Current step:', currentStep);
   console.log('Selected modality:', selectedModality);
   console.log('Assigned instructor:', assignedInstructor);
   console.log('Instructor selected:', instructorSelected);
   console.log('Activity type:', activityType);
+  console.log('Available students:', availableStudents);
 
   return (
     <div className="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
@@ -125,34 +178,38 @@ export default function AppointmentsSection() {
           )}
           
           {/* Paso 2: Tipo de Actividad y Estudiantes (solo para citas grupales) */}
-          { currentStep === 2 && selectedModality === 'G' && (
-            <div className="form-step" data-step="2">
-              <h3 className="text-lg font-semibold mb-4 text-theme-rich-black flex items-center">
+          {currentStep === 2 && (
+            (selectedModality === 'G' || (selectedModality === 'I' && selectedInstructor?.bothActivities)) && (
+              <div className="form-step" data-step="2">
+                <h3 className="text-lg font-semibold mb-4">
                   <span className="bg-theme-keppel text-white rounded-full h-8 w-8 flex items-center justify-center mr-2">2</span>
-                  Selecciona estudiantes para la cita grupal
-              </h3>
+                  {selectedModality === 'I' ? 'Selecciona el tipo de actividad' : 'Selecciona estudiantes para la cita grupal'}
+                </h3>
 
-              {/* Tipo de Actividad (solo visible cuando bothActivities es true) */}
-              { selectedInstructor?.bothActivities && (
-                <TypeActivity idPrefix={idPrefix} value={activityType} onChange={setActivityType}/>
-              )}
-              
-              {/* Selección de Estudiantes (solo para citas grupales) */}
-              <div id="studentsContainer" className="mb-6">
-                  <span className="block text-sm font-medium mb-2 text-theme-rich-black/80">Selecciona estudiantes</span>
-                  <div className="border border-theme-rich-black/20 rounded-lg p-3 max-h-60 overflow-y-auto">
-                      <div id="studentsList" className="space-y-2">
-                          {/* Los estudiantes se cargarán dinámicamente */}
-                      </div>
-                  </div>
-                  <p id="noStudentsMessage" className="text-sm text-gray-500 mt-2 hidden">No hay estudiantes disponibles para este docente y tipo de actividad.</p>
-              </div>
+                {/* Tipo de Actividad (si bothActivities es true) */}
+                {selectedInstructor?.bothActivities && (
+                  <TypeActivity idPrefix={idPrefix} value={activityType} onChange={setActivityType} />
+                )}
 
-              <div className="flex justify-between">
-                  <PrevStepButton onClick={prevStep}/>
-                  <NextStepButton onClick={nextStep}/>
+                {/* Selección de Estudiantes (solo para citas grupales) */}
+                {selectedModality === 'G' && (
+                  <div className="mb-6">
+                    <span className="text-sm font-medium mb-2 text-theme-rich-black/80">Selecciona estudiantes</span>
+                    <div className="border border-theme-rich-black/20 rounded-lg p-3 max-h-60 overflow-y-auto">
+                        <div ref={studentsListRef} className="space-y-2">
+                            {/* Los estudiantes se cargarán dinámicamente */}
+                        </div>
+                    </div>
+                    <p id="noStudentsMessage" className="text-sm text-gray-500 mt-2 hidden">No hay estudiantes disponibles para este docente y tipo de actividad.</p>
+                </div>
+                )}
+
+                <div className="flex justify-between">
+                  <PrevStepButton onClick={prevStep} />
+                  <NextStepButton onClick={nextStep} />
+                </div>
               </div>
-            </div>
+            )
           )}
           
           {/* Paso 3: Detalles de la cita */}
