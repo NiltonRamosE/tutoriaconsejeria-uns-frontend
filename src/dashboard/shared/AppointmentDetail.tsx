@@ -1,13 +1,41 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import PrevStepButton from '@/shared/components/PrevStepButton';
 import ScheduleSelector from '@/dashboard/shared/ScheduleSelector';
 
 export interface AppointmentDetailProps {
   idPrefix: string;
   prevStep?: () => void;
+  onOpenScheduleModal?: () => void;
+  selectedModality?: 'I' | 'G' | null;
+  schedulePreviewVisible?: boolean;
+  selectedSchedulePreviewRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ idPrefix, prevStep }) => {
+const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ 
+  idPrefix, 
+  prevStep,
+  onOpenScheduleModal,
+  selectedModality,
+  schedulePreviewVisible,
+  selectedSchedulePreviewRef
+}) => {
+  const specificMethodContainerRef = useRef<HTMLDivElement>(null);
+  const specificReasonContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleMethodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (specificMethodContainerRef.current) {
+      specificMethodContainerRef.current.classList.toggle('hidden', value !== 'Otro');
+    }
+  };
+
+  const handleReasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (specificReasonContainerRef.current) {
+      specificReasonContainerRef.current.classList.toggle('hidden', value !== 'Otro');
+    }
+  };
+
   return (
     <div className="form-step" id={`${idPrefix}-detailsStep`}>
       <h3 className="text-lg font-semibold mb-4 text-theme-rich-black flex items-center">
@@ -18,7 +46,6 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ idPrefix, prevSte
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        {/* Método de Cita */}
         <div>
           <label htmlFor={`${idPrefix}-appointmentMethod`} className="block text-sm font-medium mb-2 text-theme-rich-black/80">
             Método de Cita
@@ -26,6 +53,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ idPrefix, prevSte
           <select 
             id={`${idPrefix}-appointmentMethod`} 
             className="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent"
+            onChange={handleMethodChange}
           >
             <option value="">Seleccione un método</option>
             <option value="A">Personal</option>
@@ -36,8 +64,11 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ idPrefix, prevSte
           </select>
         </div>
 
-        {/* Método Específico de Cita */}
-        <div id={`${idPrefix}-specificMethodContainer`} className="hidden">
+        <div 
+          ref={specificMethodContainerRef}
+          id={`${idPrefix}-specificMethodContainer`} 
+          className="hidden"
+        >
           <label htmlFor={`${idPrefix}-specificAppointmentMethod`} className="block text-sm font-medium mb-2 text-theme-rich-black/80">
             Método Específico
           </label>
@@ -49,7 +80,6 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ idPrefix, prevSte
           />
         </div>
 
-        {/* Razón de la Cita */}
         <div>
           <label htmlFor={`${idPrefix}-appointmentReason`} className="block text-sm font-medium mb-2 text-theme-rich-black/80">
             Razón de la Cita
@@ -57,6 +87,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ idPrefix, prevSte
           <select 
             id={`${idPrefix}-appointmentReason`} 
             className="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent"
+            onChange={handleReasonChange}
           >
             <option value="">Seleccione una razón</option>
             <option value="A">Rendimiento académico</option>
@@ -73,8 +104,11 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ idPrefix, prevSte
           </select>
         </div>
 
-        {/* Razón Específica de la Cita */}
-        <div id={`${idPrefix}-specificReasonContainer`} className="hidden">
+        <div 
+          ref={specificReasonContainerRef}
+          id={`${idPrefix}-specificReasonContainer`} 
+          className="hidden"
+        >
           <label htmlFor={`${idPrefix}-specificAppointmentReason`} className="block text-sm font-medium mb-2 text-theme-rich-black/80">
             Razón Específica
           </label>
@@ -87,8 +121,13 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ idPrefix, prevSte
         </div>
       </div>
 
-      {/* Horarios Alternativos */}
-      <ScheduleSelector idPrefix={idPrefix} />
+      <ScheduleSelector 
+        idPrefix={idPrefix}
+        selectedModality={selectedModality}
+        onOpenScheduleModal={onOpenScheduleModal}
+        schedulePreviewVisible={schedulePreviewVisible}
+        selectedSchedulePreviewRef={selectedSchedulePreviewRef}
+      />
 
       <div className="flex justify-between">
         <PrevStepButton onClick={prevStep} />

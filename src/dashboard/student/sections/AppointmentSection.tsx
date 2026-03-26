@@ -7,12 +7,12 @@ import NextStepButton from '@/shared/components/NextStepButton';
 import AppointmentDetail from '@/dashboard/shared/AppointmentDetail';
 
 import { fetchAssignedInstructor, fetchStudentsAssignedByInstructor, submitIndividualAppointment, submitGroupAppointment } from '@/infrastructure/api/student';
-import { resetFormSteps, resetForm, toggleFieldVisibility, setSelectedModalityButton, resetModalityButtons, initAppointmentFormListeners } from '@/dashboard/shared/appointmentManager';
 import { fetchBusySchedules } from '@/infrastructure/api/academicSchedule';
 import { getUser } from '@/dashboard/shared/authUtils';
 import { type User } from '@/domain/entities/User';
 import { type AssignedInstructorResponse } from '@/infrastructure/dto/student/AssignedInstructorResponse';
 import { type AssignedStudentResponse } from '@/infrastructure/dto/student/AssignedStudentResponse';
+import ScheduleModal from '@/dashboard/shared/ScheduleModal';
 
 const idPrefix = 'studentSender';
 
@@ -28,6 +28,13 @@ export default function AppointmentsSection() {
   const [availableStudents, setAvailableStudents] = useState<AssignedStudentResponse[]>([]);
   const studentsListRef = useRef<HTMLDivElement>(null);
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [busySchedules, setBusySchedules] = useState<any[]>([]);
+  const [selectedScheduleSlots, setSelectedScheduleSlots] = useState<string[]>([]);
+  const [schedulePreviewVisible, setSchedulePreviewVisible] = useState(false);
+  const selectedSchedulePreviewRef = useRef<HTMLDivElement>(null);
+  const [selectedSlotsSummary, setSelectedSlotsSummary] = useState<string>('');
+  const [previewKey, setPreviewKey] = useState(0);
 
   useEffect(() => {
     const loadInstructor = async () => {
@@ -133,6 +140,102 @@ export default function AppointmentsSection() {
     }
   }, [currentStep, selectedModality, availableStudents, selectedInstructor, activityType, student?.id]);
 
+  const openScheduleModal = async () => {
+    if (!student?.id || !instructorSelected) {
+      alert('Por favor selecciona un docente primero');
+      return;
+    }
+    
+    try {
+      const data = await fetchBusySchedules(student.id, instructorSelected);
+      setBusySchedules(data);
+      setModalOpen(true);
+    } catch (error) {
+      console.error('Error al cargar horarios:', error);
+      alert('Error al cargar los horarios');
+    }
+  };
+
+  const handleConfirmSlots = (slots: string[]) => {
+    setSelectedScheduleSlots(slots);
+    setSchedulePreviewVisible(true);
+    
+    // Crear resumen de horarios
+    const summary = slots.map(slot => {
+      const date = new Date(slot);
+      return `${date.toLocaleDateString('es-ES')} a las ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+    }).join(', ');
+    setSelectedSlotsSummary(summary);
+    
+    // Forzar re-renderización del preview
+    setPreviewKey(prev => prev + 1);
+    
+    // Actualizar preview inmediatamente después del render
+    setTimeout(() => {
+      if (selectedSchedulePreviewRef.current) {
+        selectedSchedulePreviewRef.current.innerHTML = renderSchedulePreview(slots);
+      }
+    }, 0);
+  };
+
+  // Agrega un useEffect para actualizar el preview cuando cambie la clave o los slots
+  useEffect(() => {
+    if (schedulePreviewVisible && selectedScheduleSlots.length > 0 && selectedSchedulePreviewRef.current) {
+      selectedSchedulePreviewRef.current.innerHTML = renderSchedulePreview(selectedScheduleSlots);
+    }
+  }, [previewKey, selectedScheduleSlots, schedulePreviewVisible]);
+
+  // En AppointmentsSection.tsx, implementa renderSchedulePreview
+  const renderSchedulePreview = (slots: string[]) => {
+    return `
+      <div class="bg-gradient-to-br from-theme-seasalt to-theme-keppel/5 p-4 rounded-xl border border-theme-keppel/20 shadow-sm">
+        <p class="text-sm font-medium text-theme-rich-black/80 flex items-center mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Horarios seleccionados para la cita:
+        </p>
+        <div class="space-y-2">
+          ${slots.map((slot, index) => {
+            const date = new Date(slot);
+            const formattedDate = date.toLocaleDateString('es-ES', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            });
+            const formattedTime = date.toLocaleTimeString('es-ES', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            });
+            return `
+              <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-theme-keppel/10 shadow-xs transition-all duration-200 hover:shadow-sm">
+                <div class="flex items-center space-x-3">
+                  <div class="bg-theme-keppel/10 p-1.5 rounded-lg">
+                    <span class="text-sm font-medium text-theme-keppel">${index + 1}</span>
+                  </div>
+                  <div>
+                    <span class="text-theme-rich-black font-medium">${formattedDate}</span>
+                    <span class="text-theme-rich-black/70 text-sm ml-2">${formattedTime}</span>
+                  </div>
+                </div>
+                <span class="bg-theme-keppel/10 text-theme-keppel p-1 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <p class="text-xs text-theme-rich-black/60 mt-3 pt-2 border-t border-theme-keppel/10">
+          Se han seleccionado ${slots.length} horario${slots.length !== 1 ? 's' : ''} para la cita
+        </p>
+      </div>
+    `;
+  };
+
+
   console.log('Student data:', student);
   console.log('Current step:', currentStep);
   console.log('Selected modality:', selectedModality);
@@ -214,10 +317,25 @@ export default function AppointmentsSection() {
           
           {/* Paso 3: Detalles de la cita */}
           { currentStep === 3 && (
-            <AppointmentDetail idPrefix={idPrefix} prevStep={prevStep} />
+            <AppointmentDetail 
+              idPrefix={idPrefix} 
+              prevStep={prevStep}
+              onOpenScheduleModal={openScheduleModal}
+              selectedModality={selectedModality}
+              schedulePreviewVisible={schedulePreviewVisible}
+              selectedSchedulePreviewRef={selectedSchedulePreviewRef}
+            />
           )}
+
+          <ScheduleModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onConfirm={handleConfirmSlots}
+            busySchedules={busySchedules}
+          />
         </form>
       )}
+
       
   </div>
   );
