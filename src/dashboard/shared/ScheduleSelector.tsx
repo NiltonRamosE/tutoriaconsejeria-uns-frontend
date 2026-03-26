@@ -6,6 +6,9 @@ export interface ScheduleSelectorProps {
   onOpenScheduleModal?: () => void;
   schedulePreviewVisible?: boolean;
   selectedSchedulePreviewRef?: React.RefObject<HTMLDivElement | null>;
+  altScheduleARef?: React.RefObject<HTMLInputElement | null>;
+  altScheduleBRef?: React.RefObject<HTMLInputElement | null>;
+  altScheduleCRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({ 
@@ -13,7 +16,10 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
   selectedModality,
   onOpenScheduleModal,
   schedulePreviewVisible,
-  selectedSchedulePreviewRef 
+  selectedSchedulePreviewRef,
+  altScheduleARef,
+  altScheduleBRef,
+  altScheduleCRef
 }) => {
   const getMinDate = () => {
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -35,6 +41,7 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
             <div className="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
               <label htmlFor={`${idPrefix}-altScheduleA`} className="block text-sm font-medium mb-1 text-theme-rich-black/70">Primera Opción</label>
               <input 
+                ref={altScheduleARef}
                 type="datetime-local" 
                 id={`${idPrefix}-altScheduleA`}
                 min={getMinDate()}
@@ -45,6 +52,7 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
             <div className="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
               <label htmlFor={`${idPrefix}-altScheduleB`} className="block text-sm font-medium mb-1 text-theme-rich-black/70">Segunda Opción</label>
               <input 
+                ref={altScheduleBRef}
                 type="datetime-local" 
                 id={`${idPrefix}-altScheduleB`}
                 min={getMinDate()}
@@ -55,6 +63,7 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
             <div className="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
               <label htmlFor={`${idPrefix}-altScheduleC`} className="block text-sm font-medium mb-1 text-theme-rich-black/70">Tercera Opción</label>
               <input 
+                ref={altScheduleCRef}
                 type="datetime-local" 
                 id={`${idPrefix}-altScheduleC`}
                 min={getMinDate()}

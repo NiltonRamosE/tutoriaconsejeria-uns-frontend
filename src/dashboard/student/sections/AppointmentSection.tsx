@@ -13,7 +13,8 @@ import { type User } from '@/domain/entities/User';
 import { type AssignedInstructorResponse } from '@/infrastructure/dto/student/AssignedInstructorResponse';
 import { type AssignedStudentResponse } from '@/infrastructure/dto/student/AssignedStudentResponse';
 import ScheduleModal from '@/dashboard/shared/ScheduleModal';
-
+import {type ScheduleGroupAppointmentRequest} from '@/infrastructure/dto/appointment-schedule/ScheduleGroupAppointmentRequest';
+import { type ScheduleIndividualAppointmentRequest } from '@/infrastructure/dto/appointment-schedule/ScheduleIndividualAppointmentRequest';
 const idPrefix = 'studentSender';
 
 export default function AppointmentsSection() {
@@ -35,6 +36,14 @@ export default function AppointmentsSection() {
   const selectedSchedulePreviewRef = useRef<HTMLDivElement>(null);
   const [selectedSlotsSummary, setSelectedSlotsSummary] = useState<string>('');
   const [previewKey, setPreviewKey] = useState(0);
+
+  const appointmentMethodRef = useRef<HTMLSelectElement>(null);
+  const specificAppointmentMethodRef = useRef<HTMLInputElement>(null);
+  const appointmentReasonRef = useRef<HTMLSelectElement>(null);
+  const specificAppointmentReasonRef = useRef<HTMLInputElement>(null);
+  const altScheduleARef = useRef<HTMLInputElement>(null);
+  const altScheduleBRef = useRef<HTMLInputElement>(null);
+  const altScheduleCRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadInstructor = async () => {
@@ -160,17 +169,14 @@ export default function AppointmentsSection() {
     setSelectedScheduleSlots(slots);
     setSchedulePreviewVisible(true);
     
-    // Crear resumen de horarios
     const summary = slots.map(slot => {
       const date = new Date(slot);
       return `${date.toLocaleDateString('es-ES')} a las ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
     }).join(', ');
     setSelectedSlotsSummary(summary);
     
-    // Forzar re-renderización del preview
     setPreviewKey(prev => prev + 1);
     
-    // Actualizar preview inmediatamente después del render
     setTimeout(() => {
       if (selectedSchedulePreviewRef.current) {
         selectedSchedulePreviewRef.current.innerHTML = renderSchedulePreview(slots);
@@ -178,14 +184,12 @@ export default function AppointmentsSection() {
     }, 0);
   };
 
-  // Agrega un useEffect para actualizar el preview cuando cambie la clave o los slots
   useEffect(() => {
     if (schedulePreviewVisible && selectedScheduleSlots.length > 0 && selectedSchedulePreviewRef.current) {
       selectedSchedulePreviewRef.current.innerHTML = renderSchedulePreview(selectedScheduleSlots);
     }
   }, [previewKey, selectedScheduleSlots, schedulePreviewVisible]);
 
-  // En AppointmentsSection.tsx, implementa renderSchedulePreview
   const renderSchedulePreview = (slots: string[]) => {
     return `
       <div class="bg-gradient-to-br from-theme-seasalt to-theme-keppel/5 p-4 rounded-xl border border-theme-keppel/20 shadow-sm">
@@ -235,25 +239,127 @@ export default function AppointmentsSection() {
     `;
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!student?.id) {
+      alert('No se encontró información del estudiante');
+      return;
+    }
 
-  console.log('Student data:', student);
-  console.log('Current step:', currentStep);
-  console.log('Selected modality:', selectedModality);
-  console.log('Assigned instructor:', assignedInstructor);
-  console.log('Instructor selected:', instructorSelected);
-  console.log('Activity type:', activityType);
-  console.log('Available students:', availableStudents);
+    // 1. Validar tipo de actividad
+    let currentActivity = activityType;
+    if (!selectedInstructor?.bothActivities) {
+      currentActivity = selectedInstructor?.typeActivity || undefined;
+    }
+    if (!currentActivity) {
+      alert('Por favor selecciona un tipo de actividad');
+      return;
+    }
+
+    // 2. Validar método de cita
+    const appointmentMethod = appointmentMethodRef.current?.value || '';
+    if (!appointmentMethod) {
+      alert('Por favor selecciona un método de cita');
+      return;
+    }
+
+    // 3. Validar razón de cita
+    const appointmentReason = appointmentReasonRef.current?.value || '';
+    if (!appointmentReason) {
+      alert('Por favor selecciona una razón de cita');
+      return;
+    }
+
+    // 4. Obtener horarios según la modalidad
+    let altA: string, altB: string, altC: string;
+    
+    if (selectedModality === 'I') {
+      // Cita individual - usar horarios seleccionados del modal
+      if (selectedScheduleSlots.length < 3) {
+        alert('Debes seleccionar 3 horarios para la cita individual');
+        return;
+      }
+      [altA, altB, altC] = selectedScheduleSlots;
+    } else {
+      // Cita grupal - usar inputs de horarios alternativos
+      altA = altScheduleARef.current?.value || '';
+      altB = altScheduleBRef.current?.value || '';
+      altC = altScheduleCRef.current?.value || '';
+      
+      if (!altA || !altB || !altC) {
+        alert('Debes completar los tres horarios alternativos');
+        return;
+      }
+    }
+
+    // 5. Construir el payload base
+    const basePayload = {
+      appointmentModalityCode: selectedModality!,
+      appointmentMethod: appointmentMethod === 'Otro' ? null : appointmentMethod,
+      specificAppointmentMethod: specificAppointmentMethodRef.current?.value || null,
+      appointmentReason: appointmentReason === 'Otro' ? null : appointmentReason,
+      specificAppointmentReason: specificAppointmentReasonRef.current?.value || null,
+      typeActivityCode: currentActivity,
+      instructorId: selectedInstructor!.id,
+      altScheduleA: altA,
+      altScheduleB: altB,
+      altScheduleC: altC,
+    };
+
+    try {
+      if (selectedModality === 'I') {
+        // Cita individual
+        const payload = {
+          ...basePayload,
+          studentId: student.id,
+        };
+        await submitIndividualAppointment(payload as ScheduleIndividualAppointmentRequest);
+        alert('Cita individual programada exitosamente');
+      } else {
+        // Cita grupal
+        const allStudentIds = [...selectedStudents, student.id];
+        const payload = {
+          ...basePayload,
+          studentId: student.id,
+          studentsId: allStudentIds,
+        };
+        await submitGroupAppointment(payload as ScheduleGroupAppointmentRequest);
+        alert('Cita grupal programada exitosamente');
+      }
+
+      resetFormState();
+    } catch (error: any) {
+      console.error('Error al programar la cita:', error);
+      alert('Error al programar la cita: ' + (error.message || 'Error desconocido'));
+    }
+  };
+
+  const resetFormState = () => {
+    setSelectedModality(null);
+    setShowFormContainer(false);
+    setCurrentStep(1);
+    setInstructorSelected(null);
+    setSelectedStudents([]);
+    setActivityType(undefined);
+    setSelectedScheduleSlots([]);
+    setSchedulePreviewVisible(false);
+    setModalOpen(false);
+    setBusySchedules([]);
+    setSelectedSlotsSummary('');
+    
+    if (appointmentMethodRef.current) appointmentMethodRef.current.value = '';
+    if (appointmentReasonRef.current) appointmentReasonRef.current.value = '';
+  };
 
   return (
     <div className="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
       <h2 className="text-2xl font-bold mb-6 text-theme-rich-black">Programación de Citas</h2>
       
-      {/* Selector de Modalidad */}
       <AppointmentModality selectedModality={selectedModality} onSelect={handleModalitySelect} />
 
-      {/* Formulario de Cita */}
       {showFormContainer && (
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Paso 1: Selección de Docente */}
           { currentStep === 1 && (
             <div className="form-step active" data-step="1">
@@ -324,6 +430,13 @@ export default function AppointmentsSection() {
               selectedModality={selectedModality}
               schedulePreviewVisible={schedulePreviewVisible}
               selectedSchedulePreviewRef={selectedSchedulePreviewRef}
+              appointmentMethodRef={appointmentMethodRef}
+              specificAppointmentMethodRef={specificAppointmentMethodRef}
+              appointmentReasonRef={appointmentReasonRef}
+              specificAppointmentReasonRef={specificAppointmentReasonRef}
+              altScheduleARef={altScheduleARef}
+              altScheduleBRef={altScheduleBRef}
+              altScheduleCRef={altScheduleCRef}
             />
           )}
 
@@ -335,8 +448,6 @@ export default function AppointmentsSection() {
           />
         </form>
       )}
-
-      
   </div>
   );
 }

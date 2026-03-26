@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import PrevStepButton from '@/shared/components/PrevStepButton';
 import ScheduleSelector from '@/dashboard/shared/ScheduleSelector';
 
@@ -9,6 +9,13 @@ export interface AppointmentDetailProps {
   selectedModality?: 'I' | 'G' | null;
   schedulePreviewVisible?: boolean;
   selectedSchedulePreviewRef?: React.RefObject<HTMLDivElement | null>;
+  appointmentMethodRef?: React.RefObject<HTMLSelectElement | null>;
+  specificAppointmentMethodRef?: React.RefObject<HTMLInputElement | null>;
+  appointmentReasonRef?: React.RefObject<HTMLSelectElement | null>;
+  specificAppointmentReasonRef?: React.RefObject<HTMLInputElement | null>;
+  altScheduleARef?: React.RefObject<HTMLInputElement | null>;
+  altScheduleBRef?: React.RefObject<HTMLInputElement | null>;
+  altScheduleCRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 const AppointmentDetail: React.FC<AppointmentDetailProps> = ({ 
@@ -17,7 +24,14 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
   onOpenScheduleModal,
   selectedModality,
   schedulePreviewVisible,
-  selectedSchedulePreviewRef
+  selectedSchedulePreviewRef,
+  appointmentMethodRef,
+  specificAppointmentMethodRef,
+  appointmentReasonRef,
+  specificAppointmentReasonRef,
+  altScheduleARef,
+  altScheduleBRef,
+  altScheduleCRef
 }) => {
   const specificMethodContainerRef = useRef<HTMLDivElement>(null);
   const specificReasonContainerRef = useRef<HTMLDivElement>(null);
@@ -51,6 +65,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
             Método de Cita
           </label>
           <select 
+            ref={appointmentMethodRef}
             id={`${idPrefix}-appointmentMethod`} 
             className="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent"
             onChange={handleMethodChange}
@@ -73,6 +88,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
             Método Específico
           </label>
           <input 
+            ref={specificAppointmentMethodRef}
             type="text" 
             id={`${idPrefix}-specificAppointmentMethod`} 
             className="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent" 
@@ -85,6 +101,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
             Razón de la Cita
           </label>
           <select 
+            ref={appointmentReasonRef}
             id={`${idPrefix}-appointmentReason`} 
             className="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent"
             onChange={handleReasonChange}
@@ -113,6 +130,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
             Razón Específica
           </label>
           <input 
+            ref={specificAppointmentReasonRef}
             type="text" 
             id={`${idPrefix}-specificAppointmentReason`} 
             className="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent" 
@@ -127,6 +145,9 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
         onOpenScheduleModal={onOpenScheduleModal}
         schedulePreviewVisible={schedulePreviewVisible}
         selectedSchedulePreviewRef={selectedSchedulePreviewRef}
+        altScheduleARef={altScheduleARef}
+        altScheduleBRef={altScheduleBRef}
+        altScheduleCRef={altScheduleCRef}
       />
 
       <div className="flex justify-between">
