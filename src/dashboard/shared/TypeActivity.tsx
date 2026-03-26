@@ -1,14 +1,13 @@
 import React from 'react';
 
 export interface TypeActivityProps {
-  idPrefix: string;
   value?: string;
   onChange: (value: string) => void;
 }
 
-const TypeActivity: React.FC<TypeActivityProps> = ({ idPrefix, value, onChange }) => {
+const TypeActivity: React.FC<TypeActivityProps> = ({ value, onChange }) => {
   return (
-    <div id={`${idPrefix}-typeActivityContainer`} className="mb-4">
+    <div className="mb-4">
       <span className="block text-sm font-medium mb-2 text-theme-rich-black/80">
         Tipo de Actividad
       </span>

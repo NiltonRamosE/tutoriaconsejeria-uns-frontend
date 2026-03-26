@@ -1,7 +1,6 @@
 import React from 'react';
 
 export interface ScheduleSelectorProps {
-  idPrefix: string;
   selectedModality?: 'I' | 'G' | null;
   onOpenScheduleModal?: () => void;
   schedulePreviewVisible?: boolean;
@@ -10,9 +9,7 @@ export interface ScheduleSelectorProps {
   altScheduleBRef?: React.RefObject<HTMLInputElement | null>;
   altScheduleCRef?: React.RefObject<HTMLInputElement | null>;
 }
-
 const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({ 
-  idPrefix, 
   selectedModality,
   onOpenScheduleModal,
   schedulePreviewVisible,
@@ -30,7 +27,7 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
     <>
       {/* Horarios Alternativos (solo para citas grupales) */}
       {selectedModality === 'G' && (
-        <div id={`${idPrefix}-groupScheduleContainer`} className="mb-4">
+        <div className="mb-4">
           <span className="text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -39,33 +36,30 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
           </span>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
-              <label htmlFor={`${idPrefix}-altScheduleA`} className="block text-sm font-medium mb-1 text-theme-rich-black/70">Primera Opción</label>
+              <label className="block text-sm font-medium mb-1 text-theme-rich-black/70">Primera Opción</label>
               <input 
                 ref={altScheduleARef}
                 type="datetime-local" 
-                id={`${idPrefix}-altScheduleA`}
                 min={getMinDate()}
                 className="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200"
               />
             </div>
 
             <div className="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
-              <label htmlFor={`${idPrefix}-altScheduleB`} className="block text-sm font-medium mb-1 text-theme-rich-black/70">Segunda Opción</label>
+              <label className="block text-sm font-medium mb-1 text-theme-rich-black/70">Segunda Opción</label>
               <input 
                 ref={altScheduleBRef}
                 type="datetime-local" 
-                id={`${idPrefix}-altScheduleB`}
                 min={getMinDate()}
                 className="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200"
               />
             </div>
 
             <div className="bg-gradient-to-b from-white to-theme-seasalt p-3 rounded-xl border border-theme-rich-black/10 shadow-sm">
-              <label htmlFor={`${idPrefix}-altScheduleC`} className="block text-sm font-medium mb-1 text-theme-rich-black/70">Tercera Opción</label>
+              <label className="block text-sm font-medium mb-1 text-theme-rich-black/70">Tercera Opción</label>
               <input 
                 ref={altScheduleCRef}
                 type="datetime-local" 
-                id={`${idPrefix}-altScheduleC`}
                 min={getMinDate()}
                 className="w-full p-3 border rounded-lg border-theme-rich-black/20 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200"
               />
@@ -76,7 +70,7 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
 
       {/* Selector de horarios interactivo (solo para citas individuales) */}
       {selectedModality === 'I' && (
-        <div id={`${idPrefix}-individualScheduleContainer`} className="mb-4">
+        <div className="mb-4">
           <span className="text-sm font-medium mb-2 text-theme-rich-black/80 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-theme-keppel" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -84,7 +78,6 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
             Horarios Preferidos
           </span>
           <button 
-            id={`${idPrefix}-openScheduleModal`} 
             type="button" 
             onClick={onOpenScheduleModal}
             className="w-full p-5 border-2 border-dashed border-theme-keppel/40 rounded-xl text-theme-keppel hover:bg-theme-keppel/5 transition-all duration-200 flex flex-col items-center bg-gradient-to-b from-white to-theme-seasalt hover:from-theme-keppel/5 hover:to-theme-keppel/10 shadow-sm hover:shadow-md"

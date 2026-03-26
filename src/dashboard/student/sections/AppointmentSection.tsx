@@ -15,8 +15,6 @@ import { type AssignedStudentResponse } from '@/infrastructure/dto/student/Assig
 import ScheduleModal from '@/dashboard/shared/ScheduleModal';
 import {type ScheduleGroupAppointmentRequest} from '@/infrastructure/dto/appointment-schedule/ScheduleGroupAppointmentRequest';
 import { type ScheduleIndividualAppointmentRequest } from '@/infrastructure/dto/appointment-schedule/ScheduleIndividualAppointmentRequest';
-const idPrefix = 'studentSender';
-
 export default function AppointmentsSection() {
 
   const [student, setStudent] = useState<User | null>(null);
@@ -397,7 +395,7 @@ export default function AppointmentsSection() {
 
                 {/* Tipo de Actividad (si bothActivities es true) */}
                 {selectedInstructor?.bothActivities && (
-                  <TypeActivity idPrefix={idPrefix} value={activityType} onChange={setActivityType} />
+                  <TypeActivity value={activityType} onChange={setActivityType} />
                 )}
 
                 {/* Selección de Estudiantes (solo para citas grupales) */}
@@ -423,8 +421,7 @@ export default function AppointmentsSection() {
           
           {/* Paso 3: Detalles de la cita */}
           { currentStep === 3 && (
-            <AppointmentDetail 
-              idPrefix={idPrefix} 
+            <AppointmentDetail
               prevStep={prevStep}
               onOpenScheduleModal={openScheduleModal}
               selectedModality={selectedModality}

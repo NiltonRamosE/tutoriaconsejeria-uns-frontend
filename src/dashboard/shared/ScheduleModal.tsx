@@ -1,11 +1,10 @@
-// src/dashboard/shared/ScheduleModal.tsx
 import React, { useState, useEffect } from 'react';
 
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (slots: string[]) => void;
-  busySchedules?: any[]; // Reemplazar con el tipo correcto
+  busySchedules?: any[];
 }
 
 const ScheduleModal: React.FC<ScheduleModalProps> = ({ 
