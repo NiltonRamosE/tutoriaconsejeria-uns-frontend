@@ -5,7 +5,7 @@ import { EvaluateSection } from '@/dashboard/student/sections/EvaluateSection';
 import { SurveysSection } from '@/dashboard/student/sections/SurveysSection';
 import AppointmentsSection from '@/dashboard/student/sections/AppointmentSection';
 import { StudentProfile } from '@/dashboard/student/sections/StudentProfile';
-//import AppointmentsScheduleSection from '@/dashboard/student/sections/AppointmentsScheduleSection.astro';
+import AppointmentsScheduleSection from '@/dashboard/student/sections/AppointmentsScheduleSection';
 import { useStudentSection } from '@/dashboard/shared/hooks/useStudentSection';
 
 
@@ -21,8 +21,8 @@ export function StudentPanel() {
         return <EvaluateSection />;
       case 'surveys':
         return <SurveysSection />;
-      /*case 'appointments-schedule':
-        return <AppointmentsScheduleSection />;*/
+      case 'appointments-schedule':
+        return <AppointmentsScheduleSection />;
       case 'appointments':
         return <AppointmentsSection />;
       default:
