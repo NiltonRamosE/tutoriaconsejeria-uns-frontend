@@ -1,3 +1,4 @@
+// src/dashboard/instructor/sections/InstructorAppointmentsSection.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { getUser } from '@/dashboard/shared/authUtils';
 import { fetchStudentsAssignedByInstructor, submitIndividualAppointment, submitGroupAppointment } from '@/infrastructure/api/instructor';
@@ -16,6 +17,7 @@ const InstructorAppointmentsSection: React.FC = () => {
   const [instructor, setInstructor] = useState<any>(null);
   const [selectedModality, setSelectedModality] = useState<'I' | 'G' | null>(null);
   const [activityType, setActivityType] = useState<string | undefined>(undefined);
+  const [showTypeActivity, setShowTypeActivity] = useState(false);
   const [showFormContainer, setShowFormContainer] = useState(false);
   const [availableStudents, setAvailableStudents] = useState<AssignedStudentResponse[]>([]);
   const [selectedIndividualStudentId, setSelectedIndividualStudentId] = useState<number | null>(null);
@@ -52,6 +54,11 @@ const InstructorAppointmentsSection: React.FC = () => {
   useEffect(() => {
     if (activityType && instructor?.id) {
       loadStudents();
+    } else if (!activityType) {
+      // Limpiar estudiantes si no hay tipo de actividad
+      setAvailableStudents([]);
+      setSelectedIndividualStudentId(null);
+      setSelectedStudents([]);
     }
   }, [activityType, instructor?.id]);
 
@@ -60,6 +67,9 @@ const InstructorAppointmentsSection: React.FC = () => {
       const students = await fetchStudentsAssignedByInstructor(instructor.id);
       const filtered = students.filter(s => s.typeActivityCode === activityType);
       setAvailableStudents(filtered);
+      // Resetear selecciones cuando cambia el tipo de actividad
+      setSelectedIndividualStudentId(null);
+      setSelectedStudents([]);
     } catch (error) {
       console.error('Error loading students:', error);
     }
@@ -67,17 +77,20 @@ const InstructorAppointmentsSection: React.FC = () => {
 
   // Efecto para mostrar estudiantes en el paso correspondiente
   useEffect(() => {
-    if (selectedModality === 'I' && availableStudents.length > 0) {
+    if (!availableStudents.length) return;
+    
+    if (selectedModality === 'I') {
       populateStudentSelect();
-    } else if (selectedModality === 'G' && availableStudents.length > 0) {
+    } else if (selectedModality === 'G') {
       populateStudentCheckboxes();
     }
-  }, [availableStudents, selectedModality, activityType]);
+  }, [availableStudents, selectedModality, currentStep]); // Agregado currentStep para refrescar al volver al paso
 
   const populateStudentSelect = () => {
     if (!studentSelectRef.current) return;
     
     const select = studentSelectRef.current;
+    const currentValue = select.value;
     select.innerHTML = '<option value="">Seleccione un estudiante</option>';
     
     availableStudents.forEach(student => {
@@ -86,6 +99,11 @@ const InstructorAppointmentsSection: React.FC = () => {
       option.textContent = student.fullName;
       select.appendChild(option);
     });
+    
+    // Restaurar selección si existe
+    if (selectedIndividualStudentId) {
+      select.value = String(selectedIndividualStudentId);
+    }
   };
 
   const populateStudentCheckboxes = () => {
@@ -96,15 +114,21 @@ const InstructorAppointmentsSection: React.FC = () => {
     availableStudents.forEach(student => {
       const div = document.createElement('div');
       div.className = 'flex items-center p-2 border border-theme-rich-black/10 rounded hover:bg-theme-keppel/5 cursor-pointer transition-colors duration-200';
+      const isChecked = selectedStudents.includes(student.id);
       div.innerHTML = `
-        <input type="checkbox" id="student-${student.id}" value="${student.id}" class="mr-2 student-checkbox">
+        <input type="checkbox" id="student-${student.id}" value="${student.id}" class="mr-2 student-checkbox" ${isChecked ? 'checked' : ''}>
         <label for="student-${student.id}" class="cursor-pointer flex-1">${student.fullName}</label>
       `;
       studentsListRef.current?.appendChild(div);
     });
     
+    // Remover listeners antiguos y agregar nuevos
     document.querySelectorAll('.student-checkbox').forEach(checkbox => {
-      checkbox.addEventListener('change', (e) => {
+      const newCheckbox = checkbox.cloneNode(true);
+      if (checkbox.parentNode) {
+        checkbox.parentNode.replaceChild(newCheckbox, checkbox);
+      }
+      newCheckbox.addEventListener('change', (e) => {
         const target = e.target as HTMLInputElement;
         const id = parseInt(target.value);
         setSelectedStudents(prev =>
@@ -116,15 +140,21 @@ const InstructorAppointmentsSection: React.FC = () => {
 
   const handleModalitySelect = (modality: 'I' | 'G') => {
     setSelectedModality(modality);
+    setShowTypeActivity(true);
     setShowFormContainer(false);
     setSelectedIndividualStudentId(null);
     setSelectedStudents([]);
     setCurrentStep(1);
+    setActivityType(undefined);
+    setAvailableStudents([]); // Limpiar estudiantes al cambiar modalidad
   };
 
   const handleActivityTypeChange = (type: string) => {
     setActivityType(type);
     setShowFormContainer(true);
+    setCurrentStep(1); // Resetear al paso 1 cuando cambia el tipo
+    setSelectedIndividualStudentId(null);
+    setSelectedStudents([]);
   };
 
   const nextStep = () => {
@@ -133,6 +163,16 @@ const InstructorAppointmentsSection: React.FC = () => {
 
   const prevStep = () => {
     setCurrentStep(prev => prev - 1);
+    // Forzar actualización de la lista de estudiantes cuando se regresa al paso 1
+    if (currentStep === 2) {
+      setTimeout(() => {
+        if (selectedModality === 'I') {
+          populateStudentSelect();
+        } else if (selectedModality === 'G') {
+          populateStudentCheckboxes();
+        }
+      }, 0);
+    }
   };
 
   const openScheduleModal = async () => {
@@ -238,21 +278,18 @@ const InstructorAppointmentsSection: React.FC = () => {
       return;
     }
 
-    // Validar método de cita
     const appointmentMethod = appointmentMethodRef.current?.value || '';
     if (!appointmentMethod) {
       alert('Por favor selecciona un método de cita');
       return;
     }
 
-    // Validar razón de cita
     const appointmentReason = appointmentReasonRef.current?.value || '';
     if (!appointmentReason) {
       alert('Por favor selecciona una razón de cita');
       return;
     }
 
-    // Obtener horarios según la modalidad
     let altA: string, altB: string, altC: string;
     
     if (selectedModality === 'I') {
@@ -311,8 +348,8 @@ const InstructorAppointmentsSection: React.FC = () => {
         alert('Cita grupal programada exitosamente');
       }
 
-      // Resetear estado
       setSelectedModality(null);
+      setShowTypeActivity(false);
       setShowFormContainer(false);
       setActivityType(undefined);
       setSelectedIndividualStudentId(null);
@@ -320,6 +357,7 @@ const InstructorAppointmentsSection: React.FC = () => {
       setSelectedScheduleSlots([]);
       setSchedulePreviewVisible(false);
       setCurrentStep(1);
+      setAvailableStudents([]);
       
       if (appointmentMethodRef.current) appointmentMethodRef.current.value = '';
       if (appointmentReasonRef.current) appointmentReasonRef.current.value = '';
@@ -329,23 +367,28 @@ const InstructorAppointmentsSection: React.FC = () => {
     }
   };
 
+  const handleStudentCheckboxChange = (studentId: number, checked: boolean) => {
+    setSelectedStudents(prev =>
+      checked ? [...prev, studentId] : prev.filter(id => id !== studentId)
+    );
+  };
+
   return (
     <div className="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
       <h2 className="text-2xl font-bold mb-6 text-theme-rich-black">Programación de Citas</h2>
       
-      {/* Selector de Modalidad */}
       <AppointmentModality 
         selectedModality={selectedModality} 
         onSelect={handleModalitySelect} 
       />
       
-      {/* Selector de Tipo de Actividad */}
-      <TypeActivity 
-        value={activityType} 
-        onChange={handleActivityTypeChange} 
-      />
+      {showTypeActivity && (
+        <TypeActivity 
+          value={activityType} 
+          onChange={handleActivityTypeChange} 
+        />
+      )}
 
-      {/* Formulario de Cita */}
       {showFormContainer && (
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Paso 1: Selección de Estudiante (Individual) */}
@@ -359,8 +402,8 @@ const InstructorAppointmentsSection: React.FC = () => {
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2 text-theme-rich-black/80">Estudiante</label>
                 <select
-                  ref={studentSelectRef}
                   className="w-full p-3 border rounded-lg border-theme-rich-black/30 focus:ring-2 focus:ring-theme-keppel focus:border-transparent transition-all duration-200"
+                  value={selectedIndividualStudentId ?? ''}
                   onChange={(e) => setSelectedIndividualStudentId(e.target.value ? Number(e.target.value) : null)}
                 >
                   <option value="">Seleccione un estudiante</option>
@@ -389,15 +432,30 @@ const InstructorAppointmentsSection: React.FC = () => {
               <div className="mb-6">
                 <span className="block text-sm font-medium mb-2 text-theme-rich-black/80">Selecciona estudiantes</span>
                 <div className="border border-theme-rich-black/20 rounded-lg p-3 max-h-60 overflow-y-auto">
-                  <div ref={studentsListRef} className="space-y-2">
-                    {/* Los estudiantes se cargarán dinámicamente */}
+                  <div className="space-y-2">
+                    {availableStudents.length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        No hay estudiantes disponibles para este tipo de actividad.
+                      </p>
+                    ) : (
+                      availableStudents.map(student => (
+                        <div key={student.id} className="flex items-center p-2 border border-theme-rich-black/10 rounded hover:bg-theme-keppel/5 cursor-pointer transition-colors duration-200">
+                          <input
+                            type="checkbox"
+                            id={`student-${student.id}`}
+                            value={student.id}
+                            checked={selectedStudents.includes(student.id)}
+                            onChange={(e) => handleStudentCheckboxChange(student.id, e.target.checked)}
+                            className="mr-2"
+                          />
+                          <label htmlFor={`student-${student.id}`} className="cursor-pointer flex-1">
+                            {student.fullName}
+                          </label>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
-                {availableStudents.length === 0 && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    No hay estudiantes disponibles para este tipo de actividad.
-                  </p>
-                )}
               </div>
 
               <div className="flex justify-end">
@@ -426,7 +484,6 @@ const InstructorAppointmentsSection: React.FC = () => {
         </form>
       )}
 
-      {/* Modal de selección de horarios */}
       <ScheduleModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
