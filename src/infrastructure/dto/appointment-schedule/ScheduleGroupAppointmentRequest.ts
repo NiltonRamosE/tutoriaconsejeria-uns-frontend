@@ -1,9 +1,9 @@
 export interface ScheduleGroupAppointmentRequest {
     appointmentModalityCode: string;
-    appointmentMethod: string;
-    specificAppointmentMethod: string;
-    appointmentReason: string;
-    specificAppointmentReason: string;
+    appointmentMethod: string | null;
+    specificAppointmentMethod: string | null;
+    appointmentReason: string | null;
+    specificAppointmentReason: string | null;
     typeActivityCode: string;
     studentId: number;
     studentsId: number[];
