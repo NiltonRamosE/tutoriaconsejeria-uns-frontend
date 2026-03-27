@@ -214,7 +214,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({
           <button 
             type="button" 
             onClick={handleConfirm}
-            className="bg-gradient-to-r from-theme-keppel to-theme-keppel-dark text-white font-medium py-2.5 px-6 rounded-lg hover:from-theme-keppel-dark hover:to-theme-keppel transition-all duration-200 shadow-md hover:shadow-lg"
+            className="bg-theme-keppel text-white font-medium py-2.5 px-6 rounded-lg hover:from-theme-keppel-dark hover:to-theme-keppel transition-all duration-200 shadow-md hover:shadow-lg"
           >
             Confirmar horarios
           </button>
