@@ -124,3 +124,20 @@ body {
 .animate-circular-b {
   animation: moveCircularb 10s infinite linear;
 }
+
+.activity-type-option input:checked + div {
+  border-color: #2A9D8F;
+  background-color: rgba(42, 157, 143, 0.1);
+}
+
+.modalidad-btn {
+  transition: all 0.2s ease;
+}
+
+.modalidad-btn:hover {
+  transform: translateY(-2px);
+}
+
+.form-step {
+  transition: opacity 0.3s ease;
+}
