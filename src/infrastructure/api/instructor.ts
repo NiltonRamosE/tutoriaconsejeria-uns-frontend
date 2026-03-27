@@ -6,6 +6,7 @@ import type { ScheduleGroupAppointmentRequest } from '@/infrastructure/dto/appoi
 import type { AppointmentScheduleSentResponse } from '@/infrastructure/dto/appointment-schedule/AppointmentScheduleSentResponse';
 import type { AppointmentScheduleReceivedResponse } from '@/infrastructure/dto/appointment-schedule/AppointmentScheduleReceivedResponse';
 import type { AppointmentConfirmRequest } from '@/infrastructure/dto/appointment/AppointmentConfirmRequest';
+import type { StudentResponse } from '@/infrastructure/dto/administrator/StudentResponse';
 
 const getAuthToken = (): string => {
   const token = getToken();
@@ -35,6 +36,26 @@ export async function fetchStudentsAssignedByInstructor(
   }
   
   return await response.json() as AssignedStudentResponse[];
+}
+
+export async function fetchListAssignedStudents(
+  instructorId: number
+): Promise<StudentResponse[]> {
+  const token = getAuthToken(); 
+  const response = await fetch(
+    `${config.apiUrl}${config.endpoints.instructor.listAssignedStudents}`.replace(':instructorId', String(instructorId)),
+    {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` }
+    }
+  );
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+
+  return await response.json() as StudentResponse[];
 }
 
 // Función para enviar el formulario de cita individual

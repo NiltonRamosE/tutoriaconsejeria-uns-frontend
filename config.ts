@@ -48,6 +48,7 @@ export const config = {
       appointmentsReceived: "/instructor/appointments/received/:instructorId",
       confirmAppointment: "/instructor/appointments/confirm/:appointmentId",
       cancelAppointment: "/instructor/appointments/cancel/:appointmentId",
+      listAssignedStudents: "/instructor/list/assigned/:instructorId",
     },
   },
 };
