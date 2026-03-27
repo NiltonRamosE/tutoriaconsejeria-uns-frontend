@@ -4,7 +4,7 @@ import DashboardSection from '@/dashboard/instructor/sections/DashboardSection';
 import EvaluateSection from '@/dashboard/instructor/sections/EvaluateSection';
 import ManageStudentsSection from '@/dashboard/instructor/sections/ManageStudentsSection';
 import AppointmentsSection from '@/dashboard/instructor/sections/AppointmentsSection';
-//import AppointmentsScheduleSection from '@/dashboard/instructor/sections/AppointmentsScheduleSection.astro';
+import AppointmentsScheduleSection from '@/dashboard/instructor/sections/AppointmentsScheduleSection';
 import { useInstructorSection } from '@/dashboard/shared/hooks/useInstructorSection';
 
 export function InstructorPanel() {
@@ -17,8 +17,8 @@ export function InstructorPanel() {
         return <EvaluateSection />;
       case 'surveys':
         return <ManageStudentsSection />;
-      /*case 'appointments-schedule':
-        return <AppointmentsScheduleSection />;*/
+      case 'appointments-schedule':
+        return <AppointmentsScheduleSection />;
       case 'appointments':
         return <AppointmentsSection />;
       default:
