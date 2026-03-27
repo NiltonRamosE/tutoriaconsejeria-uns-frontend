@@ -5,6 +5,8 @@ import type { InstructorResponse } from '@/infrastructure/dto/administrator/Inst
 import type { AdministratorRequest } from '@/infrastructure/dto/administrator/AdministratorRequest';
 import type { AdministratorResponse } from '@/infrastructure/dto/administrator/AdministratorResponse';
 import type { StudentResponse } from '@/infrastructure/dto/administrator/StudentResponse';
+import type { StudentProfileResponse } from '@/infrastructure/dto/student/StudentProfileResponse';
+import type { InstructorProfileResponse } from '@/infrastructure/dto/instructor/InstructorProfileResponse';
 
 const getAuthToken = (): string => {
   const token = getToken();
@@ -159,4 +161,39 @@ export async function fetchStudentsByFilter(endpoint: string): Promise<StudentRe
   }
   
   return await response.json() as StudentResponse[];
+}
+
+export async function fetchViewStudent(studentId: string): Promise<StudentProfileResponse> {
+  const token = getAuthToken();
+  
+  const response = await fetch(`${config.apiUrl}${config.endpoints.administrator.viewStudent}`.replace(":studentId", studentId), {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+
+  return await response.json() as StudentProfileResponse;
+}
+
+export async function fetchViewInstructor(instructorId: string): Promise<InstructorProfileResponse> {
+  const token = getAuthToken();
+  const response = await fetch(`${config.apiUrl}${config.endpoints.administrator.viewInstructor}`.replace(":instructorId", instructorId), {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+
+  return await response.json() as InstructorProfileResponse;
 }
