@@ -5,6 +5,7 @@ import { createPagination } from '@/dashboard/shared/paginationManager';
 import { fetchListAssignedStudents } from '@/infrastructure/api/instructor';
 import StudentProfileModal from '@/dashboard/administrator/components/StudentProfileModal';
 import type { StudentResponse } from '@/infrastructure/dto/administrator/StudentResponse';
+import StudentScheduleModal from '@/dashboard/instructor/components/StudentScheduleModal';
 
 const ManageStudentsSection: React.FC = () => {
   const [allStudents, setAllStudents] = useState<StudentResponse[]>([]);
@@ -15,6 +16,9 @@ const ManageStudentsSection: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [expandedStudentId, setExpandedStudentId] = useState<number | null>(null);
+
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [selectedScheduleStudent, setSelectedScheduleStudent] = useState<StudentResponse | null>(null);
 
   const paginationRef = useRef(createPagination('manage-students', 5));
 
@@ -101,8 +105,13 @@ const ManageStudentsSection: React.FC = () => {
   };
 
   const handleViewSchedule = (student: StudentResponse) => {
-    console.log('Ver Horario de:', student);
-    alert(`Ver Horario de ${student.studentName}`);
+    setSelectedScheduleStudent(student);
+    setScheduleModalOpen(true);
+  };
+
+  const handleCloseScheduleModal = () => {
+    setScheduleModalOpen(false);
+    setSelectedScheduleStudent(null);
   };
 
   const renderStudentCard = (student: StudentResponse) => {
@@ -261,6 +270,13 @@ const ManageStudentsSection: React.FC = () => {
         isOpen={modalOpen}
         onClose={handleCloseModal}
         studentId={selectedStudentId}
+      />
+
+      <StudentScheduleModal
+        isOpen={scheduleModalOpen}
+        onClose={handleCloseScheduleModal}
+        studentId={selectedScheduleStudent?.studentId || null}
+        studentName={selectedScheduleStudent?.studentName || ''}
       />
     </>
   );

@@ -7,6 +7,7 @@ import type { AppointmentScheduleSentResponse } from '@/infrastructure/dto/appoi
 import type { AppointmentScheduleReceivedResponse } from '@/infrastructure/dto/appointment-schedule/AppointmentScheduleReceivedResponse';
 import type { AppointmentConfirmRequest } from '@/infrastructure/dto/appointment/AppointmentConfirmRequest';
 import type { StudentResponse } from '@/infrastructure/dto/administrator/StudentResponse';
+import type { AcademicScheduleResponse } from '@/infrastructure/dto/academic-schedule/AcademicScheduleResponse';
 
 const getAuthToken = (): string => {
   const token = getToken();
@@ -206,4 +207,22 @@ export async function fetchPutAppointmentCancel(
     const errorText = await response.text();
     throw new Error(errorText || response.statusText);
   }
+}
+
+export async function fetchViewStudentSchedule(studentId: number): Promise<AcademicScheduleResponse[]> {
+  const token = getAuthToken(); 
+  const response = await fetch(
+    `${config.apiUrl}${config.endpoints.instructor.viewStudentSchedule}`.replace(':studentId', String(studentId)),
+    { 
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` }
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+
+  return await response.json() as AcademicScheduleResponse[];
 }
