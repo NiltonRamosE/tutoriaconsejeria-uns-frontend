@@ -8,6 +8,7 @@ import type { AppointmentScheduleReceivedResponse } from '@/infrastructure/dto/a
 import type { AppointmentConfirmRequest } from '@/infrastructure/dto/appointment/AppointmentConfirmRequest';
 import type { StudentResponse } from '@/infrastructure/dto/administrator/StudentResponse';
 import type { AcademicScheduleResponse } from '@/infrastructure/dto/academic-schedule/AcademicScheduleResponse';
+import type { AssessmentRequest } from '@/domain/types/Assessment';
 
 const getAuthToken = (): string => {
   const token = getToken();
@@ -225,4 +226,24 @@ export async function fetchViewStudentSchedule(studentId: number): Promise<Acade
   }
 
   return await response.json() as AcademicScheduleResponse[];
+}
+
+export async function submitEvaluationForm(data: AssessmentRequest): Promise<Object> {
+  const token = getAuthToken();
+  const response = await fetch(
+    `${config.apiUrl}${config.endpoints.instructor.evalutionStudent}`, 
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    }
+  );
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+  return await response.json() as Object;
 }

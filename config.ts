@@ -50,6 +50,7 @@ export const config = {
       cancelAppointment: "/instructor/appointments/cancel/:appointmentId",
       listAssignedStudents: "/instructor/list/assigned/:instructorId",
       viewStudentSchedule: "/instructor/view/student/schedule/:studentId",
+      evalutionStudent: "/instructor/assessment/student"
     },
   },
 };
