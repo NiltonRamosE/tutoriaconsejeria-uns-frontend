@@ -1,9 +1,12 @@
-// src/dashboard/instructor/sections/EvaluateSection.tsx
 import React, { useState, useEffect } from 'react';
 import { getUser } from '@/dashboard/shared/authUtils';
 import { fetchStudentsAssignedByInstructor, submitEvaluationForm } from '@/infrastructure/api/instructor';
 import { assessedQuestions, ratingOptions } from '@/dashboard/instructor/data/assessedQuestions';
-import type { AssessmentRequest, AssessedQuestion, StudentWithRelation } from '@/domain/types/Assessment';
+import type { StudentWithRelation } from '@/domain/types/Assessment';
+import type {AssessmentRequest} from '@/infrastructure/dto/assessment/AssessmentRequest';
+import type {AssessedQuestion} from '@/infrastructure/dto/assessment/AssessedQuestion';
+import { fetchIsEnabledAssessment } from '@/infrastructure/api/assessment';
+import ViewAssessmentModal from '@/dashboard/instructor/components/ViewAssessmentModal';
 
 const EvaluateSection: React.FC = () => {
   const [students, setStudents] = useState<StudentWithRelation[]>([]);
@@ -15,6 +18,11 @@ const EvaluateSection: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEvaluationForm, setShowEvaluationForm] = useState(false);
+
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewAssessmentId, setViewAssessmentId] = useState<number | null>(null);
+  const [viewStudentName, setViewStudentName] = useState('');
+  const [viewTypeActivity, setViewTypeActivity] = useState<'T' | 'C'>('T');
 
   const instructorData = getUser();
   const instructorId = instructorData?.id;
@@ -30,28 +38,44 @@ const EvaluateSection: React.FC = () => {
     try {
       const data = await fetchStudentsAssignedByInstructor(instructorId!);
       
-      // Agrupar estudiantes por ID para saber qué tipo de relación tienen
       const studentMap = new Map<number, StudentWithRelation>();
       
-      data.forEach(student => {
+      for (const student of data) {
         const existing = studentMap.get(student.id);
+        const typeActivity = student.typeActivityCode as 'T' | 'C';
+        
         if (existing) {
-          // Si ya existe, actualizar según el tipo de actividad
-          if (student.typeActivityCode === 'T') {
+          if (typeActivity === 'T') {
             existing.hasTutoring = true;
-          } else if (student.typeActivityCode === 'C') {
+            // Verificar si ya existe evaluación de tutoría
+            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'T');
+            existing.tutoringAssessmentId = assessmentId;
+          } else if (typeActivity === 'C') {
             existing.hasCounseling = true;
+            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'C');
+            existing.counselingAssessmentId = assessmentId;
           }
         } else {
-          // Nuevo estudiante
-          studentMap.set(student.id, {
+          const newStudent: StudentWithRelation = {
             id: student.id,
             fullName: student.fullName,
-            hasTutoring: student.typeActivityCode === 'T',
-            hasCounseling: student.typeActivityCode === 'C',
-          });
+            hasTutoring: typeActivity === 'T',
+            hasCounseling: typeActivity === 'C',
+            tutoringAssessmentId: null,
+            counselingAssessmentId: null
+          };
+          
+          if (typeActivity === 'T') {
+            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'T');
+            newStudent.tutoringAssessmentId = assessmentId;
+          } else if (typeActivity === 'C') {
+            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'C');
+            newStudent.counselingAssessmentId = assessmentId;
+          }
+          
+          studentMap.set(student.id, newStudent);
         }
-      });
+      }
       
       setStudents(Array.from(studentMap.values()));
     } catch (error) {
@@ -135,6 +159,19 @@ const EvaluateSection: React.FC = () => {
       alert('No se pudo registrar la evaluación, intente nuevamente.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleViewAssessment = (student: StudentWithRelation, type: 'T' | 'C') => {
+    const assessmentId = type === 'T' ? student.tutoringAssessmentId : student.counselingAssessmentId;
+    console.log('🔍 Abriendo modal de evaluación:', { studentId: student.id, type, assessmentId });
+    if (assessmentId) {
+      setViewAssessmentId(assessmentId);
+      setViewStudentName(student.fullName);
+      setViewTypeActivity(type);
+      setViewModalOpen(true);
+    } else {
+      console.warn('⚠️ No se encontró assessmentId para:', { student, type });
     }
   };
 
@@ -289,65 +326,81 @@ const EvaluateSection: React.FC = () => {
     );
   }
 
-  // Vista de selección de estudiantes (separados por tipo)
-  return (
-    <div className="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
-      <h2 className="text-2xl font-bold mb-6 text-theme-rich-black">Evaluar Estudiantes</h2>
-      
-      <div className="space-y-8">
-        {/* Tutorados */}
-        {tutoringStudents.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-theme-rich-black flex items-center gap-2">
-              <span className="text-2xl">📚</span>
-              Tutorados
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {tutoringStudents.map(student => (
-                <button
-                  key={`tutor-${student.id}`}
-                  onClick={() => handleStudentSelect(student, 'T')}
-                  className="flex items-center p-4 border border-theme-rich-black/20 rounded-xl hover:bg-theme-keppel/5 transition-colors text-left"
-                >
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-lg">👨‍🎓</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-theme-rich-black">{student.fullName}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
+  const renderStudentCard = (student: StudentWithRelation, type: 'T' | 'C', label: string, bgColor: string) => {
+    const assessmentId = type === 'T' ? student.tutoringAssessmentId : student.counselingAssessmentId;
+    const hasAssessment = assessmentId !== null && assessmentId !== undefined;
+    
+    return (
+      <button
+        key={`${type}-${student.id}`}
+        onClick={() => hasAssessment ? handleViewAssessment(student, type) : handleStudentSelect(student, type)}
+        className={`flex items-center justify-between w-full p-4 border rounded-xl transition-colors text-left ${
+          hasAssessment 
+            ? 'border-green-300 bg-green-50 hover:bg-green-100' 
+            : 'border-theme-rich-black/20 hover:bg-theme-keppel/5'
+        }`}
+      >
+        <div className="flex items-center">
+          <div className={`w-10 h-10 ${bgColor} rounded-full flex items-center justify-center mr-3`}>
+            <span className="text-lg">👨‍🎓</span>
           </div>
+          <div>
+            <p className="font-medium text-theme-rich-black">{student.fullName}</p>
+            {hasAssessment && (
+              <p className="text-xs text-green-600 mt-1">✓ Evaluación completada - Click para ver</p>
+            )}
+          </div>
+        </div>
+        {hasAssessment && (
+          <svg className="h-5 w-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
         )}
+      </button>
+    );
+  };
 
-        {/* Aconsejados */}
-        {counselingStudents.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-theme-rich-black flex items-center gap-2">
-              <span className="text-2xl">💬</span>
-              Aconsejados
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {counselingStudents.map(student => (
-                <button
-                  key={`counsel-${student.id}`}
-                  onClick={() => handleStudentSelect(student, 'C')}
-                  className="flex items-center p-4 border border-theme-rich-black/20 rounded-xl hover:bg-theme-keppel/5 transition-colors text-left"
-                >
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-lg">👨‍🎓</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-theme-rich-black">{student.fullName}</p>
-                  </div>
-                </button>
-              ))}
+  return (
+    <>
+      <div className="bg-white p-6 rounded-3xl shadow-lg border-2 border-b-8 border-theme-rich-black">
+        <h2 className="text-2xl font-bold mb-6 text-theme-rich-black">Evaluar Estudiantes</h2>
+        
+        <div className="space-y-8">
+          {tutoringStudents.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-theme-rich-black flex items-center gap-2">
+                <span className="text-2xl">📚</span>
+                Tutorados
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {tutoringStudents.map(student => renderStudentCard(student, 'T', 'Tutoría', 'bg-blue-100'))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {counselingStudents.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-theme-rich-black flex items-center gap-2">
+                <span className="text-2xl">💬</span>
+                Aconsejados
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {counselingStudents.map(student => renderStudentCard(student, 'C', 'Consejería', 'bg-green-100'))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      <ViewAssessmentModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        assessmentId={viewAssessmentId}
+        studentName={viewStudentName}
+        typeActivity={viewTypeActivity}
+      />
+    </>
   );
 };
 

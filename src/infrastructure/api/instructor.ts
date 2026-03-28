@@ -8,7 +8,7 @@ import type { AppointmentScheduleReceivedResponse } from '@/infrastructure/dto/a
 import type { AppointmentConfirmRequest } from '@/infrastructure/dto/appointment/AppointmentConfirmRequest';
 import type { StudentResponse } from '@/infrastructure/dto/administrator/StudentResponse';
 import type { AcademicScheduleResponse } from '@/infrastructure/dto/academic-schedule/AcademicScheduleResponse';
-import type { AssessmentRequest } from '@/domain/types/Assessment';
+import type {AssessmentRequest} from '@/infrastructure/dto/assessment/AssessmentRequest';
 
 const getAuthToken = (): string => {
   const token = getToken();

@@ -52,5 +52,9 @@ export const config = {
       viewStudentSchedule: "/instructor/view/student/schedule/:studentId",
       evalutionStudent: "/instructor/assessment/student"
     },
+    assessment: {
+      isEnabled: "/assessment/enabled?studentId=:studentId&instructorId=:instructorId&typeActivity=:typeActivity",
+      search: "/assessment/:id"
+    }
   },
 };

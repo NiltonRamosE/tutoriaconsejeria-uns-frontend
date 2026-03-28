@@ -1,4 +1,4 @@
-import type { AssessedQuestion } from '@/domain/types/Assessment';
+import type {AssessedQuestion} from '@/infrastructure/dto/assessment/AssessedQuestion';
 
 export const assessedQuestions: AssessedQuestion[] = [
   {
