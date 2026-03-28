@@ -126,7 +126,6 @@ const EvaluateSection: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Construir el array de preguntas con sus puntajes
       const questionsArray: AssessedQuestion[] = assessedQuestions.map(q => ({
         order: q.order,
         question: q.question,
@@ -141,18 +140,14 @@ const EvaluateSection: React.FC = () => {
         observation: observation.trim() || '',
         suggestion: suggestion.trim() || ''
       };
-
-      // Log para verificar la estructura
-      console.log('📋 Evaluación a enviar:', JSON.stringify(formData, null, 2));
       
-      // Llamar al endpoint
       const response = await submitEvaluationForm(formData);
-      console.log('✅ Respuesta del servidor:', response);
       
       alert('Evaluación registrada exitosamente');
       
-      // Resetear formulario
       handleBack();
+      
+      await loadStudents();
       
     } catch (error) {
       console.error('❌ Error al enviar evaluación:', error);
