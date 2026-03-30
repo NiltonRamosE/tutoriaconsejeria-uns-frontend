@@ -228,7 +228,7 @@ export async function fetchViewStudentSchedule(studentId: number): Promise<Acade
   return await response.json() as AcademicScheduleResponse[];
 }
 
-export async function submitEvaluationForm(data: AssessmentRequest): Promise<Object> {
+export async function submitEvaluationStudent(data: AssessmentRequest): Promise<Object> {
   const token = getAuthToken();
   const response = await fetch(
     `${config.apiUrl}${config.endpoints.instructor.evalutionStudent}`, 

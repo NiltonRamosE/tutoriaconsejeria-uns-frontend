@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUser } from '@/dashboard/shared/authUtils';
-import { fetchStudentsAssignedByInstructor, submitEvaluationForm } from '@/infrastructure/api/instructor';
+import { fetchStudentsAssignedByInstructor, submitEvaluationStudent } from '@/infrastructure/api/instructor';
 import { assessedQuestions, ratingOptions } from '@/dashboard/instructor/data/assessedQuestions';
 import type { StudentWithRelation } from '@/domain/types/Assessment';
 import type {AssessmentRequest} from '@/infrastructure/dto/assessment/AssessmentRequest';
@@ -48,11 +48,11 @@ const EvaluateSection: React.FC = () => {
           if (typeActivity === 'T') {
             existing.hasTutoring = true;
             // Verificar si ya existe evaluación de tutoría
-            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'T');
+            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'T', false);
             existing.tutoringAssessmentId = assessmentId;
           } else if (typeActivity === 'C') {
             existing.hasCounseling = true;
-            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'C');
+            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'C', false);
             existing.counselingAssessmentId = assessmentId;
           }
         } else {
@@ -66,10 +66,10 @@ const EvaluateSection: React.FC = () => {
           };
           
           if (typeActivity === 'T') {
-            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'T');
+            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'T', false);
             newStudent.tutoringAssessmentId = assessmentId;
           } else if (typeActivity === 'C') {
-            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'C');
+            const assessmentId = await fetchIsEnabledAssessment(student.id, instructorId!, 'C', false);
             newStudent.counselingAssessmentId = assessmentId;
           }
           
@@ -141,7 +141,7 @@ const EvaluateSection: React.FC = () => {
         suggestion: suggestion.trim() || ''
       };
       
-      const response = await submitEvaluationForm(formData);
+      const response = await submitEvaluationStudent(formData);
       
       alert('Evaluación registrada exitosamente');
       
@@ -392,8 +392,9 @@ const EvaluateSection: React.FC = () => {
         isOpen={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
         assessmentId={viewAssessmentId}
-        studentName={viewStudentName}
+        personName={viewStudentName}
         typeActivity={viewTypeActivity}
+        viewType="student"
       />
     </>
   );

@@ -1,6 +1,5 @@
 import { getToken, isTokenPresent } from '@/dashboard/shared/authUtils';
 import { config } from 'config';
-import type { AssessmentResponse } from '@/infrastructure/dto/assessment/AssessmentResponse';
 import type { AssessmentStudentResponse } from '@/infrastructure/dto/assessment/AssessmentStudentResponse';
 import type { AssessmentInstructorResponse } from '@/infrastructure/dto/assessment/AssessmentInstructorResponse';
 
@@ -14,7 +13,8 @@ const getAuthToken = (): string => {
 export async function fetchIsEnabledAssessment(
   studentId: number,
   instructorId: number,
-  typeActivity: string
+  typeActivity: string,
+  isStudentEvaluating: boolean
 ): Promise<number | null> {
   const token = getAuthToken();
   
@@ -22,7 +22,8 @@ export async function fetchIsEnabledAssessment(
     `${config.apiUrl}${config.endpoints.assessment.isEnabled}`
     .replace(':studentId', String(studentId))
     .replace(':instructorId', String(instructorId))
-    .replace(':typeActivity', String(typeActivity)),
+    .replace(':typeActivity', String(typeActivity))
+    .replace(':isStudentEvaluating', String(isStudentEvaluating)),
     {
       method: 'GET',
       headers: {

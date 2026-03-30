@@ -39,6 +39,7 @@ export const config = {
       confirmGroup: "/student/appointments/confirm/:appointmentId/:studentId",
       cancelIndividual: "/student/appointments/cancel/:appointmentId",
       cancelGroup: "/student/appointments/cancel/:appointmentId/:studentId",
+      evalutionInstructor: "/student/assessment/instructor"
     },
     instructor: {
       assignedStudents: "/instructor/assigned/:instructorId",
@@ -53,7 +54,7 @@ export const config = {
       evalutionStudent: "/instructor/assessment/student"
     },
     assessment: {
-      isEnabled: "/assessment/enabled?studentId=:studentId&instructorId=:instructorId&typeActivity=:typeActivity",
+      isEnabled: "/assessment/enabled?studentId=:studentId&instructorId=:instructorId&typeActivity=:typeActivity&isStudentEvaluating=:isStudentEvaluating",
       search: "/assessment/:id"
     }
   },

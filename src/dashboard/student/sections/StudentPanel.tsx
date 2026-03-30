@@ -1,7 +1,7 @@
 import React from 'react';
 import { StudentSidebar } from '@/dashboard/student/components/StudentSidebar';
 import { DashboardSection } from '@/dashboard/student/sections/DashboardSection';
-import { EvaluateSection } from '@/dashboard/student/sections/EvaluateSection';
+import EvaluateSection from '@/dashboard/student/sections/EvaluateSection';
 import { SurveysSection } from '@/dashboard/student/sections/SurveysSection';
 import AppointmentsSection from '@/dashboard/student/sections/AppointmentSection';
 import { StudentProfile } from '@/dashboard/student/sections/StudentProfile';

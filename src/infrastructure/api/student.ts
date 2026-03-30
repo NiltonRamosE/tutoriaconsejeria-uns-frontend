@@ -8,6 +8,7 @@ import type { AppointmentConfirmRequest } from '@/infrastructure/dto/appointment
 import type { AssignedInstructorResponse } from '@/infrastructure/dto/student/AssignedInstructorResponse';
 import type { AssignedStudentResponse } from '@/infrastructure/dto/student/AssignedStudentResponse';
 import type { StudentProfileResponse } from '@/infrastructure/dto/student/StudentProfileResponse';
+import type {AssessmentRequest} from '@/infrastructure/dto/assessment/AssessmentRequest';
 
 const getAuthToken = (): string => {
   const token = getToken();
@@ -291,4 +292,24 @@ export async function fetchCancelGroupAppointmentAttendance(
     const errorText = await response.text();
     throw new Error(errorText || response.statusText);
   }
+}
+
+export async function submitEvaluationInstructor(data: AssessmentRequest): Promise<Object> {
+  const token = getAuthToken();
+  const response = await fetch(
+    `${config.apiUrl}${config.endpoints.student.evalutionInstructor}`, 
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    }
+  );
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+  return await response.json() as Object;
 }

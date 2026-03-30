@@ -1,39 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAssessmentById } from '@/infrastructure/api/assessment';
 import { ratingOptions } from '@/dashboard/instructor/data/assessedQuestions';
-import type { AssessmentStudentResponse } from '@/infrastructure/dto/assessment/AssessmentStudentResponse';
-
-interface ViewAssessmentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  assessmentId: number | null;
-  studentName: string;
-  typeActivity: 'T' | 'C';
-}
+import type { AssessmentViewData, ViewAssessmentModalProps } from '@/domain/types/Assessment';
 
 const ViewAssessmentModal: React.FC<ViewAssessmentModalProps> = ({ 
   isOpen, 
   onClose, 
   assessmentId,
-  studentName,
-  typeActivity
+  personName,
+  typeActivity,
+  assessmentData: initialAssessmentData,
+  viewType
 }) => {
-  const [assessment, setAssessment] = useState<AssessmentStudentResponse | null>(null);
+  const [assessment, setAssessment] = useState<AssessmentViewData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen && assessmentId) {
+    if (isOpen && assessmentId && !initialAssessmentData) {
       loadAssessment();
+    } else if (isOpen && initialAssessmentData) {
+      setAssessment(initialAssessmentData);
+      setIsLoading(false);
     }
-  }, [isOpen, assessmentId]);
+  }, [isOpen, assessmentId, initialAssessmentData]);
 
   const loadAssessment = async () => {
     setIsLoading(true);
     setError(null);
     try {
       const data = await fetchAssessmentById(assessmentId!);
-      setAssessment(data as AssessmentStudentResponse);
+      setAssessment(data);
     } catch (err) {
       console.error('Error loading assessment:', err);
       setError('Error al cargar la evaluación');
@@ -53,7 +50,66 @@ const ViewAssessmentModal: React.FC<ViewAssessmentModalProps> = ({
     return 'bg-red-100 text-red-800 border-red-200';
   };
 
+  const getTitle = () => {
+    return viewType === 'student' ? 'Evaluación del Docente' : 'Evaluación del Estudiante';
+  };
+
+  const getSemesterInfo = () => {
+    if (!assessment) return null;
+    if ('studentAssessment' in assessment) {
+      return assessment.semester;
+    }
+    if ('instructorAssessment' in assessment) {
+      return assessment.semester;
+    }
+    return null;
+  };
+
+  const getQuestions = () => {
+    if (!assessment) return [];
+    if ('studentAssessment' in assessment) {
+      return assessment.studentAssessment.questions;
+    }
+    if ('instructorAssessment' in assessment) {
+      return assessment.instructorAssessment.questions;
+    }
+    return [];
+  };
+
+  const getObservationAndSuggestion = () => {
+    if (!assessment) return { observation: '', suggestion: '' };
+    if ('studentAssessment' in assessment) {
+      return {
+        observation: assessment.studentAssessment.observation,
+        suggestion: assessment.studentAssessment.suggestion
+      };
+    }
+    if ('instructorAssessment' in assessment) {
+      return {
+        observation: assessment.instructorAssessment.observation,
+        suggestion: assessment.instructorAssessment.suggestion
+      };
+    }
+    return { observation: '', suggestion: '' };
+  };
+
+  const getEvaluatedName = () => {
+    if (!assessment) return personName;
+    if ('studentFullName' in assessment) {
+      return assessment.studentFullName;
+    }
+    if ('instructorFullName' in assessment) {
+      return assessment.instructorFullName;
+    }
+    return personName;
+  };
+
   if (!isOpen) return null;
+
+  const questions = getQuestions();
+  const { observation, suggestion } = getObservationAndSuggestion();
+  const semester = getSemesterInfo();
+  const evaluatedName = getEvaluatedName();
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -69,10 +125,10 @@ const ViewAssessmentModal: React.FC<ViewAssessmentModalProps> = ({
               <div>
                 <h2 className="text-xl font-bold text-theme-rich-black flex items-center gap-2">
                   <span className="text-2xl">📋</span>
-                  Evaluación Realizada
+                  {getTitle()}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  {studentName} - {typeActivity === 'T' ? 'Tutoría' : 'Consejería'}
+                  {typeActivity === 'T' ? 'Tutoría' : 'Consejería'} - {evaluatedName}
                 </p>
               </div>
               <button
@@ -111,25 +167,27 @@ const ViewAssessmentModal: React.FC<ViewAssessmentModalProps> = ({
             ) : assessment ? (
               <>
                 {/* Información del período */}
-                <div className="bg-theme-seasalt rounded-xl p-4 mb-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-500">Semestre</p>
-                      <p className="font-semibold text-theme-rich-black">{assessment.semester}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Estado:</span>
-                      <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                        Evaluación Completada
-                      </span>
+                {semester && (
+                  <div className="bg-theme-seasalt rounded-xl p-4 mb-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-500">Semestre</p>
+                        <p className="font-semibold text-theme-rich-black">{semester}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">Estado:</span>
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                          Evaluación Completada
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Preguntas y respuestas */}
                 <div className="space-y-4 mb-6">
                   <h3 className="font-semibold text-theme-rich-black">Preguntas de Evaluación</h3>
-                  {assessment.studentAssessment.questions.map((q, index) => (
+                  {questions.map((q, index) => (
                     <div key={q.order} className="border border-theme-rich-black/20 rounded-xl p-4 bg-white">
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex-1">
@@ -146,9 +204,9 @@ const ViewAssessmentModal: React.FC<ViewAssessmentModalProps> = ({
                 </div>
 
                 {/* Observación y sugerencia */}
-                {(assessment.studentAssessment.observation || assessment.studentAssessment.suggestion) && (
+                {(observation || suggestion) && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    {assessment.studentAssessment.observation && (
+                    {observation && (
                       <div className="bg-theme-seasalt rounded-xl p-4">
                         <h4 className="font-medium text-theme-rich-black mb-2 flex items-center gap-2">
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -157,10 +215,10 @@ const ViewAssessmentModal: React.FC<ViewAssessmentModalProps> = ({
                           </svg>
                           Observación
                         </h4>
-                        <p className="text-gray-700 whitespace-pre-wrap">{assessment.studentAssessment.observation}</p>
+                        <p className="text-gray-700 whitespace-pre-wrap">{observation}</p>
                       </div>
                     )}
-                    {assessment.studentAssessment.suggestion && (
+                    {suggestion && (
                       <div className="bg-theme-seasalt rounded-xl p-4">
                         <h4 className="font-medium text-theme-rich-black mb-2 flex items-center gap-2">
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -168,7 +226,7 @@ const ViewAssessmentModal: React.FC<ViewAssessmentModalProps> = ({
                           </svg>
                           Sugerencia
                         </h4>
-                        <p className="text-gray-700 whitespace-pre-wrap">{assessment.studentAssessment.suggestion}</p>
+                        <p className="text-gray-700 whitespace-pre-wrap">{suggestion}</p>
                       </div>
                     )}
                   </div>
